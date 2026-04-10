@@ -1,392 +1,82 @@
 <!DOCTYPE html>
 <html dir="rtl">
 <head>
-    <title>یاری پرسیار و وەڵام - هەڵبژاردنی کەتەگۆری</title>
+    <title>یاری پرسیار و وەڵام</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        @font-face {
-            font-family: 'K24Kurdish';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            padding: 30px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        
-        .container {
-            max-width: 900px;
-            width: 100%;
-            margin: auto;
-        }
-        
-        /* دوگمەی import - لە سەرەوە و بۆ ماوەی 30 چرکە */
-        .import-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            display: none;
-        }
-        
-        .import-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: 0.3s;
-        }
-        
-        .import-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .row {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .category-btn {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            border-radius: 20px;
-            padding: 18px 25px;
-            width: 180px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        
-        .category-btn span {
-            font-size: 24px;
-            font-weight: normal;
-            color: white;
-            letter-spacing: 1px;
-        }
-        
-        .category-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-        
-        @keyframes greenFlash {
-            0% { background: rgba(255,255,255,0.1); transform: scale(1); }
-            30% { background: #4CAF50; transform: scale(1.05); border-color: #2e7d32; }
-            70% { background: #4CAF50; transform: scale(1.05); border-color: #2e7d32; }
-            100% { background: rgba(255,255,255,0.1); transform: scale(1); }
-        }
-        
-        .category-btn-animate {
-            animation: greenFlash 0.6s ease forwards;
-        }
-        
-        @media (max-width: 700px) {
-            .row { gap: 15px; margin-bottom: 20px; }
-            .category-btn { width: 100px; padding: 12px 10px; }
-            .category-btn span { font-size: 18px; }
-        }
-        
-        @media (max-width: 480px) {
-            .category-btn { width: 85px; padding: 10px 5px; }
-            .category-btn span { font-size: 16px; }
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        
-        .modal-content {
-            max-width: 900px;
-            margin: 20px auto;
-            background: rgba(30,30,50,0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 30px;
-            padding: 30px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .questions-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .question-number {
-            background: rgba(255,255,255,0.15);
-            border-radius: 20px;
-            padding: 25px 10px;
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        
-        .question-number:hover {
-            background: rgba(255,255,255,0.35);
-            transform: scale(1.05);
-        }
-        
-        .question-screen {
-            text-align: center;
-        }
-        
-        .timer {
-            font-size: 52px;
-            font-weight: bold;
-            color: #ff6b6b;
-            background: rgba(0,0,0,0.6);
-            display: inline-block;
-            padding: 10px 35px;
-            border-radius: 60px;
-            margin: 20px 0;
-            font-family: monospace;
-        }
-        
-        .question-text {
-            font-size: 28px;
-            color: white;
-            margin: 30px 0;
-            padding: 25px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 25px;
-            line-height: 1.5;
-        }
-        
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .option-btn {
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            padding: 18px;
-            font-size: 18px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        
-        .option-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.02);
-        }
-        
-        .option-correct {
-            background: #4CAF50 !important;
-            border-color: #2e7d32 !important;
-            animation: pulse 0.5s;
-        }
-        
-        .option-wrong {
-            background: #f44336 !important;
-            border-color: #c62828 !important;
-            animation: shake 0.3s;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        
-        .close-btn {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-        }
-        
-        .close-btn:hover {
-            background: #ff5252;
-            transform: scale(1.02);
-        }
-        
-        .back-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
-        }
-        
-        .back-btn:hover {
-            background: #45a049;
-            transform: scale(1.02);
-        }
-        
-        @media (max-width: 700px) {
-            .questions-grid { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-            .question-number { padding: 15px 5px; font-size: 22px; }
-            .question-text { font-size: 18px; padding: 15px; }
-            .option-btn { padding: 12px; font-size: 13px; }
-            .options-grid { gap: 10px; }
-            .timer { font-size: 36px; padding: 5px 25px; }
-        }
-        
-        .empty-state {
-            text-align: center;
-            color: white;
-            padding: 50px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 30px;
-        }
+        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .container { max-width: 900px; width: 100%; margin: auto; }
+        .import-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: none; }
+        .import-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; padding: 12px 25px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .row { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; flex-wrap: wrap; }
+        .category-btn { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 18px 25px; width: 180px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .category-btn span { font-size: 24px; color: white; }
+        @keyframes greenFlash { 0% { background: rgba(255,255,255,0.1); transform: scale(1); } 30% { background: #4CAF50; transform: scale(1.05); } 100% { background: rgba(255,255,255,0.1); transform: scale(1); } }
+        .category-btn-animate { animation: greenFlash 0.6s ease forwards; }
+        @media (max-width: 700px) { .category-btn { width: 100px; padding: 12px 10px; } .category-btn span { font-size: 18px; } }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
+        .modal-content { max-width: 900px; margin: 20px auto; background: rgba(30,30,50,0.95); backdrop-filter: blur(15px); border-radius: 30px; padding: 30px; }
+        .questions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; }
+        .question-number { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 25px 10px; text-align: center; font-size: 32px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
+        .question-screen { text-align: center; }
+        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; }
+        .question-text { font-size: 28px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; }
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
+        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; }
+        .option-correct { background: #4CAF50 !important; }
+        .option-wrong { background: #f44336 !important; }
+        .close-btn, .back-btn { background: #ff6b6b; color: white; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; margin: 10px; }
+        .back-btn { background: #4CAF50; }
+        @media (max-width: 700px) { .question-number { font-size: 22px; } .question-text { font-size: 18px; } .option-btn { font-size: 13px; } .timer { font-size: 36px; } }
     </style>
 </head>
 <body>
-<div class="import-container" id="importContainer">
-    <button class="import-btn" onclick="importData()">📥 Import کردن پرسیارەکان (پاشەکەوتکراو)</button>
-</div>
-
+<div class="import-container" id="importContainer"><button class="import-btn" onclick="importData()">📥 Import کردن پرسیارەکان</button></div>
 <div class="container">
-    <div class="row">
-        <div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div>
-        <div class="category-btn" data-cat="زانست"><span>زانست</span></div>
-        <div class="category-btn" data-cat="ئەدەبیات"><span>ئەدەبیات</span></div>
-    </div>
-    <div class="row">
-        <div class="category-btn" data-cat="هونەر"><span>هونەر</span></div>
-        <div class="category-btn" data-cat="وەرزش"><span>وەرزش</span></div>
-        <div class="category-btn" data-cat="بیرکاری"><span>بیرکاری</span></div>
-    </div>
-    <div class="row">
-        <div class="category-btn" data-cat="تەکنەلۆژیا"><span>تەکنەلۆژیا</span></div>
-        <div class="category-btn" data-cat="تەندروستی"><span>تەندروستی</span></div>
-        <div class="category-btn" data-cat="جوگرافیا"><span>جوگرافیا</span></div>
-    </div>
-    <div class="row">
-        <div class="category-btn" data-cat="ئاینی"><span>ئاینی</span></div>
-        <div class="category-btn" data-cat="کوردستان"><span>کوردستان</span></div>
-        <div class="category-btn" data-cat="فیلم و دراما"><span>فیلم و دراما</span></div>
-    </div>
+    <div class="row"><div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div><div class="category-btn" data-cat="زانست"><span>زانست</span></div><div class="category-btn" data-cat="ئەدەبیات"><span>ئەدەبیات</span></div></div>
+    <div class="row"><div class="category-btn" data-cat="هونەر"><span>هونەر</span></div><div class="category-btn" data-cat="وەرزش"><span>وەرزش</span></div><div class="category-btn" data-cat="بیرکاری"><span>بیرکاری</span></div></div>
+    <div class="row"><div class="category-btn" data-cat="تەکنەلۆژیا"><span>تەکنەلۆژیا</span></div><div class="category-btn" data-cat="تەندروستی"><span>تەندروستی</span></div><div class="category-btn" data-cat="جوگرافیا"><span>جوگرافیا</span></div></div>
+    <div class="row"><div class="category-btn" data-cat="ئاینی"><span>ئاینی</span></div><div class="category-btn" data-cat="کوردستان"><span>کوردستان</span></div><div class="category-btn" data-cat="فیلم و دراما"><span>فیلم و دراما</span></div></div>
 </div>
-
-<div id="questionModal" class="modal">
-    <div class="modal-content">
-        <div id="questionsListDiv"></div>
-        <div id="questionScreenDiv" style="display:none;"></div>
-        <div style="text-align:center;"><button class="close-btn" onclick="closeModal()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button></div>
-    </div>
-</div>
+<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"><button class="close-btn" onclick="closeModal()">🔙 گەڕانەوە</button></div></div></div>
 
 <script>
     let categories = {};
     let currentCategory = "";
-    let currentQuestionIndex = null;
-    let timerInterval = null;
-    let timeLeft = 60;
-    let isAnswered = false;
+    let currentQuestionIndex = null, timerInterval = null, timeLeft = 60, isAnswered = false;
     
-    // ناچالاککردنی راستکلیک
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    window.addEventListener('keydown', function(e) {
-        if(e.key === 'F5' || 
-           (e.ctrlKey && e.key === 'r') || 
-           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
-           (e.metaKey && e.key === 'r')) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', e => { if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) e.preventDefault(); });
     
     function loadCategories() {
         const stored = localStorage.getItem("categories");
-        if(stored) { categories = JSON.parse(stored); } 
-        else { categories = {}; }
-        
+        if(stored) {
+            categories = JSON.parse(stored);
+            console.log("داتا لە Local Storage خوێندرا:", categories);
+        } else {
+            console.log("هیچ داتایەک نەدۆزرایەوە!");
+            categories = {};
+        }
         const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
         allCatNames.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         attachCategoryEvents();
-        
-        // نمایشکردنی دوگمەی import بۆ ماوەی 30 چرکە
         showImportButtonFor30Seconds();
     }
     
     function showImportButtonFor30Seconds() {
         const importContainer = document.getElementById("importContainer");
         importContainer.style.display = "block";
-        
-        let timeLeftImport = 30;
+        let seconds = 30;
         const btn = document.querySelector(".import-btn");
         const originalText = btn.innerText;
-        
         const interval = setInterval(() => {
-            timeLeftImport--;
-            if(timeLeftImport <= 0) {
-                clearInterval(interval);
-                importContainer.style.display = "none";
-            } else {
-                btn.innerText = `📥 Import کردن (${timeLeftImport})`;
-            }
+            seconds--;
+            if(seconds <= 0) { clearInterval(interval); importContainer.style.display = "none"; btn.innerText = originalText; }
+            else btn.innerText = `📥 Import (${seconds})`;
         }, 1000);
-        
-        setTimeout(() => {
-            clearInterval(interval);
-            if(importContainer.style.display === "block") {
-                importContainer.style.display = "none";
-            }
-            btn.innerText = originalText;
-        }, 30000);
     }
     
     function importData() {
@@ -399,21 +89,16 @@
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
-                    const importedData = JSON.parse(evt.target.result);
+                    const imported = JSON.parse(evt.target.result);
                     const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
                     allCatNames.forEach(cat => {
-                        if(importedData[cat] && Array.isArray(importedData[cat])) {
-                            categories[cat] = importedData[cat].slice(0, 8);
-                        } else if(!categories[cat]) {
-                            categories[cat] = [];
-                        }
+                        if(imported[cat] && Array.isArray(imported[cat])) categories[cat] = imported[cat].slice(0,8);
+                        else if(!categories[cat]) categories[cat] = [];
                     });
                     localStorage.setItem("categories", JSON.stringify(categories));
-                    alert("✅ پرسیارەکان بە سەرکەوتوویی import کرا!");
+                    alert("✅ Import سەرکەوتوو بوو!");
                     location.reload();
-                } catch(err) {
-                    alert("❌ فایلەکە نادروستە یان زیان پێگەیشتووە!");
-                }
+                } catch(err) { alert("❌ فایلەکە نادروستە"); }
             };
             reader.readAsText(file);
         };
@@ -430,9 +115,7 @@
     function handleCategoryClick(e) {
         const btn = e.currentTarget;
         const catName = btn.getAttribute("data-cat");
-        
         btn.classList.add("category-btn-animate");
-        
         setTimeout(() => {
             btn.classList.remove("category-btn-animate");
             openCategory(catName);
@@ -441,15 +124,11 @@
     
     function openCategory(catName) {
         currentCategory = catName;
-        const questions = categories[catName];
-        
+        const questions = categories[catName] || [];
         let qHtml = "";
-        for(let i=0; i<8; i++) {
-            if(questions && i < questions.length) {
-                qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
-            } else {
-                qHtml += `<div class="question-number" style="opacity:0.6; cursor:pointer;" onclick="showEmptyWarning()">${i+1}</div>`;
-            }
+        for(let i=0;i<8;i++) {
+            if(i < questions.length) qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
+            else qHtml += `<div class="question-number" style="opacity:0.6; cursor:pointer;" onclick="alert('هیچ پرسیارێک نییە!')">${i+1}</div>`;
         }
         document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName}</h2><div class="questions-grid">${qHtml}</div>`;
         document.getElementById("questionScreenDiv").style.display = "none";
@@ -457,17 +136,9 @@
         document.getElementById("questionModal").style.display = "block";
     }
     
-    function showEmptyWarning() {
-        alert("⚠️ هیچ پرسیارێک لەم ژمارەیەدا نییە! تکایە یەکەم پرسیار زیاد بکە.");
-    }
-    
     function selectQuestion(index) {
         const questions = categories[currentCategory];
-        if(!questions || index >= questions.length) {
-            alert("⚠️ هیچ پرسیارێک لەم ژمارەیەدا نییە! تکایە یەکەم پرسیار زیاد بکە.");
-            return;
-        }
-        
+        if(!questions || index >= questions.length) { alert("هیچ پرسیارێک نییە!"); return; }
         if(timerInterval) clearInterval(timerInterval);
         currentQuestionIndex = index;
         timeLeft = 60; isAnswered = false;
@@ -486,7 +157,7 @@
                 if(td) td.innerText = `${timeLeft} چرکە`;
                 if(timeLeft===0 && !isAnswered) {
                     clearInterval(timerInterval);
-                    alert("⏰ کات تەواو بوو! وەڵامی ڕاست ئاشکرا دەکرێت");
+                    alert("کات تەواو بوو!");
                     showCorrectAnswer();
                     isAnswered=true;
                 }
@@ -503,46 +174,28 @@
                 <div class="options-grid" id="optionsGrid">
                     ${q.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="checkAnswer('${letters[idx]}','${q.correct}')">${letters[idx]}. ${opt}</div>`).join('')}
                 </div>
-                <button class="back-btn" onclick="backToQuestions()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
+                <button class="back-btn" onclick="backToQuestions()">🔙 گەڕانەوە</button>
             </div>`;
     }
     
     function checkAnswer(selected,correct) {
         if(isAnswered || timeLeft<=0) { alert("ناتوانیت وەڵام بدەیتەوە"); return; }
-        isAnswered=true;
-        clearInterval(timerInterval);
+        isAnswered=true; clearInterval(timerInterval);
         const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(btn=>{
-            btn.style.pointerEvents="none";
-            if(btn.dataset.opt===correct) btn.classList.add("option-correct");
-            if(btn.dataset.opt===selected && selected!==correct) btn.classList.add("option-wrong");
-        });
+        btns.forEach(btn=>{ btn.style.pointerEvents="none"; if(btn.dataset.opt===correct) btn.classList.add("option-correct"); if(btn.dataset.opt===selected && selected!==correct) btn.classList.add("option-wrong"); });
         const question=categories[currentCategory][currentQuestionIndex];
         const correctText=question.options[correct.charCodeAt(0)-65];
-        alert(selected===correct ? `✅ ڕاستە! وەڵام: ${correctText}` : `❌ هەڵەیە! وەڵامی ڕاست: ${correctText}`);
+        alert(selected===correct ? `✅ ڕاستە! ${correctText}` : `❌ هەڵەیە! وەڵامی ڕاست: ${correctText}`);
     }
     
     function showCorrectAnswer() {
         const q=categories[currentCategory][currentQuestionIndex];
-        document.querySelectorAll(".option-btn").forEach(btn=>{
-            btn.style.pointerEvents="none";
-            if(btn.dataset.opt===q.correct) btn.classList.add("option-correct");
-        });
+        document.querySelectorAll(".option-btn").forEach(btn=>{ if(btn.dataset.opt===q.correct) btn.classList.add("option-correct"); });
         alert(`وەڵامی ڕاست: ${q.options[q.correct.charCodeAt(0)-65]}`);
     }
     
-    function backToQuestions() {
-        clearInterval(timerInterval);
-        document.getElementById("questionScreenDiv").style.display="none";
-        document.getElementById("questionsListDiv").style.display="block";
-        currentQuestionIndex=null; isAnswered=false;
-    }
-    
-    function closeModal() {
-        clearInterval(timerInterval);
-        document.getElementById("questionModal").style.display="none";
-        currentQuestionIndex=null; isAnswered=false;
-    }
+    function backToQuestions() { clearInterval(timerInterval); document.getElementById("questionScreenDiv").style.display="none"; document.getElementById("questionsListDiv").style.display="block"; currentQuestionIndex=null; isAnswered=false; }
+    function closeModal() { clearInterval(timerInterval); document.getElementById("questionModal").style.display="none"; currentQuestionIndex=null; isAnswered=false; }
     
     loadCategories();
 </script>
