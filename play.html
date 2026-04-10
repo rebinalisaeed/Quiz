@@ -54,7 +54,7 @@
         }
         
         .category-btn span {
-            font-size: 24px;    /* لە 20px کراوە بە 24px - 4 نمرە گەورەتر */
+            font-size: 24px;
             font-weight: normal;
             color: white;
             letter-spacing: 1px;
@@ -64,6 +64,13 @@
             background: rgba(255, 255, 255, 0.25);
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        /* ئەنیمەیشنی سەوزبوون */
+        .category-btn-green {
+            background: #4CAF50 !important;
+            border-color: #2e7d32 !important;
+            transition: background 0.1s ease;
         }
         
         @media (max-width: 700px) {
@@ -76,7 +83,7 @@
                 padding: 12px 10px;
             }
             .category-btn span {
-                font-size: 18px;  /* لە 14px کراوە بە 18px */
+                font-size: 18px;
             }
         }
         
@@ -86,11 +93,10 @@
                 padding: 10px 5px;
             }
             .category-btn span {
-                font-size: 16px;  /* لە 12px کراوە بە 16px */
+                font-size: 16px;
             }
         }
         
-        /* مۆدال و بەشەکانی تر هەر وەک خۆی */
         .modal {
             display: none;
             position: fixed;
@@ -323,7 +329,17 @@
     }
     
     function handleCategoryClick(e) {
-        openCategory(e.currentTarget.getAttribute("data-cat"));
+        const btn = e.currentTarget;
+        const catName = btn.getAttribute("data-cat");
+        
+        // زیادکردنی کلاسی سەوز بۆ ٢ چرکە
+        btn.classList.add("category-btn-green");
+        
+        // دوای ٢ چرکە، بچۆ بۆ ناو کەتەگۆرییەکە
+        setTimeout(() => {
+            btn.classList.remove("category-btn-green");
+            openCategory(catName);
+        }, 2000);
     }
     
     function openCategory(catName) {
@@ -338,7 +354,7 @@
             if(i<questions.length) qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
             else qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
         }
-        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">📂 ${catName}</h2><div class="questions-grid">${qHtml}</div>`;
+        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName}</h2><div class="questions-grid">${qHtml}</div>`;
         document.getElementById("questionScreenDiv").style.display = "none";
         document.getElementById("questionsListDiv").style.display = "block";
         document.getElementById("questionModal").style.display = "block";
@@ -377,7 +393,7 @@
         document.getElementById("questionScreenDiv").innerHTML = `
             <div class="question-screen">
                 <div class="timer" id="timerDisplay">60 چرکە</div>
-                <div class="question-text">❓ ${q.text}</div>
+                <div class="question-text">${q.text}</div>
                 <div class="options-grid" id="optionsGrid">
                     ${q.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="checkAnswer('${letters[idx]}','${q.correct}')">${letters[idx]}. ${opt}</div>`).join('')}
                 </div>
