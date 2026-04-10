@@ -114,6 +114,23 @@
     const ADMIN_PASS = "admin123";
     const PLAY_PASS = "adminplay";
     
+    // ناچالاککردنی راستکلیک
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // ناچالاککردنی reload (F5, Ctrl+R, Ctrl+Shift+R, Cmd+R)
+    window.addEventListener('keydown', function(e) {
+        if(e.key === 'F5' || 
+           (e.ctrlKey && e.key === 'r') || 
+           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
+           (e.metaKey && e.key === 'r')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
     function checkLogin() {
         const pass = document.getElementById("password").value;
         
@@ -131,7 +148,6 @@
         }
     }
     
-    // ڕێگەدان بە کردنەوەی کلیکی Enter
     document.getElementById("password").addEventListener("keypress", function(e) {
         if(e.key === "Enter") {
             checkLogin();
