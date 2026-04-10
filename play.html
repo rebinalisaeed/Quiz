@@ -67,10 +67,15 @@
         }
         
         /* ئەنیمەیشنی سەوزبوون */
-        .category-btn-green {
-            background: #4CAF50 !important;
-            border-color: #2e7d32 !important;
-            transition: background 0.1s ease;
+        @keyframes greenFlash {
+            0% { background: rgba(255,255,255,0.1); transform: scale(1); }
+            30% { background: #4CAF50; transform: scale(1.05); border-color: #2e7d32; }
+            70% { background: #4CAF50; transform: scale(1.05); border-color: #2e7d32; }
+            100% { background: rgba(255,255,255,0.1); transform: scale(1); }
+        }
+        
+        .category-btn-animate {
+            animation: greenFlash 0.6s ease forwards;
         }
         
         @media (max-width: 700px) {
@@ -332,27 +337,28 @@
         const btn = e.currentTarget;
         const catName = btn.getAttribute("data-cat");
         
-        // زیادکردنی کلاسی سەوز بۆ ٢ چرکە
-        btn.classList.add("category-btn-green");
+        // زیادکردنی ئەنیمەیشنی سەوزبوون بە جوڵە
+        btn.classList.add("category-btn-animate");
         
-        // دوای ٢ چرکە، بچۆ بۆ ناو کەتەگۆرییەکە
+        // دوای تەواوبوونی ئەنیمەیشن (600ms) بچۆ بۆ ناو کەتەگۆری
         setTimeout(() => {
-            btn.classList.remove("category-btn-green");
+            btn.classList.remove("category-btn-animate");
             openCategory(catName);
-        }, 2000);
+        }, 600);
     }
     
     function openCategory(catName) {
         currentCategory = catName;
         const questions = categories[catName];
-        if(!questions || questions.length === 0) {
-            alert(`هیچ پرسیارێک لە کەتەگۆری ${catName} دا نییە!`);
-            return;
-        }
+        
+        // هەر 8 بۆکسەکە نمایش بکە، بەبێ ئاگادارکردنەوە
         let qHtml = "";
-        for(let i=0;i<8;i++) {
-            if(i<questions.length) qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
-            else qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
+        for(let i=0; i<8; i++) {
+            if(questions && i < questions.length) {
+                qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
+            } else {
+                qHtml += `<div class="question-number" style="opacity:0.6; cursor:pointer;" onclick="showEmptyWarning()">${i+1}</div>`;
+            }
         }
         document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName}</h2><div class="questions-grid">${qHtml}</div>`;
         document.getElementById("questionScreenDiv").style.display = "none";
@@ -360,15 +366,25 @@
         document.getElementById("questionModal").style.display = "block";
     }
     
+    // فەنکشنی نوێ بۆ ئاگادارکردنەوە کاتێک پرسیار نییە
+    function showEmptyWarning() {
+        alert("⚠️ هیچ پرسیارێک لەم ژمارەیەدا نییە! تکایە یەکەم پرسیار زیاد بکە.");
+    }
+    
     function selectQuestion(index) {
+        const questions = categories[currentCategory];
+        if(!questions || index >= questions.length) {
+            alert("⚠️ هیچ پرسیارێک لەم ژمارەیەدا نییە! تکایە یەکەم پرسیار زیاد بکە.");
+            return;
+        }
+        
         if(timerInterval) clearInterval(timerInterval);
-        if(index >= categories[currentCategory].length) return;
         currentQuestionIndex = index;
         timeLeft = 60; isAnswered = false;
         document.getElementById("questionsListDiv").style.display = "none";
         document.getElementById("questionScreenDiv").style.display = "block";
         startTimer();
-        renderQuestion(categories[currentCategory][index]);
+        renderQuestion(questions[index]);
     }
     
     function startTimer() {
