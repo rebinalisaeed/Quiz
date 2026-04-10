@@ -5,223 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        @font-face {
-            font-family: 'K24Kurdish';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
-        }
-        
-        * {
-            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: #1e1e2f;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-        
-        h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .category-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        
-        .tab-btn {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 40px;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .tab-btn.active {
-            background: #4CAF50;
-            border-color: #2e7d32;
-            box-shadow: 0 0 10px rgba(76,175,80,0.5);
-        }
-        
-        .tab-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-        }
-        
-        .glass-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-        
-        .glass-card h3 {
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 15px;
-            border: none;
-            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
-            font-size: 14px;
-            background: rgba(255,255,255,0.9);
-        }
-        
-        .options-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 15px 0;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-        
-        .btn-add {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .btn-add:hover {
-            background: #0b7dda;
-            transform: scale(1.02);
-        }
-        
-        .btn-save {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-save:hover {
-            background: #45a049;
-            transform: scale(1.02);
-        }
-        
-        .btn-export {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-export:hover {
-            background: #e68900;
-            transform: scale(1.02);
-        }
-        
-        .btn-logout {
-            background: #ff6b6b;
-            color: white;
-            margin-top: 20px;
-            display: block;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .questions-list {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .questions-list h4 {
-            color: white;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .question-item {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 12px;
-            margin-bottom: 10px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .question-text {
-            flex: 1;
-            font-size: 14px;
-        }
-        
-        .delete-question {
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        .delete-question:hover {
-            background: #d32f2f;
-        }
-        
-        .empty-msg {
-            color: rgba(255,255,255,0.6);
-            text-align: center;
-            padding: 20px;
-        }
-        
-        @media (max-width: 600px) {
-            .options-row { grid-template-columns: 1fr; }
-            .tab-btn { padding: 6px 12px; font-size: 12px; }
-            .button-group { flex-direction: column; align-items: center; }
-        }
+        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
+        * { font-family: 'K24Kurdish', 'Segoe UI', sans-serif; box-sizing: border-box; }
+        body { background: #1e1e2f; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: auto; }
+        h1 { color: white; text-align: center; margin-bottom: 30px; }
+        .category-tabs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        .tab-btn { background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); border: 2px solid rgba(255,255,255,0.2); border-radius: 40px; padding: 10px 20px; font-size: 16px; color: white; cursor: pointer; }
+        .tab-btn.active { background: #4CAF50; border-color: #2e7d32; }
+        .glass-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; margin-bottom: 30px; }
+        .glass-card h3 { color: white; text-align: center; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 15px; border: none; background: rgba(255,255,255,0.9); }
+        .options-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+        .button-group { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        button { padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: #2196F3; color: white; }
+        .btn-save { background: #4CAF50; color: white; }
+        .btn-export { background: #ff9800; color: white; }
+        .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; }
+        .questions-list { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-top: 20px; }
+        .questions-list h4 { color: white; text-align: center; }
+        .question-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .delete-question { background: #f44336; border-radius: 20px; padding: 5px 12px; cursor: pointer; }
+        @media (max-width: 600px) { .options-row { grid-template-columns: 1fr; } .tab-btn { padding: 6px 12px; font-size: 12px; } }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>📝 دانان و تۆمار کردنی پرسیارەکان</h1>
-    
+    <h1>📝 دانان و تۆمارکردنی پرسیارەکان</h1>
     <div class="category-tabs" id="categoryTabs"></div>
     
     <div class="glass-card">
-        <h3>➕ زیادکردنی پرسیاری نوێ بۆ کەتەگۆری هەڵبژێردراو</h3>
+        <h3>➕ زیادکردنی پرسیار بۆ کەتەگۆری هەڵبژێردراو</h3>
         <input type="text" id="questionText" placeholder="پرسیارەکە لێرە بنووسە">
         <div class="options-row">
             <input type="text" id="optA" placeholder="هەڵبژاردەی A">
@@ -235,66 +50,43 @@
             <option value="C">وەڵامی ڕاست: C</option>
             <option value="D">وەڵامی ڕاست: D</option>
         </select>
-        
         <div class="button-group">
             <button class="btn-add" onclick="addQuestionToCurrent()">➕ زیادکردنی پرسیار</button>
-            <button class="btn-save" onclick="saveAllCategories()">💾 سەیڤ کردن بە شێوەی خۆکار</button>
-            <button class="btn-export" onclick="exportData()">📤 Export کردن (پاشەکەوتکردن)</button>
+            <button class="btn-save" onclick="saveToLocal()">💾 سەیڤ کردن بە دەست</button>
+            <button class="btn-export" onclick="exportData()">📤 Export (پاشەکەوت)</button>
+            <button class="btn-export" onclick="showJSON()">🔍 پیشاندانی JSON</button>
         </div>
     </div>
     
-    <div class="questions-list" id="questionsList">
+    <div class="questions-list">
         <h4>📋 پرسیارەکانی ئەم کەتەگۆرییە</h4>
         <div id="questionsContainer"></div>
     </div>
-    
     <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
 </div>
 
 <script>
-    const defaultCategories = [
-        "مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", 
-        "بیرکاری", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", 
-        "ئاینی", "کوردستان", "فیلم و دراما"
-    ];
-    
+    const defaultCategories = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
     let categories = {};
-    let currentCategory = "";
+    let currentCategory = defaultCategories[0];
     
-    // ناچالاککردنی راستکلیک
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    window.addEventListener('keydown', function(e) {
-        if(e.key === 'F5' || 
-           (e.ctrlKey && e.key === 'r') || 
-           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
-           (e.metaKey && e.key === 'r')) {
+    // ناچالاککردنی right-click و reload
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', e => {
+        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.shiftKey && e.key === 'R') || (e.metaKey && e.key === 'r'))
             e.preventDefault();
-            return false;
-        }
     });
     
     function loadData() {
         const stored = localStorage.getItem("categories");
         if(stored) {
             categories = JSON.parse(stored);
+            // دڵنیابوون لە بوونی هەموو کەتەگۆرییەکان
+            defaultCategories.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         } else {
             categories = {};
+            defaultCategories.forEach(cat => { categories[cat] = []; });
         }
-        
-        defaultCategories.forEach(cat => {
-            if(!categories[cat]) {
-                categories[cat] = [];
-            }
-        });
-        
-        if(!currentCategory && defaultCategories.length > 0) {
-            currentCategory = defaultCategories[0];
-        }
-        
         renderTabs();
         renderQuestionsList();
     }
@@ -302,25 +94,13 @@
     function renderTabs() {
         const container = document.getElementById("categoryTabs");
         container.innerHTML = "";
-        for(let cat of defaultCategories) {
+        defaultCategories.forEach(cat => {
             const btn = document.createElement("button");
             btn.textContent = cat;
-            btn.className = "tab-btn";
-            if(cat === currentCategory) {
-                btn.classList.add("active");
-            }
-            btn.onclick = (function(category) {
-                return function() { switchCategory(category); };
-            })(cat);
+            btn.className = "tab-btn" + (cat === currentCategory ? " active" : "");
+            btn.onclick = () => { currentCategory = cat; renderTabs(); renderQuestionsList(); clearForm(); };
             container.appendChild(btn);
-        }
-    }
-    
-    function switchCategory(category) {
-        currentCategory = category;
-        renderTabs();
-        renderQuestionsList();
-        clearForm();
+        });
     }
     
     function clearForm() {
@@ -333,43 +113,31 @@
     }
     
     function addQuestionToCurrent() {
-        if(!currentCategory) {
-            alert("تکایە یەکەم کەتەگۆری هەڵبژێرە!");
-            return;
-        }
-        
         const qText = document.getElementById("questionText").value.trim();
         const optA = document.getElementById("optA").value.trim();
         const optB = document.getElementById("optB").value.trim();
         const optC = document.getElementById("optC").value.trim();
         const optD = document.getElementById("optD").value.trim();
         const correct = document.getElementById("correctOpt").value;
+        if(!qText || !optA || !optB || !optC || !optD) return alert("تکایە هەموو خانەکان پڕ بکەوە!");
+        if(categories[currentCategory].length >= 8) return alert("پڕە! تەنها 8 پرسیار دەگرێت.");
         
-        if(!qText || !optA || !optB || !optC || !optD) {
-            alert("تکایە هەموو خانەکان پڕ بکەوە (پرسیار و چوار هەڵبژاردە)!");
-            return;
-        }
-        
-        if(categories[currentCategory].length >= 8) {
-            alert(`کەتەگۆری ${currentCategory} پڕە! تەنها 8 پرسیار دەگرێت.`);
-            return;
-        }
-        
-        const newQuestion = {
-            text: qText,
-            options: [optA, optB, optC, optD],
-            correct: correct
-        };
-        categories[currentCategory].push(newQuestion);
-        
+        categories[currentCategory].push({ text: qText, options: [optA, optB, optC, optD], correct: correct });
+        saveToLocal();
         renderQuestionsList();
         clearForm();
-        saveAllCategories();
-        alert("✅ پرسیار زیاد کرا و خۆکارانە هەڵگیرا!");
+        alert("✅ پرسیار زیاد کرا و هەڵگیرا!");
     }
     
-    function saveAllCategories() {
+    function saveToLocal() {
         localStorage.setItem("categories", JSON.stringify(categories));
+        // پشکنینی هەڵگرتن
+        const saved = localStorage.getItem("categories");
+        if(saved && JSON.parse(saved)[currentCategory]?.length > 0) {
+            // سەرکەوتوو
+        } else {
+            alert("⚠️ هۆشیاری: هەڵگرتن سەرکەوتوو نەبوو!");
+        }
     }
     
     function exportData() {
@@ -379,64 +147,43 @@
         const a = document.createElement("a");
         a.href = url;
         a.download = "questions_backup.json";
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert("📁 هەموو پرسیارەکان بە سەرکەوتوویی پاشەکەوت کرا!");
+        alert("📁 پشتیوانی گیرا!");
+    }
+    
+    function showJSON() {
+        alert(JSON.stringify(categories, null, 2));
     }
     
     function renderQuestionsList() {
         const container = document.getElementById("questionsContainer");
-        if(!currentCategory || !categories[currentCategory]) {
-            container.innerHTML = "<div class='empty-msg'>هیچ کەتەگۆرییەک هەڵنەبژێراوە</div>";
-            return;
-        }
-        
-        const questions = categories[currentCategory];
+        const questions = categories[currentCategory] || [];
         if(questions.length === 0) {
-            container.innerHTML = "<div class='empty-msg'>هیچ پرسیارێک لەم کەتەگۆرییەدا نییە. سەرەتا پرسیارێک زیاد بکە.</div>";
+            container.innerHTML = "<div class='empty-msg'>هیچ پرسیارێک نییە.</div>";
             return;
         }
-        
         let html = "";
         questions.forEach((q, idx) => {
-            const optionsText = q.options.map((opt, i) => {
-                const letter = String.fromCharCode(65+i);
-                return `${letter}. ${opt}`;
-            }).join(" | ");
-            html += `
-                <div class="question-item">
-                    <div class="question-text">
-                        <strong>${idx+1}.</strong> ${q.text}<br>
-                        <small style="opacity:0.7;">${optionsText}</small><br>
-                        <span style="color:#4CAF50;">✅ وەڵامی ڕاست: ${q.correct}</span>
-                    </div>
-                    <button class="delete-question" onclick="deleteQuestion(${idx})">🗑️ سڕینەوە</button>
-                </div>
-            `;
+            html += `<div class="question-item">
+                        <div class="question-text"><strong>${idx+1}.</strong> ${q.text}<br><small>${q.options.map((o,i)=>String.fromCharCode(65+i)+'. '+o).join(' | ')}</small><br><span style="color:#4CAF50;">✅ ڕاست: ${q.correct}</span></div>
+                        <button class="delete-question" onclick="deleteQuestion(${idx})">🗑️ سڕینەوە</button>
+                    </div>`;
         });
         container.innerHTML = html;
     }
     
     function deleteQuestion(index) {
-        if(confirm("دڵنیایت لە سڕینەوەی ئەم پرسیارە؟")) {
+        if(confirm("دڵنیایت؟")) {
             categories[currentCategory].splice(index, 1);
+            saveToLocal();
             renderQuestionsList();
-            saveAllCategories();
-            alert("پرسیار سڕایەوە و گۆڕانکارییەکان هەڵگیران.");
         }
     }
     
-    function logout() {
-        localStorage.removeItem("isAdmin");
-        window.location.href = "index.html";
-    }
+    function logout() { localStorage.removeItem("isAdmin"); window.location.href = "index.html"; }
     
-    if(localStorage.getItem("isAdmin") !== "true") {
-        window.location.href = "index.html";
-    }
-    
+    if(localStorage.getItem("isAdmin") !== "true") window.location.href = "index.html";
     loadData();
 </script>
 </body>
