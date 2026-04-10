@@ -24,12 +24,39 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         
         .container {
             max-width: 900px;
             width: 100%;
             margin: auto;
+        }
+        
+        /* دوگمەی import - لە سەرەوە و بۆ ماوەی 30 چرکە */
+        .import-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: none;
+        }
+        
+        .import-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        
+        .import-btn:hover {
+            transform: scale(1.05);
         }
         
         .row {
@@ -66,7 +93,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
-        /* ئەنیمەیشنی سەوزبوون */
         @keyframes greenFlash {
             0% { background: rgba(255,255,255,0.1); transform: scale(1); }
             30% { background: #4CAF50; transform: scale(1.05); border-color: #2e7d32; }
@@ -79,27 +105,14 @@
         }
         
         @media (max-width: 700px) {
-            .row {
-                gap: 15px;
-                margin-bottom: 20px;
-            }
-            .category-btn {
-                width: 100px;
-                padding: 12px 10px;
-            }
-            .category-btn span {
-                font-size: 18px;
-            }
+            .row { gap: 15px; margin-bottom: 20px; }
+            .category-btn { width: 100px; padding: 12px 10px; }
+            .category-btn span { font-size: 18px; }
         }
         
         @media (max-width: 480px) {
-            .category-btn {
-                width: 85px;
-                padding: 10px 5px;
-            }
-            .category-btn span {
-                font-size: 16px;
-            }
+            .category-btn { width: 85px; padding: 10px 5px; }
+            .category-btn span { font-size: 16px; }
         }
         
         .modal {
@@ -277,6 +290,10 @@
     </style>
 </head>
 <body>
+<div class="import-container" id="importContainer">
+    <button class="import-btn" onclick="importData()">📥 Import کردن پرسیارەکان (پاشەکەوتکراو)</button>
+</div>
+
 <div class="container">
     <div class="row">
         <div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div>
@@ -316,6 +333,22 @@
     let timeLeft = 60;
     let isAnswered = false;
     
+    // ناچالاککردنی راستکلیک
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    window.addEventListener('keydown', function(e) {
+        if(e.key === 'F5' || 
+           (e.ctrlKey && e.key === 'r') || 
+           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
+           (e.metaKey && e.key === 'r')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
     function loadCategories() {
         const stored = localStorage.getItem("categories");
         if(stored) { categories = JSON.parse(stored); } 
@@ -324,6 +357,67 @@
         const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
         allCatNames.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         attachCategoryEvents();
+        
+        // نمایشکردنی دوگمەی import بۆ ماوەی 30 چرکە
+        showImportButtonFor30Seconds();
+    }
+    
+    function showImportButtonFor30Seconds() {
+        const importContainer = document.getElementById("importContainer");
+        importContainer.style.display = "block";
+        
+        let timeLeftImport = 30;
+        const btn = document.querySelector(".import-btn");
+        const originalText = btn.innerText;
+        
+        const interval = setInterval(() => {
+            timeLeftImport--;
+            if(timeLeftImport <= 0) {
+                clearInterval(interval);
+                importContainer.style.display = "none";
+            } else {
+                btn.innerText = `📥 Import کردن (${timeLeftImport})`;
+            }
+        }, 1000);
+        
+        setTimeout(() => {
+            clearInterval(interval);
+            if(importContainer.style.display === "block") {
+                importContainer.style.display = "none";
+            }
+            btn.innerText = originalText;
+        }, 30000);
+    }
+    
+    function importData() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const importedData = JSON.parse(evt.target.result);
+                    const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
+                    allCatNames.forEach(cat => {
+                        if(importedData[cat] && Array.isArray(importedData[cat])) {
+                            categories[cat] = importedData[cat].slice(0, 8);
+                        } else if(!categories[cat]) {
+                            categories[cat] = [];
+                        }
+                    });
+                    localStorage.setItem("categories", JSON.stringify(categories));
+                    alert("✅ پرسیارەکان بە سەرکەوتوویی import کرا!");
+                    location.reload();
+                } catch(err) {
+                    alert("❌ فایلەکە نادروستە یان زیان پێگەیشتووە!");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
     
     function attachCategoryEvents() {
@@ -337,10 +431,8 @@
         const btn = e.currentTarget;
         const catName = btn.getAttribute("data-cat");
         
-        // زیادکردنی ئەنیمەیشنی سەوزبوون بە جوڵە
         btn.classList.add("category-btn-animate");
         
-        // دوای تەواوبوونی ئەنیمەیشن (600ms) بچۆ بۆ ناو کەتەگۆری
         setTimeout(() => {
             btn.classList.remove("category-btn-animate");
             openCategory(catName);
@@ -351,7 +443,6 @@
         currentCategory = catName;
         const questions = categories[catName];
         
-        // هەر 8 بۆکسەکە نمایش بکە، بەبێ ئاگادارکردنەوە
         let qHtml = "";
         for(let i=0; i<8; i++) {
             if(questions && i < questions.length) {
@@ -366,7 +457,6 @@
         document.getElementById("questionModal").style.display = "block";
     }
     
-    // فەنکشنی نوێ بۆ ئاگادارکردنەوە کاتێک پرسیار نییە
     function showEmptyWarning() {
         alert("⚠️ هیچ پرسیارێک لەم ژمارەیەدا نییە! تکایە یەکەم پرسیار زیاد بکە.");
     }
