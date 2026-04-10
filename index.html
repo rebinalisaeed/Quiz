@@ -33,7 +33,7 @@
             border-radius: 30px;
             padding: 40px;
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
         
@@ -47,31 +47,32 @@
         .glass-box {
             background: rgba(255,255,255,0.2);
             border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 25px;
         }
         
         .glass-box label {
             color: white;
             display: block;
-            margin-bottom: 10px;
-            font-size: 14px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
         }
         
         input {
             width: 100%;
-            padding: 14px;
-            margin: 10px 0;
+            padding: 15px;
+            margin: 15px 0;
             border: none;
             border-radius: 15px;
             font-size: 16px;
             font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif;
             text-align: center;
+            background: rgba(255,255,255,0.9);
         }
         
         button {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             margin: 10px 0;
             border: none;
             border-radius: 15px;
@@ -80,37 +81,31 @@
             cursor: pointer;
             transition: 0.3s;
             font-weight: bold;
-        }
-        
-        .btn-admin {
             background: #4CAF50;
             color: white;
         }
         
-        .btn-admin:hover {
+        button:hover {
             background: #45a049;
-            transform: scale(1.02);
-        }
-        
-        .btn-play {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-play:hover {
-            background: #e68900;
             transform: scale(1.02);
         }
         
         .error {
             color: #ff6b6b;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 14px;
         }
         
+        .info {
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+        
         hr {
-            border-color: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.2);
             margin: 20px 0;
         }
     </style>
@@ -120,45 +115,45 @@
     <h1>🎮 یاری پرسیار و وەڵام 🎮</h1>
     
     <div class="glass-box">
-        <label>👑 چوونە ژوورەوەی بەڕێوەبەر (زیادکردنی پرسیار)</label>
-        <input type="password" id="adminPass" placeholder="وشەی نهێنی بەڕێوەبەر" autocomplete="off">
-        <button class="btn-admin" onclick="login('admin')">📝 چوونە ژوورەوە بۆ بەڕێوەبردنی پرسیارەکان</button>
+        <label>🔐 تکایە وشەی نهێنی بنووسە</label>
+        <input type="password" id="password" placeholder="وشەی نهێنی" autocomplete="off">
+        <button onclick="checkLogin()">🚪 چوونە ژوورەوە</button>
+        <div id="errorMsg" class="error"></div>
+        <hr>
+        <div class="info">
+            💡 وشەی نهێنی بەڕێوەبەر: <strong>admin123</strong><br>
+            🎮 وشەی نهێنی یاری: <strong>adminplay</strong>
+        </div>
     </div>
-    
-    <hr>
-    
-    <div class="glass-box">
-        <label>🎯 چوونە ژوورەوەی یاری (ڕاستەوخۆ بۆ کەتەگۆری)</label>
-        <input type="password" id="playPass" placeholder="وشەی نهێنی یاری" autocomplete="off">
-        <button class="btn-play" onclick="login('play')">🎮 چوونە ژوورەوە بۆ یاریکردن</button>
-    </div>
-    
-    <div id="errorMsg" class="error"></div>
 </div>
 
 <script>
     const ADMIN_PASS = "admin123";
     const PLAY_PASS = "adminplay";
     
-    function login(type) {
-        let pass;
-        if(type === 'admin') {
-            pass = document.getElementById("adminPass").value;
-        } else {
-            pass = document.getElementById("playPass").value;
-        }
+    function checkLogin() {
+        const pass = document.getElementById("password").value;
         
-        if(type === 'admin' && pass === ADMIN_PASS) {
+        if(pass === ADMIN_PASS) {
             localStorage.setItem("isAdmin", "true");
             window.location.href = "admin.html";
         }
-        else if(type === 'play' && pass === PLAY_PASS) {
+        else if(pass === PLAY_PASS) {
             window.location.href = "play.html";
         }
         else {
-            document.getElementById("errorMsg").innerText = "❌ وشەی نهێنی هەڵەیە!";
+            document.getElementById("errorMsg").innerText = "❌ وشەی نهێنی هەڵەیە! تکایە هەوڵبدەرەوە.";
+            document.getElementById("password").value = "";
+            document.getElementById("password").focus();
         }
     }
+    
+    // ڕێگەدان بە کردنەوەی کلیکی Enter
+    document.getElementById("password").addEventListener("keypress", function(e) {
+        if(e.key === "Enter") {
+            checkLogin();
+        }
+    });
 </script>
 </body>
 </html>
