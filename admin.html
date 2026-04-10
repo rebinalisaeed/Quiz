@@ -3,18 +3,122 @@
 <head>
     <title>بەڕێوەبردن - پرسیارەکان</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * { font-family: 'Segoe UI', sans-serif; }
-        body { background: #1e1e2f; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; }
-        h1 { color: white; text-align: center; }
-        .glass-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 30px; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 12px; border: none; }
-        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer; margin: 5px; }
-        .category-grid { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
-        .category-box { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 15px; width: 250px; backdrop-filter: blur(5px); color: white; }
-        .question-item { background: rgba(0,0,0,0.3); margin: 10px 0; padding: 10px; border-radius: 10px; }
-        hr { border-color: rgba(255,255,255,0.2); }
+        @font-face {
+            font-family: 'K24Kurdish';
+            src: url('K24KurdishBold-Bold.ttf') format('truetype');
+        }
+        
+        * {
+            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1e1e2f;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .glass-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .glass-card h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 12px;
+            border: none;
+            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: 'K24Kurdish', 'Segoe UI', sans-serif;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+        
+        .category-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .category-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 15px;
+            width: 250px;
+            backdrop-filter: blur(5px);
+            color: white;
+        }
+        
+        .question-item {
+            background: rgba(0,0,0,0.3);
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        hr {
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .logout-btn {
+            background: #ff6b6b;
+            margin-top: 20px;
+        }
+        
+        .fixed-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .fixed-cat-btn {
+            background: #ff9800;
+            font-size: 12px;
+            padding: 8px 12px;
+        }
     </style>
 </head>
 <body>
@@ -23,8 +127,22 @@
     
     <div class="glass-card">
         <h3>➕ زیادکردنی کەتەگۆری نوێ</h3>
-        <input type="text" id="newCatName" placeholder="ناوی کەتەگۆری (وەک: وەرزش، مێژوو، جوگرافیا)">
-        <button onclick="addCategory()">زیادکردنی کەتەگۆری</button>
+        <div class="fixed-categories">
+            <button class="fixed-cat-btn" onclick="setFixedCategory('مێژوو')">مێژوو</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('زانست')">زانست</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('ئەدەبیات')">ئەدەبیات</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('هونەر')">هونەر</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('وەرزش')">وەرزش</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('بیرکاری')">بیرکاری</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('تەکنەلۆژیا')">تەکنەلۆژیا</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('تەندروستی')">تەندروستی</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('جوگرافیا')">جوگرافیا</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('ئاینی')">ئاینی</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('کوردستان')">کوردستان</button>
+            <button class="fixed-cat-btn" onclick="setFixedCategory('فیلم و دراما')">فیلم و دراما</button>
+        </div>
+        <input type="text" id="newCatName" placeholder="یان ناوی کەتەگۆری تایبەت بنووسە">
+        <button onclick="addCategory()">➕ زیادکردنی کەتەگۆری</button>
     </div>
 
     <div class="glass-card">
@@ -41,92 +159,128 @@
             <option value="C">هەڵبژاردەی C</option>
             <option value="D">هەڵبژاردەی D</option>
         </select>
-        <button onclick="addQuestion()">زیادکردنی پرسیار</button>
+        <button onclick="addQuestion()">➕ زیادکردنی پرسیار</button>
+        <p style="color:rgba(255,255,255,0.7); font-size:12px; margin-top:10px;">⚠️ هەر کەتەگۆریەک تەنها 8 پرسیار دەگرێت!</p>
     </div>
 
     <div id="categoriesList"></div>
-    <button onclick="logout()">🚪 دەرچوون</button>
+    <button class="logout-btn" onclick="logout()">🚪 دەرچوون</button>
 </div>
 
 <script>
     let categories = JSON.parse(localStorage.getItem("categories")) || {};
-
+    
+    // کەتەگۆری دیاریکراوەکان زیاد بکە ئەگەر بوونیان نەبوو
+    const defaultCategories = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "بیرکاری", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی", "کوردستان", "فیلم و دراما"];
+    
+    defaultCategories.forEach(cat => {
+        if(!categories[cat]) {
+            categories[cat] = [];
+        }
+    });
+    
+    function setFixedCategory(catName) {
+        document.getElementById("newCatName").value = catName;
+    }
+    
     function saveCategories() {
         localStorage.setItem("categories", JSON.stringify(categories));
         renderCategories();
         updateCategorySelect();
     }
-
+    
     function addCategory() {
         let name = document.getElementById("newCatName").value.trim();
         if(name && !categories[name]) {
             categories[name] = [];
             saveCategories();
             document.getElementById("newCatName").value = "";
-        } else alert("کەتەگۆری پێشتر هەیە یان ناوەکە بەتاڵە!");
+        } else if(name && categories[name]) {
+            alert("ئەم کەتەگۆرییە پێشتر هەیە!");
+        } else {
+            alert("تکایە ناوێک بنووسە!");
+        }
     }
-
+    
     function addQuestion() {
         let cat = document.getElementById("catSelect").value;
         if(!cat || !categories[cat]) return alert("کەتەگۆری هەڵبژێرە!");
+        
         let qText = document.getElementById("questionText").value;
         let optA = document.getElementById("optA").value;
         let optB = document.getElementById("optB").value;
         let optC = document.getElementById("optC").value;
         let optD = document.getElementById("optD").value;
         let correct = document.getElementById("correctOpt").value;
-        if(!qText || !optA || !optB || !optC || !optD) return alert("تکایە هەموو خانەکان پڕ بکەوە!");
         
-        if(categories[cat].length >= 8) return alert("کەتەگۆرییەکە پڕە (٨ پرسیار)! دەتوانیت کەتەگۆری نوێ دروست بکەیت.");
+        if(!qText || !optA || !optB || !optC || !optD) {
+            return alert("تکایە هەموو خانەکان پڕ بکەوە!");
+        }
         
-        categories[cat].push({ text: qText, options: [optA, optB, optC, optD], correct: correct });
+        if(categories[cat].length >= 8) {
+            return alert("کەتەگۆرییەکە پڕە (8 پرسیار)! دەتوانیت کەتەگۆری نوێ دروست بکەیت.");
+        }
+        
+        categories[cat].push({ 
+            text: qText, 
+            options: [optA, optB, optC, optD], 
+            correct: correct 
+        });
+        
         document.getElementById("questionText").value = "";
         document.getElementById("optA").value = "";
         document.getElementById("optB").value = "";
         document.getElementById("optC").value = "";
         document.getElementById("optD").value = "";
+        
         saveCategories();
+        alert("✅ پرسیار زیاد کرا!");
     }
-
+    
     function renderCategories() {
         let html = "<div class='category-grid'>";
         for(let cat in categories) {
-            html += `<div class='category-box'><h3>📂 ${cat}</h3>`;
+            html += `<div class='category-box'>
+                        <h3>📂 ${cat}</h3>
+                        <p>${categories[cat].length}/8 پرسیار</p>`;
             categories[cat].forEach((q, idx) => {
                 html += `<div class='question-item'>${idx+1}. ${q.text.substring(0, 30)}...</div>`;
             });
-            html += `<button onclick='deleteCategory("${cat}")'>🗑️ سڕینەوەی کەتەگۆری</button></div>`;
+            html += `<button onclick='deleteCategory("${cat}")'>🗑️ سڕینەوە</button>
+                    </div>`;
         }
         html += "</div>";
         document.getElementById("categoriesList").innerHTML = html;
     }
-
+    
     function updateCategorySelect() {
         let select = document.getElementById("catSelect");
         select.innerHTML = "";
         for(let cat in categories) {
             let opt = document.createElement("option");
             opt.value = cat;
-            opt.textContent = cat;
+            opt.textContent = `${cat} (${categories[cat].length}/8)`;
             select.appendChild(opt);
         }
     }
-
+    
     function deleteCategory(cat) {
-        if(confirm("دڵنیایت لە سڕینەوەی کەتەگۆری و هەموو پرسیارەکانی؟")) {
+        if(confirm(`دڵنیایت لە سڕینەوەی کەتەگۆری "${cat}" و هەموو پرسیارەکانی؟`)) {
             delete categories[cat];
             saveCategories();
         }
     }
-
+    
     function logout() {
         localStorage.removeItem("isAdmin");
         window.location.href = "index.html";
     }
-
-    if(localStorage.getItem("isAdmin") !== "true") window.location.href = "index.html";
-    updateCategorySelect();
-    renderCategories();
+    
+    if(localStorage.getItem("isAdmin") !== "true") {
+        window.location.href = "index.html";
+    }
+    
+    saveCategories();
 </script>
 </body>
 </html>
