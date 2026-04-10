@@ -33,7 +33,6 @@
             margin-bottom: 30px;
         }
         
-        /* تابەکانی کەتەگۆری */
         .category-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -66,7 +65,6 @@
             transform: translateY(-2px);
         }
         
-        /* کارتی زیادکردنی پرسیار */
         .glass-card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
@@ -104,6 +102,7 @@
             gap: 15px;
             margin-top: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         button {
@@ -137,6 +136,16 @@
             transform: scale(1.02);
         }
         
+        .btn-export {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background: #e68900;
+            transform: scale(1.02);
+        }
+        
         .btn-logout {
             background: #ff6b6b;
             color: white;
@@ -147,7 +156,6 @@
             margin-right: auto;
         }
         
-        /* لیستی پرسیارەکان */
         .questions-list {
             background: rgba(0,0,0,0.3);
             border-radius: 20px;
@@ -210,10 +218,8 @@
 <div class="container">
     <h1>📝 دانان و تۆمار کردنی پرسیارەکان</h1>
     
-    <!-- تابەکانی کەتەگۆری -->
     <div class="category-tabs" id="categoryTabs"></div>
     
-    <!-- کارتی زیادکردنی پرسیار -->
     <div class="glass-card">
         <h3>➕ زیادکردنی پرسیاری نوێ بۆ کەتەگۆری هەڵبژێردراو</h3>
         <input type="text" id="questionText" placeholder="پرسیارەکە لێرە بنووسە">
@@ -232,11 +238,11 @@
         
         <div class="button-group">
             <button class="btn-add" onclick="addQuestionToCurrent()">➕ زیادکردنی پرسیار</button>
-            <button class="btn-save" onclick="saveAllCategories()">💾 سەیڤ کردن</button>
+            <button class="btn-save" onclick="saveAllCategories()">💾 سەیڤ کردن بە شێوەی خۆکار</button>
+            <button class="btn-export" onclick="exportData()">📤 Export کردن (پاشەکەوتکردن)</button>
         </div>
     </div>
     
-    <!-- نمایشی پرسیارەکانی کەتەگۆری هەڵبژێردراو -->
     <div class="questions-list" id="questionsList">
         <h4>📋 پرسیارەکانی ئەم کەتەگۆرییە</h4>
         <div id="questionsContainer"></div>
@@ -246,17 +252,31 @@
 </div>
 
 <script>
-    // کەتەگۆری دیاریکراوەکان (ئەم 12 کەتەگۆرییە)
     const defaultCategories = [
         "مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", 
         "بیرکاری", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", 
         "ئاینی", "کوردستان", "فیلم و دراما"
     ];
     
-    let categories = {};      // داتای سەرەکی
-    let currentCategory = ""; // کەتەگۆری ئێستا
+    let categories = {};
+    let currentCategory = "";
     
-    // بارکردنی داتا لە Local Storage یان دروستکردنی بنەڕەتی
+    // ناچالاککردنی راستکلیک
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    window.addEventListener('keydown', function(e) {
+        if(e.key === 'F5' || 
+           (e.ctrlKey && e.key === 'r') || 
+           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
+           (e.metaKey && e.key === 'r')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
     function loadData() {
         const stored = localStorage.getItem("categories");
         if(stored) {
@@ -265,17 +285,13 @@
             categories = {};
         }
         
-        // دڵنیابوون لە بوونی هەموو کەتەگۆری دیاریکراوەکان
         defaultCategories.forEach(cat => {
             if(!categories[cat]) {
                 categories[cat] = [];
             }
         });
         
-        // هەڵبژاردنی یەکەم کەتەگۆری ئەگەر currentCategory دیاری نەکرابێت
         if(!currentCategory && defaultCategories.length > 0) {
-            currentCategory = defaultCategories[0];
-        } else if(currentCategory && !categories[currentCategory]) {
             currentCategory = defaultCategories[0];
         }
         
@@ -283,7 +299,6 @@
         renderQuestionsList();
     }
     
-    // نمایشکردنی دوگمەکانی کەتەگۆری (وەک تاب)
     function renderTabs() {
         const container = document.getElementById("categoryTabs");
         container.innerHTML = "";
@@ -295,24 +310,19 @@
                 btn.classList.add("active");
             }
             btn.onclick = (function(category) {
-                return function() {
-                    switchCategory(category);
-                };
+                return function() { switchCategory(category); };
             })(cat);
             container.appendChild(btn);
         }
     }
     
-    // گۆڕینی کەتەگۆری ئێستا
     function switchCategory(category) {
         currentCategory = category;
         renderTabs();
         renderQuestionsList();
-        // پاککردنەوەی فۆڕم
         clearForm();
     }
     
-    // پاککردنەوەی خانەکانی فۆڕم
     function clearForm() {
         document.getElementById("questionText").value = "";
         document.getElementById("optA").value = "";
@@ -322,7 +332,6 @@
         document.getElementById("correctOpt").value = "A";
     }
     
-    // زیادکردنی پرسیار بۆ کەتەگۆری ئێستا (تەنها لە بیرەوەری، نەک save)
     function addQuestionToCurrent() {
         if(!currentCategory) {
             alert("تکایە یەکەم کەتەگۆری هەڵبژێرە!");
@@ -341,13 +350,11 @@
             return;
         }
         
-        // پشکنینی ژمارەی پرسیارەکان (ئەگەر 8 بێت ڕێگە نادات)
         if(categories[currentCategory].length >= 8) {
             alert(`کەتەگۆری ${currentCategory} پڕە! تەنها 8 پرسیار دەگرێت.`);
             return;
         }
         
-        // زیادکردنی پرسیارەکە
         const newQuestion = {
             text: qText,
             options: [optA, optB, optC, optD],
@@ -355,19 +362,30 @@
         };
         categories[currentCategory].push(newQuestion);
         
-        // نوێکردنەوەی لیست و پاککردنەوەی فۆڕم
         renderQuestionsList();
         clearForm();
-        alert("✅ پرسیار زیاد کرا! تکایە دوگمەی 'سەیڤ کردن' بکە بۆ هەڵگرتنی هەموو گۆڕانکارییەکان.");
+        saveAllCategories();
+        alert("✅ پرسیار زیاد کرا و خۆکارانە هەڵگیرا!");
     }
     
-    // هەڵگرتنی هەموو داتاکان بۆ Local Storage
     function saveAllCategories() {
         localStorage.setItem("categories", JSON.stringify(categories));
-        alert("💾 هەموو پرسیارەکان بە سەرکەوتوویی هەڵگیران!");
     }
     
-    // نمایشکردنی پرسیارەکانی کەتەگۆری ئێستا
+    function exportData() {
+        const dataStr = JSON.stringify(categories, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "questions_backup.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert("📁 هەموو پرسیارەکان بە سەرکەوتوویی پاشەکەوت کرا!");
+    }
+    
     function renderQuestionsList() {
         const container = document.getElementById("questionsContainer");
         if(!currentCategory || !categories[currentCategory]) {
@@ -401,28 +419,24 @@
         container.innerHTML = html;
     }
     
-    // سڕینەوەی پرسیارێک بە پێی ئیندێکس
     function deleteQuestion(index) {
         if(confirm("دڵنیایت لە سڕینەوەی ئەم پرسیارە؟")) {
             categories[currentCategory].splice(index, 1);
             renderQuestionsList();
-            // بەکارهێنەر پێویستە save بکات بۆ هەڵگرتنی گۆڕانکاری
-            alert("پرسیار سڕایەوە. تکایە دوگمەی 'سەیڤ کردن' بکە بۆ هەڵگرتنی گۆڕانکارییەکان.");
+            saveAllCategories();
+            alert("پرسیار سڕایەوە و گۆڕانکارییەکان هەڵگیران.");
         }
     }
     
-    // دەرچوون
     function logout() {
         localStorage.removeItem("isAdmin");
         window.location.href = "index.html";
     }
     
-    // پشکنینی ئەگەر بەڕێوەبەر بێت یەکەم جار
     if(localStorage.getItem("isAdmin") !== "true") {
         window.location.href = "index.html";
     }
     
-    // دەستپێکردن
     loadData();
 </script>
 </body>
