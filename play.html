@@ -32,7 +32,6 @@
             margin: auto;
         }
         
-        /* ڕیزەکانی دوگمەکان */
         .row {
             display: flex;
             justify-content: center;
@@ -41,7 +40,6 @@
             flex-wrap: wrap;
         }
         
-        /* دوگمەی کەتەگۆری */
         .category-btn {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(12px);
@@ -56,7 +54,7 @@
         }
         
         .category-btn span {
-            font-size: 20px;
+            font-size: 24px;    /* لە 20px کراوە بە 24px - 4 نمرە گەورەتر */
             font-weight: normal;
             color: white;
             letter-spacing: 1px;
@@ -68,7 +66,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         
-        /* وەڵامدانەوە بۆ مۆبایل */
         @media (max-width: 700px) {
             .row {
                 gap: 15px;
@@ -79,7 +76,7 @@
                 padding: 12px 10px;
             }
             .category-btn span {
-                font-size: 14px;
+                font-size: 18px;  /* لە 14px کراوە بە 18px */
             }
         }
         
@@ -89,11 +86,11 @@
                 padding: 10px 5px;
             }
             .category-btn span {
-                font-size: 12px;
+                font-size: 16px;  /* لە 12px کراوە بە 16px */
             }
         }
         
-        /* مۆدالی پرسیارەکان (هەمان شێوەی پێشوو) */
+        /* مۆدال و بەشەکانی تر هەر وەک خۆی */
         .modal {
             display: none;
             position: fixed;
@@ -270,67 +267,33 @@
 </head>
 <body>
 <div class="container">
-    <!-- ڕیزی یەکەم: مێژوو، زانست، ئەدەبیات -->
     <div class="row">
-        <div class="category-btn" data-cat="مێژوو">
-            <span>مێژوو</span>
-        </div>
-        <div class="category-btn" data-cat="زانست">
-            <span>زانست</span>
-        </div>
-        <div class="category-btn" data-cat="ئەدەبیات">
-            <span>ئەدەبیات</span>
-        </div>
+        <div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div>
+        <div class="category-btn" data-cat="زانست"><span>زانست</span></div>
+        <div class="category-btn" data-cat="ئەدەبیات"><span>ئەدەبیات</span></div>
     </div>
-    
-    <!-- ڕیزی دووەم: هونەر، وەرزش، بیرکاری -->
     <div class="row">
-        <div class="category-btn" data-cat="هونەر">
-            <span>هونەر</span>
-        </div>
-        <div class="category-btn" data-cat="وەرزش">
-            <span>وەرزش</span>
-        </div>
-        <div class="category-btn" data-cat="بیرکاری">
-            <span>بیرکاری</span>
-        </div>
+        <div class="category-btn" data-cat="هونەر"><span>هونەر</span></div>
+        <div class="category-btn" data-cat="وەرزش"><span>وەرزش</span></div>
+        <div class="category-btn" data-cat="بیرکاری"><span>بیرکاری</span></div>
     </div>
-    
-    <!-- ڕیزی سێیەم: تەکنەلۆژیا، تەندروستی، جوگرافیا -->
     <div class="row">
-        <div class="category-btn" data-cat="تەکنەلۆژیا">
-            <span>تەکنەلۆژیا</span>
-        </div>
-        <div class="category-btn" data-cat="تەندروستی">
-            <span>تەندروستی</span>
-        </div>
-        <div class="category-btn" data-cat="جوگرافیا">
-            <span>جوگرافیا</span>
-        </div>
+        <div class="category-btn" data-cat="تەکنەلۆژیا"><span>تەکنەلۆژیا</span></div>
+        <div class="category-btn" data-cat="تەندروستی"><span>تەندروستی</span></div>
+        <div class="category-btn" data-cat="جوگرافیا"><span>جوگرافیا</span></div>
     </div>
-    
-    <!-- ڕیزی چوارەم: ئاینی، کوردستان، فیلم و دراما -->
     <div class="row">
-        <div class="category-btn" data-cat="ئاینی">
-            <span>ئاینی</span>
-        </div>
-        <div class="category-btn" data-cat="کوردستان">
-            <span>کوردستان</span>
-        </div>
-        <div class="category-btn" data-cat="فیلم و دراما">
-            <span>فیلم و دراما</span>
-        </div>
+        <div class="category-btn" data-cat="ئاینی"><span>ئاینی</span></div>
+        <div class="category-btn" data-cat="کوردستان"><span>کوردستان</span></div>
+        <div class="category-btn" data-cat="فیلم و دراما"><span>فیلم و دراما</span></div>
     </div>
 </div>
 
-<!-- مۆدالی پرسیارەکان -->
 <div id="questionModal" class="modal">
     <div class="modal-content">
         <div id="questionsListDiv"></div>
         <div id="questionScreenDiv" style="display:none;"></div>
-        <div style="text-align:center;">
-            <button class="close-btn" onclick="closeModal()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button>
-        </div>
+        <div style="text-align:center;"><button class="close-btn" onclick="closeModal()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button></div>
     </div>
 </div>
 
@@ -342,69 +305,40 @@
     let timeLeft = 60;
     let isAnswered = false;
     
-    // بارکردنی کەتەگۆری و پرسیارەکان لە Local Storage
     function loadCategories() {
         const stored = localStorage.getItem("categories");
-        if(stored) {
-            categories = JSON.parse(stored);
-        } else {
-            // داتای بەتاڵ
-            categories = {};
-        }
+        if(stored) { categories = JSON.parse(stored); } 
+        else { categories = {}; }
         
-        // زیادکردنی کەتەگۆریەکان ئەگەر بوونیان نەبوو (بەتاڵ)
-        const allCatNames = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "بیرکاری", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی", "کوردستان", "فیلم و دراما"];
-        allCatNames.forEach(cat => {
-            if(!categories[cat]) {
-                categories[cat] = [];
-            }
-        });
-        
-        // ئەگەر هیچ پرسیارێک نەبوو، پەیامێک نیشان بدە (بەڵام بە دوگمەکانەوە)
+        const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
+        allCatNames.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         attachCategoryEvents();
     }
     
-    // بەستنەوەی ڕووداوەکان بۆ هەموو دوگمەکانی کەتەگۆری
     function attachCategoryEvents() {
-        const btns = document.querySelectorAll(".category-btn");
-        btns.forEach(btn => {
+        document.querySelectorAll(".category-btn").forEach(btn => {
             btn.removeEventListener("click", handleCategoryClick);
             btn.addEventListener("click", handleCategoryClick);
         });
     }
     
     function handleCategoryClick(e) {
-        const catName = e.currentTarget.getAttribute("data-cat");
-        openCategory(catName);
+        openCategory(e.currentTarget.getAttribute("data-cat"));
     }
     
-    // کردنەوەی کەتەگۆری و نمایشکردنی ژمارە 1 تا 8
     function openCategory(catName) {
         currentCategory = catName;
         const questions = categories[catName];
-        
         if(!questions || questions.length === 0) {
-            alert(`هیچ پرسیارێک لە کەتەگۆری ${catName} دا نییە! تکایە یەکەم پرسیار زیاد بکە.`);
+            alert(`هیچ پرسیارێک لە کەتەگۆری ${catName} دا نییە!`);
             return;
         }
-        
-        let questionsHtml = "";
-        for(let i = 0; i < 8; i++) {
-            if(i < questions.length) {
-                questionsHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
-            } else {
-                questionsHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
-            }
+        let qHtml = "";
+        for(let i=0;i<8;i++) {
+            if(i<questions.length) qHtml += `<div class="question-number" onclick="selectQuestion(${i})">${i+1}</div>`;
+            else qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
         }
-        
-        document.getElementById("questionsListDiv").innerHTML = `
-            <h2 style="color:white;text-align:center;margin-bottom:20px;">📂 ${catName}</h2>
-            <p style="color:rgba(255,255,255,0.7);text-align:center;margin-bottom:15px;">ژمارەیەک هەڵبژێرە بۆ بینینی پرسیارەکە</p>
-            <div class="questions-grid">
-                ${questionsHtml}
-            </div>
-        `;
-        
+        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">📂 ${catName}</h2><div class="questions-grid">${qHtml}</div>`;
         document.getElementById("questionScreenDiv").style.display = "none";
         document.getElementById("questionsListDiv").style.display = "block";
         document.getElementById("questionModal").style.display = "block";
@@ -412,127 +346,82 @@
     
     function selectQuestion(index) {
         if(timerInterval) clearInterval(timerInterval);
-        
-        const questions = categories[currentCategory];
-        if(index >= questions.length) return;
-        
+        if(index >= categories[currentCategory].length) return;
         currentQuestionIndex = index;
-        const question = questions[index];
-        timeLeft = 60;
-        isAnswered = false;
-        
+        timeLeft = 60; isAnswered = false;
         document.getElementById("questionsListDiv").style.display = "none";
         document.getElementById("questionScreenDiv").style.display = "block";
-        
         startTimer();
-        renderQuestion(question);
+        renderQuestion(categories[currentCategory][index]);
     }
     
     function startTimer() {
-        const timerDiv = document.getElementById("timerDisplay");
         if(timerInterval) clearInterval(timerInterval);
-        
         timerInterval = setInterval(() => {
-            if(!isAnswered && timeLeft > 0) {
+            if(!isAnswered && timeLeft>0) {
                 timeLeft--;
-                if(timerDiv) timerDiv.innerText = `${timeLeft} چرکە`;
-                
-                if(timeLeft === 0) {
+                let td = document.getElementById("timerDisplay");
+                if(td) td.innerText = `${timeLeft} چرکە`;
+                if(timeLeft===0 && !isAnswered) {
                     clearInterval(timerInterval);
-                    if(!isAnswered) {
-                        alert("⏰ کات تەواو بوو! وەڵامە ڕاستەکە ئاشکرا دەکرێت");
-                        showCorrectAnswer();
-                        isAnswered = true;
-                    }
+                    alert("⏰ کات تەواو بوو! وەڵامی ڕاست ئاشکرا دەکرێت");
+                    showCorrectAnswer();
+                    isAnswered=true;
                 }
-            } else if(timeLeft <= 0) {
-                clearInterval(timerInterval);
-            }
-        }, 1000);
+            } else if(timeLeft<=0) clearInterval(timerInterval);
+        },1000);
     }
     
-    function renderQuestion(question) {
-        const letters = ["A", "B", "C", "D"];
-        const screenDiv = document.getElementById("questionScreenDiv");
-        screenDiv.innerHTML = `
+    function renderQuestion(q) {
+        const letters=["A","B","C","D"];
+        document.getElementById("questionScreenDiv").innerHTML = `
             <div class="question-screen">
                 <div class="timer" id="timerDisplay">60 چرکە</div>
-                <div class="question-text">❓ ${question.text}</div>
+                <div class="question-text">❓ ${q.text}</div>
                 <div class="options-grid" id="optionsGrid">
-                    ${question.options.map((opt, idx) => `
-                        <div class="option-btn" data-opt="${letters[idx]}" onclick="checkAnswer('${letters[idx]}', '${question.correct}')">
-                            ${letters[idx]}. ${opt}
-                        </div>
-                    `).join('')}
+                    ${q.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="checkAnswer('${letters[idx]}','${q.correct}')">${letters[idx]}. ${opt}</div>`).join('')}
                 </div>
                 <button class="back-btn" onclick="backToQuestions()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
-            </div>
-        `;
+            </div>`;
     }
     
-    function checkAnswer(selected, correct) {
-        if(isAnswered) {
-            alert("پێشتر وەڵامت داوەتەوە!");
-            return;
-        }
-        if(timeLeft <= 0) {
-            alert("کات تەواو بووە!");
-            return;
-        }
-        
-        isAnswered = true;
-        if(timerInterval) clearInterval(timerInterval);
-        
-        const buttons = document.querySelectorAll(".option-btn");
-        buttons.forEach(btn => {
-            btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === correct) {
-                btn.classList.add("option-correct");
-            }
-            if(btn.getAttribute("data-opt") === selected && selected !== correct) {
-                btn.classList.add("option-wrong");
-            }
+    function checkAnswer(selected,correct) {
+        if(isAnswered || timeLeft<=0) { alert("ناتوانیت وەڵام بدەیتەوە"); return; }
+        isAnswered=true;
+        clearInterval(timerInterval);
+        const btns = document.querySelectorAll(".option-btn");
+        btns.forEach(btn=>{
+            btn.style.pointerEvents="none";
+            if(btn.dataset.opt===correct) btn.classList.add("option-correct");
+            if(btn.dataset.opt===selected && selected!==correct) btn.classList.add("option-wrong");
         });
-        
-        const question = categories[currentCategory][currentQuestionIndex];
-        const correctText = question.options[correct.charCodeAt(0) - 65];
-        
-        if(selected === correct) {
-            alert(`✅ وەڵامەکە ڕاستە! وەڵامی ڕاست: ${correctText}`);
-        } else {
-            alert(`❌ وەڵامەکە هەڵەیە! وەڵامی ڕاست: ${correctText}`);
-        }
+        const question=categories[currentCategory][currentQuestionIndex];
+        const correctText=question.options[correct.charCodeAt(0)-65];
+        alert(selected===correct ? `✅ ڕاستە! وەڵام: ${correctText}` : `❌ هەڵەیە! وەڵامی ڕاست: ${correctText}`);
     }
     
     function showCorrectAnswer() {
-        const question = categories[currentCategory][currentQuestionIndex];
-        const buttons = document.querySelectorAll(".option-btn");
-        buttons.forEach(btn => {
-            btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === question.correct) {
-                btn.classList.add("option-correct");
-            }
+        const q=categories[currentCategory][currentQuestionIndex];
+        document.querySelectorAll(".option-btn").forEach(btn=>{
+            btn.style.pointerEvents="none";
+            if(btn.dataset.opt===q.correct) btn.classList.add("option-correct");
         });
-        const correctText = question.options[question.correct.charCodeAt(0) - 65];
-        alert(`⏰ کات تەواو بوو! وەڵامی ڕاست: ${correctText}`);
+        alert(`وەڵامی ڕاست: ${q.options[q.correct.charCodeAt(0)-65]}`);
     }
     
     function backToQuestions() {
-        if(timerInterval) clearInterval(timerInterval);
-        document.getElementById("questionScreenDiv").style.display = "none";
-        document.getElementById("questionsListDiv").style.display = "block";
-        currentQuestionIndex = null;
-        isAnswered = false;
+        clearInterval(timerInterval);
+        document.getElementById("questionScreenDiv").style.display="none";
+        document.getElementById("questionsListDiv").style.display="block";
+        currentQuestionIndex=null; isAnswered=false;
     }
     
     function closeModal() {
-        if(timerInterval) clearInterval(timerInterval);
-        document.getElementById("questionModal").style.display = "none";
-        currentQuestionIndex = null;
-        isAnswered = false;
+        clearInterval(timerInterval);
+        document.getElementById("questionModal").style.display="none";
+        currentQuestionIndex=null; isAnswered=false;
     }
     
-    // دەستپێکردن
     loadCategories();
 </script>
 </body>
