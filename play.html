@@ -89,10 +89,8 @@
     
     const categoryList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
     
-    // ========== هەڵگرتن و بارکردنی usedQuestions ==========
     function saveUsedQuestions() {
         localStorage.setItem("quiz_usedQuestions", JSON.stringify(usedQuestions));
-        console.log("دۆخی پرسیارەکان هەڵگیرا:", usedQuestions);
     }
     
     function loadUsedQuestions() {
@@ -100,19 +98,14 @@
         if(stored) {
             try {
                 usedQuestions = JSON.parse(stored);
-                console.log("دۆخی پرسیارەکان بارکرا:", usedQuestions);
-            } catch(e) { 
-                console.error("هەڵە لە بارکردنی دۆخی پرسیارەکان", e);
-                usedQuestions = {};
-            }
+            } catch(e) { usedQuestions = {}; }
         } else {
             usedQuestions = {};
-            console.log("هیچ دۆخێک نەدۆزرایەوە، دەستپێکی نوێ");
         }
     }
     
     function resetAllQuestions() {
-        if(confirm("دڵنیایت لە ڕێسێت کردنی هەموو پرسیارەکان؟ هەموو پرسیارەکان دەگەڕێنەوە باری ئاسایی و دەتوانیت دووبارە وەڵامیان بدەیتەوە.")) {
+        if(confirm("دڵنیایت لە ڕێسێت کردنی هەموو پرسیارەکان؟")) {
             usedQuestions = {};
             saveUsedQuestions();
             alert("✅ هەموو پرسیارەکان ڕێسێت کرا! لاپەڕە نوێ دەبێتەوە.");
@@ -316,10 +309,12 @@
             </div>`;
     }
     
+    // ========== کیبۆرد بۆ وەڵامدان (A,B,C,D) - پرتەقاڵی کردن ==========
     function handleAnswerKeyboard(e) {
         const key = e.key.toUpperCase();
         const validKeys = ['A', 'B', 'C', 'D'];
         
+        // ئەگەر چاوەڕێی Enter بێت بۆ دەستپێکردن
         if(waitingForEnter) {
             if(e.key === 'Enter') {
                 e.preventDefault();
@@ -328,21 +323,26 @@
             return;
         }
         
+        // ئەگەر وەڵام درابێت، کاری تێدا مەکە
         if(isAnswered) return;
         
+        // هەڵبژاردنی وەڵام بە دوگمەکانی A,B,C,D (ڕەنگی پرتەقاڵی)
         if(validKeys.includes(key)) {
             e.preventDefault();
             const buttons = document.querySelectorAll(".option-btn");
             const index = validKeys.indexOf(key);
             if(buttons[index]) {
+                // لابردنی پرتەقاڵی پێشوو
                 if(selectedAnswerBtn) {
                     selectedAnswerBtn.classList.remove("option-btn-orange");
                 }
+                // زیادکردنی پرتەقاڵی بۆ ئەم دوگمەیە
                 buttons[index].classList.add("option-btn-orange");
                 selectedAnswerBtn = buttons[index];
             }
         }
         
+        // پێشکەشکردنی وەڵام بە Enter
         if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered && !waitingForEnter) {
             e.preventDefault();
             const selectedLetter = selectedAnswerBtn.getAttribute("data-opt");
@@ -430,7 +430,6 @@
             if(!categories[cat]) categories[cat] = []; 
         });
         
-        // دوای بارکردنی categories، پشکنینی کەتەگۆرییەکان بۆ سوورکردنەوە
         setTimeout(() => {
             categoryList.forEach(cat => checkAndDisableCategory(cat));
         }, 100);
