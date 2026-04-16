@@ -37,6 +37,7 @@
         .option-btn-orange { background: #ff9800 !important; border-color: #e68900 !important; transform: scale(1.02); }
         .option-correct { background: #4CAF50 !important; border-color: #2e7d32 !important; }
         .option-wrong { background: #f44336 !important; border-color: #c62828 !important; }
+        .waiting-message { color: #ff9800; font-size: 20px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 20px; }
         @media (max-width: 700px) { .question-number { font-size: 22px; } .question-text { font-size: 18px; } .option-btn { font-size: 13px; } .timer { font-size: 36px; } }
     </style>
 </head>
@@ -80,8 +81,10 @@
     let isInQuestionScreen = false;
     let selectedAnswerBtn = null;
     let currentCorrectAnswer = null;
-    let currentQuestionOptions = null;
-    let usedQuestions = {}; // بۆ ئەوەی کە کام پرسیارەکان بەکارهاتوون
+    let currentQuestionText = null;
+    let usedQuestions = {};
+    let waitingForEnter = false; // چاوەڕێی Enter بێت بۆ دەستپێکردنی کاتژمێر
+    let currentQuestionData = null; // هەڵگرتنی داتای پرسیارەکە بۆ کاتی نمایش
     
     const categoryList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
     
@@ -108,7 +111,7 @@
             e.preventDefault();
     });
     
-    // ========== گەڕانەوە بە Backspace بۆ پەڕەی کەتەگۆری ==========
+    // ========== گەڕانەوە بە Backspace ==========
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Backspace') {
             e.preventDefault();
@@ -140,7 +143,6 @@
         selectedCategoryBtn = null;
     }
     
-    // پشکنینی کەتەگۆری بۆ ئەوەی ئایا هەموو پرسیارەکانی بەکارهاتوون
     function checkAndDisableCategory(catName) {
         const questions = categories[catName] || [];
         if(questions.length === 0) return;
@@ -154,22 +156,16 @@
         }
     }
     
-    // ناچالاککردنی بۆکسی پرسیار دوای بەکارهێنان
     function markQuestionAsUsed(catName, questionIndex) {
         if(!usedQuestions[catName]) usedQuestions[catName] = {};
         usedQuestions[catName][questionIndex] = true;
-        
-        // هەڵگرتنی دۆخی پرسیارە بەکارهاتووەکان لە localStorage
         localStorage.setItem("usedQuestions", JSON.stringify(usedQuestions));
         
-        // نوێکردنەوەی ڕەنگی بۆکسەکە بۆ سوور
         const questionDivs = document.querySelectorAll(".question-number");
         if(questionDivs[questionIndex]) {
             questionDivs[questionIndex].classList.add("question-number-red");
             questionDivs[questionIndex].style.pointerEvents = "none";
         }
-        
-        // پشکنینی کەتەگۆری بۆ ئەوەی ئایا هەموو پرسیارەکان بەکارهاتوون
         checkAndDisableCategory(catName);
     }
     
@@ -212,10 +208,8 @@
             const questions = categories[currentCategory] || [];
             const questionDivs = document.querySelectorAll(".question-number");
             if(questionDivs.length >= num) {
-                // لابردنی هەموو سەوزی پێشوو
                 questionDivs.forEach(div => div.classList.remove("question-number-green"));
                 const targetDiv = questionDivs[num-1];
-                // تەنها ئەگەر پرسیارەکە پێشتر بەکارنەهاتووبێت
                 if(!targetDiv.classList.contains("question-number-red")) {
                     targetDiv.classList.add("question-number-green");
                     selectedQuestionDiv = targetDiv;
@@ -232,9 +226,8 @@
                 const questions = categories[currentCategory] || [];
                 if(questions.length > index && !usedQuestions[currentCategory]?.[index]) {
                     selectedQuestionDiv.classList.remove("question-number-green");
-                    selectQuestion(index);
+                    prepareQuestion(index);
                 } else {
-                    alert("⚠️ ئەم پرسیارە پێشتر بەکارهاتووە یان بوونی نییە!");
                     selectedQuestionDiv.classList.remove("question-number-green");
                     selectedQuestionDiv = null;
                 }
@@ -242,29 +235,108 @@
         }
     }
     
+    // ئامادەکردنی پرسیار بەبێ دەستپێکردنی کاتژمێر
+    function prepareQuestion(index) {
+        const questions = categories[currentCategory];
+        if(!questions || index >= questions.length) return;
+        
+        currentQuestionIndex = index;
+        currentQuestionData = questions[index];
+        currentCorrectAnswer = currentQuestionData.correct;
+        waitingForEnter = true;
+        isAnswered = false;
+        selectedAnswerBtn = null;
+        
+        document.getElementById("questionsListDiv").style.display = "none";
+        document.getElementById("questionScreenDiv").style.display = "block";
+        isInQuestionScreen = true;
+        
+        // نمایش پرسیار بەبێ کاتژمێر، چاوەڕێی Enter
+        renderQuestionWaiting();
+    }
+    
+    function renderQuestionWaiting() {
+        const letters = ["A","B","C","D"];
+        document.getElementById("questionScreenDiv").innerHTML = `
+            <div class="question-screen">
+                <div class="waiting-message">⏳ تکایە Enter دابگرە بۆ دەستپێکردنی کاتژمێر و وەڵامدان ⏳</div>
+                <div class="question-text">${currentQuestionData.text}</div>
+                <div class="options-grid" id="optionsGrid">
+                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    }
+    
+    // دەستپێکردنی پرسیار و کاتژمێر دوای Enter
+    function startQuestionWithTimer() {
+        if(!waitingForEnter) return;
+        waitingForEnter = false;
+        timeLeft = 40;
+        
+        if(timerInterval) clearInterval(timerInterval);
+        startTimer();
+        
+        // نوێکردنەوەی شاشە بە کاتژمێر
+        const letters = ["A","B","C","D"];
+        document.getElementById("questionScreenDiv").innerHTML = `
+            <div class="question-screen">
+                <div class="timer" id="timerDisplay">40 چرکە</div>
+                <div class="question-text">${currentQuestionData.text}</div>
+                <div class="options-grid" id="optionsGrid">
+                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="manualAnswerSelect('${letters[idx]}')">${letters[idx]}. ${opt}</div>`).join('')}
+                </div>
+            </div>`;
+    }
+    
     // ========== کیبۆرد بۆ وەڵامدان (A,B,C,D) ==========
     function handleAnswerKeyboard(e) {
         const key = e.key.toUpperCase();
         const validKeys = ['A', 'B', 'C', 'D'];
-        if(validKeys.includes(key) && !isAnswered) {
+        
+        // ئەگەر چاوەڕێی Enter بێت بۆ دەستپێکردن
+        if(waitingForEnter) {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                startQuestionWithTimer();
+            }
+            return;
+        }
+        
+        // ئەگەر وەڵام درابێت، کاری تێدا مەکە
+        if(isAnswered) return;
+        
+        if(validKeys.includes(key)) {
             e.preventDefault();
             const buttons = document.querySelectorAll(".option-btn");
             const index = validKeys.indexOf(key);
             if(buttons[index]) {
-                // لابردنی پرتەقاڵی پێشوو
                 if(selectedAnswerBtn) {
                     selectedAnswerBtn.classList.remove("option-btn-orange");
                 }
-                // زیادکردنی پرتەقاڵی بۆ ئەم دوگمەیە
                 buttons[index].classList.add("option-btn-orange");
                 selectedAnswerBtn = buttons[index];
             }
         }
         
-        if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered) {
+        if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered && !waitingForEnter) {
             e.preventDefault();
             const selectedLetter = selectedAnswerBtn.getAttribute("data-opt");
             submitAnswer(selectedLetter);
+        }
+    }
+    
+    function manualAnswerSelect(letter) {
+        if(isAnswered || waitingForEnter) return;
+        if(selectedAnswerBtn) {
+            selectedAnswerBtn.classList.remove("option-btn-orange");
+        }
+        const btns = document.querySelectorAll(".option-btn");
+        for(let btn of btns) {
+            if(btn.getAttribute("data-opt") === letter) {
+                btn.classList.add("option-btn-orange");
+                selectedAnswerBtn = btn;
+                break;
+            }
         }
     }
     
@@ -287,13 +359,37 @@
             btn.classList.remove("option-btn-orange");
         });
         
-        // نیشانکردنی پرسیارەکە وەک بەکارهاتوو
         markQuestionAsUsed(currentCategory, currentQuestionIndex);
         
-        // دوای 1.5 چرکە بگەڕێوە بۆ لیستی پرسیارەکان
-        setTimeout(() => {
-            backToQuestions();
-        }, 1500);
+        // دوای ئاشکرابوونی وەڵام، لەسەر پرسیارەکە دەمێنیتەوە، چاوەڕێی Backspace
+        // هیچ گەڕانەوەیەکی خۆکار نییە
+    }
+    
+    function startTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if(!isAnswered && timeLeft>0 && !waitingForEnter) {
+                timeLeft--;
+                let td = document.getElementById("timerDisplay");
+                if(td) td.innerText = `${timeLeft} چرکە`;
+                if(timeLeft===0 && !isAnswered) {
+                    clearInterval(timerInterval);
+                    markQuestionAsUsed(currentCategory, currentQuestionIndex);
+                    showCorrectAnswerOnly();
+                }
+            } else if(timeLeft<=0) clearInterval(timerInterval);
+        },1000);
+    }
+    
+    function showCorrectAnswerOnly() {
+        const btns = document.querySelectorAll(".option-btn");
+        btns.forEach(btn => {
+            btn.style.pointerEvents = "none";
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
+                btn.classList.add("option-correct");
+            }
+        });
+        // لەسەر پرسیارەکە دەمێنیتەوە، Backspace دەیگەڕێنێتەوە
     }
     
     // ========== فەنکشنە سەرەکییەکان ==========
@@ -302,14 +398,11 @@
         if(stored) {
             try {
                 categories = JSON.parse(stored);
-                console.log("داتا لە Local Storage خوێندرا:", categories);
             } catch(e) { console.error("هەڵە لە خوێندنەوەی داتا", e); categories = {}; }
         } else {
-            console.log("هیچ داتایەک نەدۆزرایەوە!");
             categories = {};
         }
         
-        // بارکردنی دۆخی پرسیارە بەکارهاتووەکان
         const storedUsed = localStorage.getItem("usedQuestions");
         if(storedUsed) {
             usedQuestions = JSON.parse(storedUsed);
@@ -319,7 +412,6 @@
         
         categoryList.forEach(cat => { 
             if(!categories[cat]) categories[cat] = []; 
-            // پشکنینی کەتەگۆری بۆ سوورکردنەوە
             checkAndDisableCategory(cat);
         });
         attachCategoryEvents();
@@ -379,7 +471,6 @@
             }
         }
         if(success) {
-            // پاککردنەوەی دۆخی پرسیارە بەکارهاتووەکان دوای import
             usedQuestions = {};
             localStorage.removeItem("usedQuestions");
             localStorage.setItem("categories", JSON.stringify(categories));
@@ -414,12 +505,12 @@
             const isUsed = usedQuestions[catName]?.[i] === true;
             if(i < questions.length) {
                 if(isUsed) {
-                    qHtml += `<div class="question-number question-number-red" style="cursor:not-allowed; pointer-events:none;" onclick="alert('ئەم پرسیارە پێشتر بەکارهاتووە!')">${i+1}</div>`;
+                    qHtml += `<div class="question-number question-number-red" style="cursor:not-allowed; pointer-events:none;">${i+1}</div>`;
                 } else {
-                    qHtml += `<div class="question-number" onclick="selectQuestionWithMouse(${i})">${i+1}</div>`;
+                    qHtml += `<div class="question-number" onclick="prepareQuestionWithMouse(${i})">${i+1}</div>`;
                 }
             } else {
-                qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;" onclick="alert('هیچ پرسیارێک نییە!')">${i+1}</div>`;
+                qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
             }
         }
         document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName}</h2><div class="questions-grid">${qHtml}</div>`;
@@ -431,114 +522,11 @@
         selectedQuestionDiv = null;
     }
     
-    function selectQuestionWithMouse(index) {
+    function prepareQuestionWithMouse(index) {
         const questions = categories[currentCategory];
-        if(!questions || index >= questions.length) { alert("هیچ پرسیارێک نییە!"); return; }
-        if(usedQuestions[currentCategory]?.[index]) { alert("ئەم پرسیارە پێشتر بەکارهاتووە!"); return; }
-        selectQuestion(index);
-    }
-    
-    function selectQuestion(index) {
-        const questions = categories[currentCategory];
-        if(!questions || index >= questions.length) { alert("هیچ پرسیارێک نییە!"); return; }
-        if(usedQuestions[currentCategory]?.[index]) { alert("ئەم پرسیارە پێشتر بەکارهاتووە!"); return; }
-        
-        if(timerInterval) clearInterval(timerInterval);
-        currentQuestionIndex = index;
-        timeLeft = 40;
-        isAnswered = false;
-        selectedAnswerBtn = null;
-        
-        const question = questions[index];
-        currentCorrectAnswer = question.correct;
-        currentQuestionOptions = question.options;
-        
-        document.getElementById("questionsListDiv").style.display = "none";
-        document.getElementById("questionScreenDiv").style.display = "block";
-        isInQuestionScreen = true;
-        startTimer();
-        renderQuestion(question);
-    }
-    
-    function startTimer() {
-        if(timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            if(!isAnswered && timeLeft>0) {
-                timeLeft--;
-                let td = document.getElementById("timerDisplay");
-                if(td) td.innerText = `${timeLeft} چرکە`;
-                if(timeLeft===0 && !isAnswered) {
-                    clearInterval(timerInterval);
-                    // کات تەواو بوو، پرسیارەکە وەک بەکارهاتوو دیاری بکە
-                    markQuestionAsUsed(currentCategory, currentQuestionIndex);
-                    showCorrectAnswerAndExit();
-                }
-            } else if(timeLeft<=0) clearInterval(timerInterval);
-        },1000);
-    }
-    
-    function showCorrectAnswerAndExit() {
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(btn => {
-            btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
-                btn.classList.add("option-correct");
-            }
-        });
-        setTimeout(() => {
-            backToQuestions();
-        }, 1500);
-    }
-    
-    function renderQuestion(q) {
-        const letters=["A","B","C","D"];
-        document.getElementById("questionScreenDiv").innerHTML = `
-            <div class="question-screen">
-                <div class="timer" id="timerDisplay">40 چرکە</div>
-                <div class="question-text">${q.text}</div>
-                <div class="options-grid" id="optionsGrid">
-                    ${q.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="manualAnswerSelect('${letters[idx]}')">${letters[idx]}. ${opt}</div>`).join('')}
-                </div>
-            </div>`;
-    }
-    
-    function manualAnswerSelect(letter) {
-        if(isAnswered) return;
-        if(selectedAnswerBtn) {
-            selectedAnswerBtn.classList.remove("option-btn-orange");
-        }
-        const btns = document.querySelectorAll(".option-btn");
-        for(let btn of btns) {
-            if(btn.getAttribute("data-opt") === letter) {
-                btn.classList.add("option-btn-orange");
-                selectedAnswerBtn = btn;
-                break;
-            }
-        }
-    }
-    
-    function backToQuestions() {
-        clearInterval(timerInterval);
-        document.getElementById("questionScreenDiv").style.display="none";
-        document.getElementById("questionsListDiv").style.display="block";
-        currentQuestionIndex=null; 
-        isAnswered=false;
-        isInQuestionScreen = false;
-        selectedAnswerBtn = null;
-        selectedQuestionDiv = null;
-        
-        // نوێکردنەوەی لیستی پرسیارەکان بۆ ئەوەی ڕەنگی سوور نیشان بدات
-        const questions = categories[currentCategory] || [];
-        const questionDivs = document.querySelectorAll(".question-number");
-        for(let i=0; i<questionDivs.length; i++) {
-            if(usedQuestions[currentCategory]?.[i]) {
-                questionDivs[i].classList.add("question-number-red");
-                questionDivs[i].style.pointerEvents = "none";
-            }
-        }
-        
-        // پشکنینی کەتەگۆری بۆ سوورکردنەوە
-        checkAndDisableCategory(currentCategory);
+        if(!questions || index >= questions.length) return;
+        if(usedQuestions[currentCategory]?.[index]) return;
+        prepareQuestion(index);
     }
     
     function closeModal() {
@@ -550,6 +538,7 @@
         isInQuestionScreen = false;
         selectedAnswerBtn = null;
         selectedQuestionDiv = null;
+        waitingForEnter = false;
         clearAllCategoryGreen();
     }
     
