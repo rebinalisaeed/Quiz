@@ -33,8 +33,6 @@
         .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; }
         .option-correct { background: #4CAF50 !important; }
         .option-wrong { background: #f44336 !important; }
-        .close-btn, .back-btn { background: #ff6b6b; color: white; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; margin: 10px; }
-        .back-btn { background: #4CAF50; }
         @media (max-width: 700px) { .question-number { font-size: 22px; } .question-text { font-size: 18px; } .option-btn { font-size: 13px; } .timer { font-size: 36px; } }
     </style>
 </head>
@@ -50,10 +48,21 @@
     </div>
 </div>
 <div class="container">
-    <div class="row"><div class="category-btn" data-cat="مێژوو" data-key="1"><span>مێژوو</span></div><div class="category-btn" data-cat="زانست" data-key="2"><span>زانست</span></div><div class="category-btn" data-cat="ئەدەبیات" data-key="3"><span>ئەدەبیات</span></div></div>
-    <div class="row"><div class="category-btn" data-cat="هونەر" data-key="4"><span>هونەر</span></div><div class="category-btn" data-cat="وەرزش" data-key="5"><span>وەرزش</span></div><div class="category-btn" data-cat="بیرکاری" data-key="6"><span>بیرکاری</span></div></div>
-    <div class="row"><div class="category-btn" data-cat="تەکنەلۆژیا" data-key="7"><span>تەکنەلۆژیا</span></div><div class="category-btn" data-cat="تەندروستی" data-key="8"><span>تەندروستی</span></div><div class="category-btn" data-cat="جوگرافیا" data-key="9"><span>جوگرافیا</span></div></div>
-    <div class="row"><div class="category-btn" data-cat="ئاینی" data-key="q"><span>ئاینی</span></div><div class="category-btn" data-cat="کوردستان" data-key="w"><span>کوردستان</span></div><div class="category-btn" data-cat="فیلم و دراما" data-key="e"><span>فیلم و دراما</span></div></div>
+    <div class="row">
+        <div class="category-btn" data-cat="مێژوو" data-key="9"><span>مێژوو</span></div>
+        <div class="category-btn" data-cat="زانست" data-key="8"><span>زانست</span></div>
+        <div class="category-btn" data-cat="ئەدەبیات" data-key="7"><span>ئەدەبیات</span></div>
+    </div>
+    <div class="row">
+        <div class="category-btn" data-cat="هونەر" data-key="6"><span>هونەر</span></div>
+        <div class="category-btn" data-cat="وەرزش" data-key="5"><span>وەرزش</span></div>
+        <div class="category-btn" data-cat="تەکنەلۆژیا" data-key="4"><span>تەکنەلۆژیا</span></div>
+    </div>
+    <div class="row">
+        <div class="category-btn" data-cat="تەندروستی" data-key="3"><span>تەندروستی</span></div>
+        <div class="category-btn" data-cat="جوگرافیا" data-key="2"><span>جوگرافیا</span></div>
+        <div class="category-btn" data-cat="ئاینی" data-key="1"><span>ئاینی</span></div>
+    </div>
 </div>
 <div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"></div></div></div>
 
@@ -66,22 +75,10 @@
     let isModalOpen = false;
     let isInQuestionScreen = false;
     
+    // کەتەگۆرییەکان (بەبێ بیرکاری، کوردستان، فیلم و دراما)
+    const categoryList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
+    
     // ========== فووڵ سکرین ==========
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => { console.log(`Error: ${err.message}`); });
-        } else {
-            // بە R دەردەچیت، نەک لێرە
-        }
-    }
-    
-    function exitFullScreen() {
-        if(document.fullscreenElement) {
-            document.exitFullscreen();
-        }
-    }
-    
-    // چوونە ناو فووڵ سکرین بە F11
     document.addEventListener('keydown', (e) => {
         if(e.key === 'F11') {
             e.preventDefault();
@@ -89,21 +86,15 @@
                 document.documentElement.requestFullscreen();
             }
         }
-        // دەرچوون لە فووڵ سکرین بە دوگمەی R (نهێنی)
         if(e.key === 'r' || e.key === 'R') {
             e.preventDefault();
-            if(document.fullscreenElement) exitFullScreen();
+            if(document.fullscreenElement) document.exitFullscreen();
         }
-        // ناچالاککردنی ESC بۆ دەرچوون لە فووڵ سکرین
         if(e.key === 'Escape') {
-            if(isModalOpen) { 
-                // نەهێڵێت فووڵ سکرین بە ESC بڕوات
-                e.preventDefault();
-            }
+            if(isModalOpen) { e.preventDefault(); }
         }
     });
     
-    // ناچالاککردنی راستکلیک و reload
     document.addEventListener('contextmenu', e => e.preventDefault());
     window.addEventListener('keydown', e => {
         if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.shiftKey && e.key === 'R') || (e.metaKey && e.key === 'r'))
@@ -114,25 +105,20 @@
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Backspace') {
             e.preventDefault();
-            // ئەگەر لە شاشەی پرسیارداین، بچینەوە بۆ لیستی پرسیارەکان
             if(isModalOpen && isInQuestionScreen) {
                 backToQuestions();
             }
-            // ئەگەر لە لیستی پرسیارەکانداین (مۆدال کراوە و پرسیارەکان نمایش کراوە)، بچینەوە بۆ کەتەگۆرییەکان
             else if(isModalOpen && !isInQuestionScreen && document.getElementById("questionsListDiv").style.display === "block") {
                 closeModal();
             }
         }
     });
     
-    // ========== کیبۆرد بۆ هەڵبژاردنی کەتەگۆری ==========
+    // ========== کیبۆرد بۆ هەڵبژاردنی کەتەگۆری (1-9) ==========
     const keyToCategory = {
-        '1': 'مێژوو', '2': 'زانست', '3': 'ئەدەبیات',
-        '4': 'هونەر', '5': 'وەرزش', '6': 'بیرکاری',
-        '7': 'تەکنەلۆژیا', '8': 'تەندروستی', '9': 'جوگرافیا',
-        'q': 'ئاینی', 'Q': 'ئاینی',
-        'w': 'کوردستان', 'W': 'کوردستان',
-        'e': 'فیلم و دراما', 'E': 'فیلم و دراما'
+        '9': 'مێژوو', '8': 'زانست', '7': 'ئەدەبیات',
+        '6': 'هونەر', '5': 'وەرزش', '4': 'تەکنەلۆژیا',
+        '3': 'تەندروستی', '2': 'جوگرافیا', '1': 'ئاینی'
     };
     
     function getCategoryButtonByCatName(catName) {
@@ -151,18 +137,15 @@
     }
     
     document.addEventListener('keydown', (e) => {
-        // ئەگەر مۆدال کراوە بێت، ڕێگە بە کیبۆردی پرسیارەکان بدە
         if(isModalOpen && document.getElementById("questionsListDiv").style.display === "block") {
             handleQuestionKeyboard(e);
             return;
         }
-        // ئەگەر شاشەی پرسیار کراوە بێت
         if(isModalOpen && document.getElementById("questionScreenDiv").style.display === "block") {
             handleAnswerKeyboard(e);
             return;
         }
         
-        // هەڵبژاردنی کەتەگۆری
         const key = e.key;
         const catName = keyToCategory[key];
         if(catName) {
@@ -175,7 +158,6 @@
             }
         }
         
-        // چوونە ژوورەوە بە Enter
         if(e.key === 'Enter' && selectedCategoryBtn) {
             e.preventDefault();
             const catName = selectedCategoryBtn.getAttribute("data-cat");
@@ -193,7 +175,6 @@
             const questions = categories[currentCategory] || [];
             const questionDivs = document.querySelectorAll(".question-number");
             if(questionDivs.length >= num) {
-                // لابردنی هەموو سەوزی پێشوو
                 questionDivs.forEach(div => div.classList.remove("question-number-green"));
                 const targetDiv = questionDivs[num-1];
                 targetDiv.classList.add("question-number-green");
@@ -201,7 +182,6 @@
             }
         }
         
-        // چوونە ژوورەوە بە Enter
         if(e.key === 'Enter' && selectedQuestionDiv) {
             e.preventDefault();
             const index = Array.from(document.querySelectorAll(".question-number")).indexOf(selectedQuestionDiv);
@@ -245,8 +225,8 @@
             console.log("هیچ داتایەک نەدۆزرایەوە!");
             categories = {};
         }
-        const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
-        allCatNames.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
+        // دڵنیابوون لە بوونی هەموو کەتەگۆرییە نوێیەکان
+        categoryList.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         attachCategoryEvents();
         showImportButtonFor5Seconds();
     }
@@ -294,9 +274,8 @@
     }
     
     function applyImportedData(imported) {
-        const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
         let success = false;
-        for(let cat of allCatNames) {
+        for(let cat of categoryList) {
             if(imported[cat] && Array.isArray(imported[cat])) {
                 categories[cat] = imported[cat].slice(0,8);
                 success = true;
@@ -309,7 +288,7 @@
             alert("✅ Import سەرکەوتوو بوو! لاپەڕە نوێ دەبێتەوە.");
             location.reload();
         } else {
-            alert("❌ فایلەکە هیچ کەتەگۆرییەکی ناسراو تێدا نییە! پێکهاتەی JSON: " + Object.keys(imported).join(", "));
+            alert("❌ فایلەکە هیچ کەتەگۆرییەکی ناسراو تێدا نییە!");
         }
     }
     
