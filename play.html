@@ -35,12 +35,10 @@
         .option-wrong { background: #f44336 !important; }
         .close-btn, .back-btn { background: #ff6b6b; color: white; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; margin: 10px; }
         .back-btn { background: #4CAF50; }
-        .key-hint { position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 10px; font-size: 11px; z-index: 999; }
         @media (max-width: 700px) { .question-number { font-size: 22px; } .question-text { font-size: 18px; } .option-btn { font-size: 13px; } .timer { font-size: 36px; } }
     </style>
 </head>
 <body>
-<div class="key-hint" id="keyHint">⌨️ کیبۆرد: 1-9,Q,W,E بۆ کەتەگۆری | Enter بۆ چوونە ژوورەوە</div>
 <div class="import-container" id="importContainer">
     <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
         <button class="import-btn" onclick="importFromFile()">📁 Import لە فایل</button>
@@ -57,7 +55,7 @@
     <div class="row"><div class="category-btn" data-cat="تەکنەلۆژیا" data-key="7"><span>تەکنەلۆژیا</span></div><div class="category-btn" data-cat="تەندروستی" data-key="8"><span>تەندروستی</span></div><div class="category-btn" data-cat="جوگرافیا" data-key="9"><span>جوگرافیا</span></div></div>
     <div class="row"><div class="category-btn" data-cat="ئاینی" data-key="q"><span>ئاینی</span></div><div class="category-btn" data-cat="کوردستان" data-key="w"><span>کوردستان</span></div><div class="category-btn" data-cat="فیلم و دراما" data-key="e"><span>فیلم و دراما</span></div></div>
 </div>
-<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"><button class="close-btn" onclick="closeModal()">🔙 گەڕانەوە</button></div></div></div>
+<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"></div></div></div>
 
 <script>
     let categories = {};
@@ -66,36 +64,42 @@
     let selectedCategoryBtn = null;
     let selectedQuestionDiv = null;
     let isModalOpen = false;
+    let isInQuestionScreen = false;
     
     // ========== فووڵ سکرین ==========
-    function enterFullScreen() {
-        const doc = document.documentElement;
-        if(doc.requestFullscreen) doc.requestFullscreen();
-        else if(doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        else if(doc.msRequestFullscreen) doc.msRequestFullscreen();
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => { console.log(`Error: ${err.message}`); });
+        } else {
+            // بە R دەردەچیت، نەک لێرە
+        }
     }
     
     function exitFullScreen() {
-        if(document.exitFullscreen) document.exitFullscreen();
-        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if(document.msExitFullscreen) document.msExitFullscreen();
+        if(document.fullscreenElement) {
+            document.exitFullscreen();
+        }
     }
     
-    // چوونە ناو فووڵ سکرین کاتێک پەڕە دەکرێتەوە
-    window.addEventListener('load', () => { enterFullScreen(); });
-    
-    // دەرچوون لە فووڵ سکرین بە دوگمەی R (نهێنی)
+    // چوونە ناو فووڵ سکرین بە F11
     document.addEventListener('keydown', (e) => {
+        if(e.key === 'F11') {
+            e.preventDefault();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            }
+        }
+        // دەرچوون لە فووڵ سکرین بە دوگمەی R (نهێنی)
         if(e.key === 'r' || e.key === 'R') {
             e.preventDefault();
             if(document.fullscreenElement) exitFullScreen();
         }
-        // ناچالاککردنی F11
-        if(e.key === 'F11') { e.preventDefault(); return false; }
-        // ناچالاککردنی ESC بۆ دەرچوون لە فووڵ سکرین (بەڵام بۆ داخستنی مۆدال کار دەکات)
+        // ناچالاککردنی ESC بۆ دەرچوون لە فووڵ سکرین
         if(e.key === 'Escape') {
-            if(isModalOpen) { closeModal(); }
-            else { e.preventDefault(); }
+            if(isModalOpen) { 
+                // نەهێڵێت فووڵ سکرین بە ESC بڕوات
+                e.preventDefault();
+            }
         }
     });
     
@@ -104,6 +108,21 @@
     window.addEventListener('keydown', e => {
         if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.shiftKey && e.key === 'R') || (e.metaKey && e.key === 'r'))
             e.preventDefault();
+    });
+    
+    // ========== گەڕانەوە بە Backspace ==========
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace') {
+            e.preventDefault();
+            // ئەگەر لە شاشەی پرسیارداین، بچینەوە بۆ لیستی پرسیارەکان
+            if(isModalOpen && isInQuestionScreen) {
+                backToQuestions();
+            }
+            // ئەگەر لە لیستی پرسیارەکانداین (مۆدال کراوە و پرسیارەکان نمایش کراوە)، بچینەوە بۆ کەتەگۆرییەکان
+            else if(isModalOpen && !isInQuestionScreen && document.getElementById("questionsListDiv").style.display === "block") {
+                closeModal();
+            }
+        }
     });
     
     // ========== کیبۆرد بۆ هەڵبژاردنی کەتەگۆری ==========
@@ -179,12 +198,6 @@
                 const targetDiv = questionDivs[num-1];
                 targetDiv.classList.add("question-number-green");
                 selectedQuestionDiv = targetDiv;
-                // ئەگەر پرسیار هەبوو، ئامادەی بکە بۆ Enter
-                if(questions.length >= num) {
-                    // هیچی، چاوەڕێی Enter
-                } else {
-                    // ئاگاداری بکەوە کە پرسیار نییە
-                }
             }
         }
         
@@ -235,17 +248,16 @@
         const allCatNames = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","بیرکاری","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی","کوردستان","فیلم و دراما"];
         allCatNames.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
         attachCategoryEvents();
-        showImportButtonFor30Seconds();
+        showImportButtonFor5Seconds();
     }
     
-    function showImportButtonFor30Seconds() {
+    function showImportButtonFor5Seconds() {
         const importContainer = document.getElementById("importContainer");
         importContainer.style.display = "flex";
-        let seconds = 30;
-        const interval = setInterval(() => {
-            seconds--;
-            if(seconds <= 0) { clearInterval(interval); importContainer.style.display = "none"; }
-        }, 1000);
+        setTimeout(() => {
+            importContainer.style.display = "none";
+            document.getElementById("manualImportArea").style.display = "none";
+        }, 5000);
     }
     
     function toggleManualImport() {
@@ -314,7 +326,6 @@
         clearAllCategoryGreen();
         btn.classList.add("category-btn-green");
         selectedCategoryBtn = btn;
-        // بۆ ماوس، ڕاستەوخۆ نەچیتە ژوورەوە، چاوەڕێی Enter بکە
     }
     
     function openCategory(catName) {
@@ -330,6 +341,7 @@
         document.getElementById("questionsListDiv").style.display = "block";
         document.getElementById("questionModal").style.display = "block";
         isModalOpen = true;
+        isInQuestionScreen = false;
         selectedQuestionDiv = null;
     }
     
@@ -347,6 +359,7 @@
         timeLeft = 60; isAnswered = false;
         document.getElementById("questionsListDiv").style.display = "none";
         document.getElementById("questionScreenDiv").style.display = "block";
+        isInQuestionScreen = true;
         startTimer();
         renderQuestion(questions[index]);
     }
@@ -377,7 +390,6 @@
                 <div class="options-grid" id="optionsGrid">
                     ${q.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="checkAnswer('${letters[idx]}','${q.correct}')">${letters[idx]}. ${opt}</div>`).join('')}
                 </div>
-                <button class="back-btn" onclick="backToQuestions()">🔙 گەڕانەوە</button>
             </div>`;
     }
     
@@ -402,6 +414,7 @@
         document.getElementById("questionScreenDiv").style.display="none";
         document.getElementById("questionsListDiv").style.display="block";
         currentQuestionIndex=null; isAnswered=false;
+        isInQuestionScreen = false;
         selectedQuestionDiv = null;
     }
     
@@ -410,6 +423,7 @@
         document.getElementById("questionModal").style.display="none";
         currentQuestionIndex=null; isAnswered=false;
         isModalOpen = false;
+        isInQuestionScreen = false;
         selectedQuestionDiv = null;
         clearAllCategoryGreen();
     }
