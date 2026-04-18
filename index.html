@@ -4,98 +4,23 @@
     <title>چوونە ژوورەوە - یاری پرسیار و وەڵام</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        @font-face {
-            font-family: 'K24Kurdish';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .login-container {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-        
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        
-        .glass-box {
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            padding: 25px;
-        }
-        
-        .glass-box label {
-            color: white;
-            display: block;
-            margin-bottom: 15px;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        input {
-            width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif;
-            text-align: center;
-            background: rgba(255,255,255,0.9);
-        }
-        
-        button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-            background: #4CAF50;
-            color: white;
-        }
-        
-        button:hover {
-            background: #45a049;
-            transform: scale(1.02);
-        }
-        
-        .error {
-            color: #ff6b6b;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
+        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif; }
+        body { background: linear-gradient(135deg, #1e3c72, #2a5298); width: 100%; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .login-container { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 30px; padding: 40px; width: 90%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        h1 { text-align: center; color: white; margin-bottom: 30px; font-size: 28px; }
+        .glass-box { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 25px; }
+        .glass-box label { color: white; display: block; margin-bottom: 15px; font-size: 16px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 15px; font-size: 16px; text-align: center; background: rgba(255,255,255,0.9); }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 15px; font-size: 18px; cursor: pointer; font-weight: bold; background: #4CAF50; color: white; transition: 0.3s; }
+        button:hover { background: #45a049; transform: scale(1.02); }
+        .error { color: #ff6b6b; text-align: center; margin-top: 15px; font-size: 14px; }
+        .room-input { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+        .room-input label { color: white; font-size: 14px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -103,6 +28,10 @@
     <h1>🎮 یاری پرسیار و وەڵام 🎮</h1>
     
     <div class="glass-box">
+        <div class="room-input">
+            <label>🏠 ناوی ژووری یاری (هەموو ئامێرەکان هەمان ناو بەکاربهێنن)</label>
+            <input type="text" id="roomId" placeholder="quiz_room_1" value="quiz_room_1">
+        </div>
         <label>🔐 تکایە وشەی نهێنی بنووسە</label>
         <input type="password" id="password" placeholder="وشەی نهێنی" autocomplete="off">
         <button onclick="checkLogin()">🚪 چوونە ژوورەوە</button>
@@ -111,47 +40,53 @@
 </div>
 
 <script>
+    // ========== Firebase پێکهێنان ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
+        authDomain: "quizgamerebin.firebaseapp.com",
+        databaseURL: "https://quizgamerebin-default-rtdb.firebaseio.com",
+        projectId: "quizgamerebin",
+        storageBucket: "quizgamerebin.firebasestorage.app",
+        messagingSenderId: "312376681830",
+        appId: "1:312376681830:web:11262fa62cc9246bac14a7",
+        measurementId: "G-BJM04Q5X44"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
     const ADMIN_PASS = "admin123";
     const PLAY_PASS = "adminplay";
+    let currentRoomId = "quiz_room_1";
     
-    // ناچالاککردنی راستکلیک
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // ناچالاککردنی reload (F5, Ctrl+R, Ctrl+Shift+R, Cmd+R)
-    window.addEventListener('keydown', function(e) {
-        if(e.key === 'F5' || 
-           (e.ctrlKey && e.key === 'r') || 
-           (e.ctrlKey && e.shiftKey && e.key === 'R') ||
-           (e.metaKey && e.key === 'r')) {
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', e => {
+        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r'))
             e.preventDefault();
-            return false;
-        }
     });
     
     function checkLogin() {
         const pass = document.getElementById("password").value;
+        currentRoomId = document.getElementById("roomId").value.trim();
+        if(!currentRoomId) currentRoomId = "quiz_room_1";
         
         if(pass === ADMIN_PASS) {
             localStorage.setItem("isAdmin", "true");
+            localStorage.setItem("roomId", currentRoomId);
             window.location.href = "admin.html";
         }
         else if(pass === PLAY_PASS) {
+            localStorage.setItem("roomId", currentRoomId);
             window.location.href = "play.html";
         }
         else {
-            document.getElementById("errorMsg").innerText = "❌ وشەی نهێنی هەڵەیە! تکایە هەوڵبدەرەوە.";
+            document.getElementById("errorMsg").innerText = "❌ وشەی نهێنی هەڵەیە!";
             document.getElementById("password").value = "";
-            document.getElementById("password").focus();
         }
     }
     
     document.getElementById("password").addEventListener("keypress", function(e) {
-        if(e.key === "Enter") {
-            checkLogin();
-        }
+        if(e.key === "Enter") checkLogin();
     });
 </script>
 </body>
