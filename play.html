@@ -8,7 +8,7 @@
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; position: relative; }
-        .container { max-width: 900px; width: 100%; margin: auto; }
+        .container { max-width: 1200px; width: 100%; margin: auto; }
         .import-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: none; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 60px; backdrop-filter: blur(10px); }
         .import-btn, .manual-import-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; padding: 12px 25px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin: 5px; }
         .manual-import-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
@@ -19,25 +19,24 @@
         .category-btn span { font-size: 24px; color: white; }
         .category-btn-green { background: #4CAF50 !important; border-color: #2e7d32 !important; transform: scale(1.02); }
         .category-btn-red { background: #f44336 !important; border-color: #c62828 !important; opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
-        @keyframes greenFlash { 0% { background: rgba(255,255,255,0.1); transform: scale(1); } 30% { background: #4CAF50; transform: scale(1.05); } 100% { background: rgba(255,255,255,0.1); transform: scale(1); } }
-        .category-btn-animate { animation: greenFlash 0.6s ease forwards; }
         @media (max-width: 700px) { .category-btn { width: 100px; padding: 12px 10px; } .category-btn span { font-size: 18px; } }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
-        .modal-content { max-width: 900px; margin: 20px auto; background: rgba(30,30,50,0.95); backdrop-filter: blur(15px); border-radius: 30px; padding: 30px; }
-        .questions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; }
-        .question-number { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 25px 10px; text-align: center; font-size: 32px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); transition: all 0.2s; }
+        .modal-content { max-width: 1000px; margin: 20px auto; background: rgba(30,30,50,0.95); backdrop-filter: blur(15px); border-radius: 30px; padding: 30px; }
+        .questions-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 30px 0; }
+        .question-number { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); transition: all 0.2s; }
         .question-number-green { background: #4CAF50 !important; border-color: #2e7d32 !important; transform: scale(1.02); }
         .question-number-red { background: #f44336 !important; border-color: #c62828 !important; opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
         .question-screen { text-align: center; }
-        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; }
-        .question-text { font-size: 28px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; }
+        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
+        .question-text { font-size: 24px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
         .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
         .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; transition: all 0.2s; }
         .option-btn-orange { background: #ff9800 !important; border-color: #e68900 !important; transform: scale(1.02); }
         .option-correct { background: #4CAF50 !important; border-color: #2e7d32 !important; }
         .option-wrong { background: #f44336 !important; border-color: #c62828 !important; }
         .waiting-message { color: #ff9800; font-size: 20px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 20px; }
-        @media (max-width: 700px) { .question-number { font-size: 22px; } .question-text { font-size: 18px; } .option-btn { font-size: 13px; } .timer { font-size: 36px; } }
+        @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-number { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-btn { font-size: 14px; padding: 12px; } .timer { font-size: 36px; } }
     </style>
 </head>
 <body>
@@ -71,6 +70,7 @@
 <div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"></div></div></div>
 
 <script>
+    const MAX_QUESTIONS = 45;
     let categories = {};
     let currentCategory = "";
     let currentQuestionIndex = null, timerInterval = null, timeLeft = 40, isAnswered = false;
@@ -101,7 +101,6 @@
         }
     }
     
-    // ========== فووڵ سکرین ==========
     document.addEventListener('keydown', (e) => {
         if(e.key === 'F11') {
             e.preventDefault();
@@ -124,7 +123,6 @@
             e.preventDefault();
     });
     
-    // ========== گەڕانەوە بە Backspace ==========
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Backspace') {
             e.preventDefault();
@@ -134,7 +132,6 @@
         }
     });
     
-    // ========== کیبۆرد بۆ هەڵبژاردنی کەتەگۆری (1-9) ==========
     const keyToCategory = {
         '9': 'مێژوو', '8': 'زانست', '7': 'ئەدەبیات',
         '6': 'هونەر', '5': 'وەرزش', '4': 'تەکنەلۆژیا',
@@ -160,7 +157,7 @@
         const questions = categories[catName] || [];
         if(questions.length === 0) return;
         const allUsed = questions.every((_, idx) => usedQuestions[catName] && usedQuestions[catName][idx] === true);
-        if(allUsed) {
+        if(allUsed && questions.length === MAX_QUESTIONS) {
             const btn = getCategoryButtonByCatName(catName);
             if(btn) {
                 btn.classList.add("category-btn-red");
@@ -212,11 +209,10 @@
         }
     });
     
-    // ========== کیبۆرد بۆ پرسیارەکان (ژمارە 1-8) ==========
     function handleQuestionKeyboard(e) {
         const key = e.key;
         const num = parseInt(key);
-        if(num >= 1 && num <= 8) {
+        if(num >= 1 && num <= MAX_QUESTIONS) {
             e.preventDefault();
             const questions = categories[currentCategory] || [];
             const questionDivs = document.querySelectorAll(".question-number");
@@ -297,7 +293,6 @@
             </div>`;
     }
     
-    // ========== کیبۆرد بۆ وەڵامدان (A,B,C,D) - پرتەقاڵی کردن ==========
     function handleAnswerKeyboard(e) {
         const key = e.key.toUpperCase();
         const validKeys = ['A', 'B', 'C', 'D'];
@@ -395,13 +390,12 @@
         });
     }
     
-    // ========== فەنکشنە سەرەکییەکان ==========
     function loadCategories() {
         const stored = localStorage.getItem("categories");
         if(stored) {
             try {
                 categories = JSON.parse(stored);
-            } catch(e) { console.error("هەڵە لە خوێندنەوەی داتا", e); categories = {}; }
+            } catch(e) { categories = {}; }
         } else {
             categories = {};
         }
@@ -466,7 +460,7 @@
         let success = false;
         for(let cat of categoryList) {
             if(imported[cat] && Array.isArray(imported[cat])) {
-                categories[cat] = imported[cat].slice(0,8);
+                categories[cat] = imported[cat].slice(0, MAX_QUESTIONS);
                 success = true;
             } else if(!categories[cat]) {
                 categories[cat] = [];
@@ -503,7 +497,7 @@
         currentCategory = catName;
         const questions = categories[catName] || [];
         let qHtml = "";
-        for(let i=0;i<8;i++) {
+        for(let i=0; i<MAX_QUESTIONS; i++) {
             const isUsed = usedQuestions[catName]?.[i] === true;
             if(i < questions.length) {
                 if(isUsed) {
@@ -512,10 +506,10 @@
                     qHtml += `<div class="question-number" onclick="prepareQuestionWithMouse(${i})">${i+1}</div>`;
                 }
             } else {
-                qHtml += `<div class="question-number" style="opacity:0.4; cursor:not-allowed;">${i+1}</div>`;
+                qHtml += `<div class="question-number" style="opacity:0.3; cursor:not-allowed; pointer-events:none;">${i+1}</div>`;
             }
         }
-        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName}</h2><div class="questions-grid">${qHtml}</div>`;
+        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName} (${questions.length}/${MAX_QUESTIONS})</h2><div class="questions-grid">${qHtml}</div>`;
         document.getElementById("questionScreenDiv").style.display = "none";
         document.getElementById("questionsListDiv").style.display = "block";
         document.getElementById("questionModal").style.display = "block";
