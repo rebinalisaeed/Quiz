@@ -23,6 +23,7 @@
         .user-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .user-info { flex: 1; }
         .role-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin-top: 5px; }
+        .role-super-admin { background: #9c27b0; }
         .role-admin { background: #f44336; }
         .role-creator { background: #ff9800; }
         .role-player { background: #4CAF50; }
@@ -74,13 +75,25 @@
     const database = firebase.database();
     
     const ROOM_ID = "quiz_room_main";
-    const ADMIN_USERNAME = "useradmin";
-    const ADMIN_PASSWORD = "userpass1";
+    const SUPER_ADMIN_USERNAME = "useradmin";
+    const SUPER_ADMIN_PASSWORD = "userpass1";
     
-    // پشکنینی ئەگەر بەکارهێنەری ئێستا مافی بەڕێوەبردنی هەیە
+    async function createSuperAdminIfNotExists() {
+        const snapshot = await database.ref(`${ROOM_ID}/users/${SUPER_ADMIN_USERNAME}`).once('value');
+        if(!snapshot.exists()) {
+            await database.ref(`${ROOM_ID}/users/${SUPER_ADMIN_USERNAME}`).set({
+                username: SUPER_ADMIN_USERNAME,
+                password: SUPER_ADMIN_PASSWORD,
+                role: "super_admin",
+                createdAt: Date.now()
+            });
+            console.log("✅ Super admin created!");
+        }
+    }
+    
     const currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     
-    if(currentUser.username !== ADMIN_USERNAME || currentUser.password !== ADMIN_PASSWORD) {
+    if(currentUser.username !== SUPER_ADMIN_USERNAME) {
         alert("⚠️ تەنها بەڕێوەبەری سیستەم دەتوانێت بچێتە ئەم پەڕەیە!");
         window.location.href = "index.html";
     }
@@ -92,8 +105,22 @@
             container.innerHTML = "";
             
             for(const [username, userData] of Object.entries(users)) {
-                const roleText = userData.role === "admin" ? "👑 بەڕێوەبەر" : (userData.role === "question_creator" ? "📝 دروستکری پرسیار" : "🎮 یاریکەر");
-                const roleClass = userData.role === "admin" ? "role-admin" : (userData.role === "question_creator" ? "role-creator" : "role-player");
+                let roleText = "";
+                let roleClass = "";
+                
+                if(userData.role === "super_admin") {
+                    roleText = "⭐ بەڕێوەبەری سیستەم";
+                    roleClass = "role-super-admin";
+                } else if(userData.role === "admin") {
+                    roleText = "👑 بەڕێوەبەر";
+                    roleClass = "role-admin";
+                } else if(userData.role === "question_creator") {
+                    roleText = "📝 دروستکری پرسیار";
+                    roleClass = "role-creator";
+                } else {
+                    roleText = "🎮 یاریکەر";
+                    roleClass = "role-player";
+                }
                 
                 const userDiv = document.createElement("div");
                 userDiv.className = "user-item";
@@ -102,7 +129,7 @@
                         <strong>👤 ${username}</strong><br>
                         <span class="role-badge ${roleClass}">${roleText}</span>
                     </div>
-                    ${username !== ADMIN_USERNAME ? `<button class="delete-user" onclick="deleteUser('${username}')">🗑️ سڕینەوە</button>` : '<span style="color:rgba(255,255,255,0.5);">(بەڕێوەبەری سیستەم - ناسڕێتەوە)</span>'}
+                    ${username !== SUPER_ADMIN_USERNAME ? `<button class="delete-user" onclick="deleteUser('${username}')">🗑️ سڕینەوە</button>` : '<span style="color:rgba(255,255,255,0.5);">(بەڕێوەبەری سیستەم - ناسڕێتەوە)</span>'}
                 `;
                 container.appendChild(userDiv);
             }
@@ -123,19 +150,17 @@
             return;
         }
         
-        if(username === ADMIN_USERNAME) {
+        if(username === SUPER_ADMIN_USERNAME) {
             alert("❌ ئەم ناوە بۆ بەڕێوەبەری سیستەم تەرخان کراوە!");
             return;
         }
         
-        // پشکنینی ئەگەر بەکارهێنەر پێشتر هەبێت
         const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
         if(snapshot.exists()) {
             alert("❌ ئەم ناوی بەکارهێنەرە پێشتر هەیە!");
             return;
         }
         
-        // دروستکردنی بەکارهێنەر
         await database.ref(`${ROOM_ID}/users/${username}`).set({
             username: username,
             password: password,
@@ -163,7 +188,9 @@
         window.location.href = "index.html";
     }
     
-    loadUsers();
+    createSuperAdminIfNotExists().then(() => {
+        loadUsers();
+    });
 </script>
 </body>
 </html>
