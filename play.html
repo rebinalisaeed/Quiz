@@ -4,334 +4,206 @@
     <title>یاری پرسیار و وەڵام</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; position: relative; }
         .container { max-width: 1200px; width: 100%; margin: auto; }
         .import-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: none; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 60px; backdrop-filter: blur(10px); }
-        .import-btn, .manual-import-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; padding: 12px 25px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin: 5px; }
-        .manual-import-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .manual-import-area { display: none; margin-top: 10px; }
-        .manual-import-area textarea { width: 300px; height: 150px; border-radius: 20px; padding: 10px; font-size: 12px; direction: ltr; text-align: left; }
+        .import-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 50px; padding: 12px 25px; font-size: 16px; cursor: pointer; margin: 5px; }
         .row { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; flex-wrap: wrap; }
         .category-btn { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 18px 25px; width: 180px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
         .category-btn span { font-size: 24px; color: white; }
-        .category-btn-green { background: #4CAF50 !important; border-color: #2e7d32 !important; transform: scale(1.02); }
-        .category-btn-red { background: #f44336 !important; border-color: #c62828 !important; opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
-        @media (max-width: 700px) { .category-btn { width: 100px; padding: 12px 10px; } .category-btn span { font-size: 18px; } }
+        .category-btn-green { background: #4CAF50 !important; }
+        .category-btn-red { background: #f44336 !important; opacity: 0.6; cursor: not-allowed; pointer-events: none; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
-        .modal-content { max-width: 1000px; margin: 20px auto; background: rgba(30,30,50,0.95); backdrop-filter: blur(15px); border-radius: 30px; padding: 30px; }
+        .modal-content { max-width: 1000px; margin: 20px auto; background: rgba(30,30,50,0.95); border-radius: 30px; padding: 30px; }
         .questions-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 30px 0; }
-        .question-number { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); transition: all 0.2s; }
-        .question-number-green { background: #4CAF50 !important; border-color: #2e7d32 !important; transform: scale(1.02); }
-        .question-number-red { background: #f44336 !important; border-color: #c62828 !important; opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
-        .question-screen { text-align: center; }
-        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
-        .question-text { font-size: 24px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
+        .question-number { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
+        .question-number-red { background: #f44336 !important; opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+        .question-number-green { background: #4CAF50 !important; }
+        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; }
+        .question-text { font-size: 24px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; }
         .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
-        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .option-btn-orange { background: #ff9800 !important; border-color: #e68900 !important; transform: scale(1.02); }
-        .option-correct { background: #4CAF50 !important; border-color: #2e7d32 !important; }
-        .option-wrong { background: #f44336 !important; border-color: #c62828 !important; }
+        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; }
+        .option-btn-orange { background: #ff9800 !important; }
+        .option-correct { background: #4CAF50 !important; }
+        .option-wrong { background: #f44336 !important; }
         .waiting-message { color: #ff9800; font-size: 20px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 20px; }
         @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-number { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-btn { font-size: 14px; padding: 12px; } .timer { font-size: 36px; } }
+        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-number { font-size: 14px; padding: 10px 3px; } }
     </style>
 </head>
 <body>
 <div class="import-container" id="importContainer">
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-        <button class="import-btn" onclick="importFromFile()">📁 Import لە فایل</button>
-        <button class="manual-import-btn" onclick="toggleManualImport()">📋 کۆپی/پەیست (JSON)</button>
-    </div>
-    <div class="manual-import-area" id="manualImportArea">
-        <textarea id="jsonText" placeholder="JSONی پاشەکەوتکراوی لێرە بلێکە (کۆپی بکە و پیست بکە)"></textarea>
-        <button class="import-btn" onclick="importFromText()">✅ پەیستی بکە</button>
-    </div>
+    <button class="import-btn" onclick="importFromFile()">📁 Import لە فایل</button>
 </div>
 <div class="container">
     <div class="row">
-        <div class="category-btn" data-cat="مێژوو" data-key="9"><span>مێژوو</span></div>
-        <div class="category-btn" data-cat="زانست" data-key="8"><span>زانست</span></div>
-        <div class="category-btn" data-cat="ئەدەبیات" data-key="7"><span>ئەدەبیات</span></div>
+        <div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div>
+        <div class="category-btn" data-cat="زانست"><span>زانست</span></div>
+        <div class="category-btn" data-cat="ئەدەبیات"><span>ئەدەبیات</span></div>
     </div>
     <div class="row">
-        <div class="category-btn" data-cat="هونەر" data-key="6"><span>هونەر</span></div>
-        <div class="category-btn" data-cat="وەرزش" data-key="5"><span>وەرزش</span></div>
-        <div class="category-btn" data-cat="تەکنەلۆژیا" data-key="4"><span>تەکنەلۆژیا</span></div>
+        <div class="category-btn" data-cat="هونەر"><span>هونەر</span></div>
+        <div class="category-btn" data-cat="وەرزش"><span>وەرزش</span></div>
+        <div class="category-btn" data-cat="تەکنەلۆژیا"><span>تەکنەلۆژیا</span></div>
     </div>
     <div class="row">
-        <div class="category-btn" data-cat="تەندروستی" data-key="3"><span>تەندروستی</span></div>
-        <div class="category-btn" data-cat="جوگرافیا" data-key="2"><span>جوگرافیا</span></div>
-        <div class="category-btn" data-cat="ئاینی" data-key="1"><span>ئاینی</span></div>
+        <div class="category-btn" data-cat="تەندروستی"><span>تەندروستی</span></div>
+        <div class="category-btn" data-cat="جوگرافیا"><span>جوگرافیا</span></div>
+        <div class="category-btn" data-cat="ئاینی"><span>ئاینی</span></div>
     </div>
 </div>
-<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div><div style="text-align:center;"></div></div></div>
+<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div></div></div>
 
 <script>
-    const MAX_QUESTIONS = 45;
-    let categories = {};
-    let currentCategory = "";
-    let currentQuestionIndex = null, timerInterval = null, timeLeft = 40, isAnswered = false;
-    let selectedCategoryBtn = null;
-    let selectedQuestionDiv = null;
-    let isModalOpen = false;
-    let isInQuestionScreen = false;
-    let selectedAnswerBtn = null;
-    let currentCorrectAnswer = null;
-    let waitingForEnter = false;
-    let currentQuestionData = null;
-    let usedQuestions = {};
-    
-    const categoryList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
-    
-    function saveUsedQuestions() {
-        localStorage.setItem("quiz_usedQuestions", JSON.stringify(usedQuestions));
-    }
-    
-    function loadUsedQuestions() {
-        const stored = localStorage.getItem("quiz_usedQuestions");
-        if(stored) {
-            try {
-                usedQuestions = JSON.parse(stored);
-            } catch(e) { usedQuestions = {}; }
-        } else {
-            usedQuestions = {};
-        }
-    }
-    
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'F11') {
-            e.preventDefault();
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            }
-        }
-        if(e.key === 'r' || e.key === 'R') {
-            e.preventDefault();
-            if(document.fullscreenElement) document.exitFullscreen();
-        }
-        if(e.key === 'Escape') {
-            if(isModalOpen) { e.preventDefault(); }
-        }
-    });
-    
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    window.addEventListener('keydown', e => {
-        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.shiftKey && e.key === 'R') || (e.metaKey && e.key === 'r'))
-            e.preventDefault();
-    });
-    
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'Backspace') {
-            e.preventDefault();
-            if(isModalOpen) {
-                closeModal();
-            }
-        }
-    });
-    
-    const keyToCategory = {
-        '9': 'مێژوو', '8': 'زانست', '7': 'ئەدەبیات',
-        '6': 'هونەر', '5': 'وەرزش', '4': 'تەکنەلۆژیا',
-        '3': 'تەندروستی', '2': 'جوگرافیا', '1': 'ئاینی'
+    // ========== Firebase پێکهێنان ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
+        authDomain: "quizgamerebin.firebaseapp.com",
+        databaseURL: "https://quizgamerebin-default-rtdb.firebaseio.com",
+        projectId: "quizgamerebin",
+        storageBucket: "quizgamerebin.firebasestorage.app",
+        messagingSenderId: "312376681830",
+        appId: "1:312376681830:web:11262fa62cc9246bac14a7",
+        measurementId: "G-BJM04Q5X44"
     };
     
-    function getCategoryButtonByCatName(catName) {
-        const btns = document.querySelectorAll(".category-btn");
-        for(let btn of btns) {
-            if(btn.getAttribute("data-cat") === catName) return btn;
-        }
-        return null;
-    }
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
     
-    function clearAllCategoryGreen() {
-        document.querySelectorAll(".category-btn").forEach(btn => {
-            btn.classList.remove("category-btn-green");
+    const MAX_QUESTIONS = 45;
+    let categories = {};
+    let currentCategory = "", currentQuestionIndex = null, timerInterval = null, timeLeft = 40, isAnswered = false;
+    let selectedCategoryBtn = null, selectedQuestionDiv = null, selectedAnswerBtn = null;
+    let isModalOpen = false, isInQuestionScreen = false, waitingForEnter = false;
+    let currentCorrectAnswer = null, currentQuestionData = null;
+    let usedQuestions = {};
+    let roomId = localStorage.getItem("roomId") || "quiz_room_1";
+    let myId = Math.random().toString(36).substring(2, 8);
+    
+    function loadData() {
+        database.ref(`${roomId}/categories`).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) categories = data;
+            else categories = {};
+            const categoryList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
+            categoryList.forEach(cat => { if(!categories[cat]) categories[cat] = []; });
+            attachCategoryEvents();
         });
-        selectedCategoryBtn = null;
-    }
-    
-    function checkAndDisableCategory(catName) {
-        const questions = categories[catName] || [];
-        if(questions.length === 0) return;
-        const allUsed = questions.every((_, idx) => usedQuestions[catName] && usedQuestions[catName][idx] === true);
-        if(allUsed && questions.length === MAX_QUESTIONS) {
-            const btn = getCategoryButtonByCatName(catName);
-            if(btn) {
-                btn.classList.add("category-btn-red");
-                btn.style.pointerEvents = "none";
+        
+        database.ref(`${roomId}/usedQuestions`).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) usedQuestions = data;
+            else usedQuestions = {};
+        });
+        
+        database.ref(`${roomId}/sync`).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data && data.by !== myId) {
+                if(data.type === 'openCategory' && data.cat) openCategory(data.cat);
+                if(data.type === 'prepareQuestion' && data.index !== undefined) prepareQuestion(data.index);
+                if(data.type === 'submitAnswer' && data.letter) submitAnswerFromSync(data.letter);
             }
-        }
+        });
     }
     
-    function markQuestionAsUsed(catName, questionIndex) {
+    function sendSync(type, data) {
+        database.ref(`${roomId}/sync`).set({ type, by: myId, timestamp: Date.now(), ...data });
+    }
+    
+    function markQuestionAsUsed(catName, index) {
         if(!usedQuestions[catName]) usedQuestions[catName] = {};
-        usedQuestions[catName][questionIndex] = true;
-        saveUsedQuestions();
-        
-        const questionDivs = document.querySelectorAll(".question-number");
-        if(questionDivs[questionIndex]) {
-            questionDivs[questionIndex].classList.add("question-number-red");
-            questionDivs[questionIndex].style.pointerEvents = "none";
-        }
-        checkAndDisableCategory(catName);
+        usedQuestions[catName][index] = true;
+        database.ref(`${roomId}/usedQuestions`).set(usedQuestions);
     }
     
-    document.addEventListener('keydown', (e) => {
-        if(isModalOpen && document.getElementById("questionsListDiv").style.display === "block") {
-            handleQuestionKeyboard(e);
-            return;
-        }
-        if(isModalOpen && document.getElementById("questionScreenDiv").style.display === "block") {
-            handleAnswerKeyboard(e);
-            return;
-        }
-        
-        const key = e.key;
-        const catName = keyToCategory[key];
-        if(catName) {
-            e.preventDefault();
-            clearAllCategoryGreen();
-            const btn = getCategoryButtonByCatName(catName);
-            if(btn && !btn.classList.contains("category-btn-red")) {
-                btn.classList.add("category-btn-green");
-                selectedCategoryBtn = btn;
+    function openCategory(catName) {
+        currentCategory = catName;
+        const questions = categories[catName] || [];
+        let qHtml = "";
+        for(let i=0; i<MAX_QUESTIONS; i++) {
+            const isUsed = usedQuestions[catName]?.[i] === true;
+            if(i < questions.length) {
+                if(isUsed) qHtml += `<div class="question-number question-number-red">${i+1}</div>`;
+                else qHtml += `<div class="question-number" onclick="prepareQuestion(${i})">${i+1}</div>`;
+            } else {
+                qHtml += `<div class="question-number" style="opacity:0.3; cursor:not-allowed;">${i+1}</div>`;
             }
         }
-        
-        if(e.key === 'Enter' && selectedCategoryBtn) {
-            e.preventDefault();
-            const catName = selectedCategoryBtn.getAttribute("data-cat");
-            clearAllCategoryGreen();
-            openCategory(catName);
-        }
-    });
-    
-    function handleQuestionKeyboard(e) {
-        const key = e.key;
-        const num = parseInt(key);
-        if(num >= 1 && num <= MAX_QUESTIONS) {
-            e.preventDefault();
-            const questions = categories[currentCategory] || [];
-            const questionDivs = document.querySelectorAll(".question-number");
-            if(questionDivs.length >= num) {
-                questionDivs.forEach(div => div.classList.remove("question-number-green"));
-                const targetDiv = questionDivs[num-1];
-                if(!targetDiv.classList.contains("question-number-red")) {
-                    targetDiv.classList.add("question-number-green");
-                    selectedQuestionDiv = targetDiv;
-                } else {
-                    selectedQuestionDiv = null;
-                }
-            }
-        }
-        
-        if(e.key === 'Enter' && selectedQuestionDiv) {
-            e.preventDefault();
-            const index = Array.from(document.querySelectorAll(".question-number")).indexOf(selectedQuestionDiv);
-            if(index !== -1) {
-                const questions = categories[currentCategory] || [];
-                if(questions.length > index && !usedQuestions[currentCategory]?.[index]) {
-                    selectedQuestionDiv.classList.remove("question-number-green");
-                    prepareQuestion(index);
-                } else {
-                    selectedQuestionDiv.classList.remove("question-number-green");
-                    selectedQuestionDiv = null;
-                }
-            }
-        }
+        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName} (${questions.length}/${MAX_QUESTIONS})</h2><div class="questions-grid">${qHtml}</div>`;
+        document.getElementById("questionScreenDiv").style.display = "none";
+        document.getElementById("questionsListDiv").style.display = "block";
+        document.getElementById("questionModal").style.display = "block";
+        isModalOpen = true;
+        isInQuestionScreen = false;
     }
     
     function prepareQuestion(index) {
         const questions = categories[currentCategory];
-        if(!questions || index >= questions.length) return;
+        if(!questions || index >= questions.length || usedQuestions[currentCategory]?.[index]) return;
         
         currentQuestionIndex = index;
         currentQuestionData = questions[index];
         currentCorrectAnswer = currentQuestionData.correct;
         waitingForEnter = true;
         isAnswered = false;
-        selectedAnswerBtn = null;
         
         document.getElementById("questionsListDiv").style.display = "none";
         document.getElementById("questionScreenDiv").style.display = "block";
         isInQuestionScreen = true;
         
         renderQuestionWaiting();
+        sendSync('prepareQuestion', { index });
     }
     
     function renderQuestionWaiting() {
-        const letters = ["A","B","C","D"];
         document.getElementById("questionScreenDiv").innerHTML = `
             <div class="question-screen">
-                <div class="waiting-message">⏳ تکایە Enter دابگرە بۆ دەستپێکردنی کاتژمێر و وەڵامدان ⏳</div>
+                <div class="waiting-message">⏳ Enter دابگرە بۆ دەستپێکردن ⏳</div>
                 <div class="question-text">${currentQuestionData.text}</div>
-                <div class="options-grid" id="optionsGrid">
-                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>`).join('')}
+                <div class="options-grid">
+                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${String.fromCharCode(65+idx)}">${String.fromCharCode(65+idx)}. ${opt}</div>`).join('')}
                 </div>
             </div>`;
     }
     
     function startQuestionWithTimer() {
-        if(!waitingForEnter) return;
         waitingForEnter = false;
         timeLeft = 40;
-        
         if(timerInterval) clearInterval(timerInterval);
         startTimer();
         
-        const letters = ["A","B","C","D"];
         document.getElementById("questionScreenDiv").innerHTML = `
             <div class="question-screen">
                 <div class="timer" id="timerDisplay">40 چرکە</div>
                 <div class="question-text">${currentQuestionData.text}</div>
-                <div class="options-grid" id="optionsGrid">
-                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${letters[idx]}" onclick="manualAnswerSelect('${letters[idx]}')">${letters[idx]}. ${opt}</div>`).join('')}
+                <div class="options-grid">
+                    ${currentQuestionData.options.map((opt,idx)=>`<div class="option-btn" data-opt="${String.fromCharCode(65+idx)}" onclick="manualAnswerSelect('${String.fromCharCode(65+idx)}')">${String.fromCharCode(65+idx)}. ${opt}</div>`).join('')}
                 </div>
             </div>`;
     }
     
-    function handleAnswerKeyboard(e) {
-        const key = e.key.toUpperCase();
-        const validKeys = ['A', 'B', 'C', 'D'];
-        
-        if(waitingForEnter) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                startQuestionWithTimer();
-            }
-            return;
-        }
-        
-        if(isAnswered) return;
-        
-        if(validKeys.includes(key)) {
-            e.preventDefault();
-            const buttons = document.querySelectorAll(".option-btn");
-            const index = validKeys.indexOf(key);
-            if(buttons[index]) {
-                if(selectedAnswerBtn) {
-                    selectedAnswerBtn.classList.remove("option-btn-orange");
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if(!isAnswered && timeLeft>0 && !waitingForEnter) {
+                timeLeft--;
+                let td = document.getElementById("timerDisplay");
+                if(td) td.innerText = `${timeLeft} چرکە`;
+                if(timeLeft===0 && !isAnswered) {
+                    clearInterval(timerInterval);
+                    markQuestionAsUsed(currentCategory, currentQuestionIndex);
                 }
-                buttons[index].classList.add("option-btn-orange");
-                selectedAnswerBtn = buttons[index];
-            }
-        }
-        
-        if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered && !waitingForEnter) {
-            e.preventDefault();
-            const selectedLetter = selectedAnswerBtn.getAttribute("data-opt");
-            submitAnswer(selectedLetter);
-        }
+            } else if(timeLeft<=0) clearInterval(timerInterval);
+        },1000);
     }
     
     function manualAnswerSelect(letter) {
         if(isAnswered || waitingForEnter) return;
-        if(selectedAnswerBtn) {
-            selectedAnswerBtn.classList.remove("option-btn-orange");
-        }
+        if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
         const btns = document.querySelectorAll(".option-btn");
         for(let btn of btns) {
             if(btn.getAttribute("data-opt") === letter) {
@@ -345,200 +217,90 @@
     function submitAnswer(selectedLetter) {
         if(isAnswered) return;
         const isCorrect = (selectedLetter === currentCorrectAnswer);
-        
         isAnswered = true;
         clearInterval(timerInterval);
         
         const btns = document.querySelectorAll(".option-btn");
         btns.forEach(btn => {
             btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
-                btn.classList.add("option-correct");
-            }
-            if(btn.getAttribute("data-opt") === selectedLetter && !isCorrect) {
-                btn.classList.add("option-wrong");
-            }
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) btn.classList.add("option-correct");
+            if(btn.getAttribute("data-opt") === selectedLetter && !isCorrect) btn.classList.add("option-wrong");
             btn.classList.remove("option-btn-orange");
         });
-        
         markQuestionAsUsed(currentCategory, currentQuestionIndex);
+        sendSync('submitAnswer', { letter: selectedLetter });
     }
     
-    function startTimer() {
-        if(timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            if(!isAnswered && timeLeft>0 && !waitingForEnter) {
-                timeLeft--;
-                let td = document.getElementById("timerDisplay");
-                if(td) td.innerText = `${timeLeft} چرکە`;
-                if(timeLeft===0 && !isAnswered) {
-                    clearInterval(timerInterval);
-                    markQuestionAsUsed(currentCategory, currentQuestionIndex);
-                    showCorrectAnswerOnly();
-                }
-            } else if(timeLeft<=0) clearInterval(timerInterval);
-        },1000);
-    }
-    
-    function showCorrectAnswerOnly() {
+    function submitAnswerFromSync(letter) {
+        if(isAnswered) return;
+        const isCorrect = (letter === currentCorrectAnswer);
+        isAnswered = true;
+        clearInterval(timerInterval);
+        
         const btns = document.querySelectorAll(".option-btn");
         btns.forEach(btn => {
             btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
-                btn.classList.add("option-correct");
-            }
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) btn.classList.add("option-correct");
+            if(btn.getAttribute("data-opt") === letter && !isCorrect) btn.classList.add("option-wrong");
+        });
+        markQuestionAsUsed(currentCategory, currentQuestionIndex);
+    }
+    
+    function attachCategoryEvents() {
+        document.querySelectorAll(".category-btn").forEach(btn => {
+            btn.onclick = () => {
+                const catName = btn.getAttribute("data-cat");
+                openCategory(catName);
+                sendSync('openCategory', { cat: catName });
+            };
         });
     }
     
-    function loadCategories() {
-        const stored = localStorage.getItem("categories");
-        if(stored) {
-            try {
-                categories = JSON.parse(stored);
-            } catch(e) { categories = {}; }
-        } else {
-            categories = {};
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Backspace' && isModalOpen) {
+            e.preventDefault();
+            document.getElementById("questionModal").style.display = "none";
+            isModalOpen = false;
+            if(timerInterval) clearInterval(timerInterval);
         }
-        
-        loadUsedQuestions();
-        
-        categoryList.forEach(cat => { 
-            if(!categories[cat]) categories[cat] = []; 
-        });
-        
-        setTimeout(() => {
-            categoryList.forEach(cat => checkAndDisableCategory(cat));
-        }, 100);
-        
-        attachCategoryEvents();
-        showImportButtonFor5Seconds();
-    }
-    
-    function showImportButtonFor5Seconds() {
-        const importContainer = document.getElementById("importContainer");
-        importContainer.style.display = "flex";
-        setTimeout(() => {
-            importContainer.style.display = "none";
-            document.getElementById("manualImportArea").style.display = "none";
-        }, 5000);
-    }
-    
-    function toggleManualImport() {
-        const area = document.getElementById("manualImportArea");
-        area.style.display = area.style.display === "none" ? "block" : "none";
-    }
+        if(isModalOpen && document.getElementById("questionScreenDiv").style.display === "block") {
+            const key = e.key.toUpperCase();
+            if(['A','B','C','D'].includes(key) && !waitingForEnter && !isAnswered) {
+                e.preventDefault();
+                manualAnswerSelect(key);
+            }
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                if(waitingForEnter) startQuestionWithTimer();
+                else if(selectedAnswerBtn) submitAnswer(selectedAnswerBtn.getAttribute("data-opt"));
+            }
+        }
+    });
     
     function importFromFile() {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "application/json";
-        input.onchange = function(e) {
+        input.onchange = (e) => {
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = (evt) => {
                 try {
                     const imported = JSON.parse(evt.target.result);
-                    applyImportedData(imported);
-                } catch(err) { alert("❌ فایلەکە JSONی نادروستە! هەڵە: " + err.message); }
+                    database.ref(`${roomId}/categories`).set(imported);
+                    database.ref(`${roomId}/usedQuestions`).set({});
+                    alert("✅ Import کرا! لاپەڕە نوێ دەبێتەوە.");
+                    location.reload();
+                } catch(err) { alert("فایلەکە نادروستە"); }
             };
             reader.readAsText(file);
         };
         input.click();
     }
     
-    function importFromText() {
-        const text = document.getElementById("jsonText").value.trim();
-        if(!text) { alert("تکایە JSON ی پاشەکەوتکراو بلێکە!"); return; }
-        try {
-            const imported = JSON.parse(text);
-            applyImportedData(imported);
-        } catch(err) { alert("❌ دەقەکە JSONی نادروستە! هەڵە: " + err.message); }
-    }
-    
-    function applyImportedData(imported) {
-        let success = false;
-        for(let cat of categoryList) {
-            if(imported[cat] && Array.isArray(imported[cat])) {
-                categories[cat] = imported[cat].slice(0, MAX_QUESTIONS);
-                success = true;
-            } else if(!categories[cat]) {
-                categories[cat] = [];
-            }
-        }
-        if(success) {
-            usedQuestions = {};
-            saveUsedQuestions();
-            localStorage.setItem("categories", JSON.stringify(categories));
-            alert("✅ Import سەرکەوتوو بوو! لاپەڕە نوێ دەبێتەوە.");
-            location.reload();
-        } else {
-            alert("❌ فایلەکە هیچ کەتەگۆرییەکی ناسراو تێدا نییە!");
-        }
-    }
-    
-    function attachCategoryEvents() {
-        document.querySelectorAll(".category-btn").forEach(btn => {
-            btn.removeEventListener("click", handleCategoryClick);
-            btn.addEventListener("click", handleCategoryClick);
-        });
-    }
-    
-    function handleCategoryClick(e) {
-        const btn = e.currentTarget;
-        if(btn.classList.contains("category-btn-red")) return;
-        const catName = btn.getAttribute("data-cat");
-        clearAllCategoryGreen();
-        btn.classList.add("category-btn-green");
-        selectedCategoryBtn = btn;
-    }
-    
-    function openCategory(catName) {
-        currentCategory = catName;
-        const questions = categories[catName] || [];
-        let qHtml = "";
-        for(let i=0; i<MAX_QUESTIONS; i++) {
-            const isUsed = usedQuestions[catName]?.[i] === true;
-            if(i < questions.length) {
-                if(isUsed) {
-                    qHtml += `<div class="question-number question-number-red" style="cursor:not-allowed; pointer-events:none;">${i+1}</div>`;
-                } else {
-                    qHtml += `<div class="question-number" onclick="prepareQuestionWithMouse(${i})">${i+1}</div>`;
-                }
-            } else {
-                qHtml += `<div class="question-number" style="opacity:0.3; cursor:not-allowed; pointer-events:none;">${i+1}</div>`;
-            }
-        }
-        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${catName} (${questions.length}/${MAX_QUESTIONS})</h2><div class="questions-grid">${qHtml}</div>`;
-        document.getElementById("questionScreenDiv").style.display = "none";
-        document.getElementById("questionsListDiv").style.display = "block";
-        document.getElementById("questionModal").style.display = "block";
-        isModalOpen = true;
-        isInQuestionScreen = false;
-        selectedQuestionDiv = null;
-    }
-    
-    function prepareQuestionWithMouse(index) {
-        const questions = categories[currentCategory];
-        if(!questions || index >= questions.length) return;
-        if(usedQuestions[currentCategory]?.[index]) return;
-        prepareQuestion(index);
-    }
-    
-    function closeModal() {
-        clearInterval(timerInterval);
-        document.getElementById("questionModal").style.display="none";
-        currentQuestionIndex=null; 
-        isAnswered=false;
-        isModalOpen = false;
-        isInQuestionScreen = false;
-        selectedAnswerBtn = null;
-        selectedQuestionDiv = null;
-        waitingForEnter = false;
-        clearAllCategoryGreen();
-    }
-    
-    loadCategories();
+    setTimeout(() => { document.getElementById("importContainer").style.display = "flex"; setTimeout(() => document.getElementById("importContainer").style.display = "none", 5000); }, 100);
+    loadData();
 </script>
 </body>
 </html>
