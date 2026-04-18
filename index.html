@@ -18,8 +18,6 @@
         button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 15px; font-size: 18px; cursor: pointer; font-weight: bold; background: #4CAF50; color: white; transition: 0.3s; }
         button:hover { background: #45a049; transform: scale(1.02); }
         .error { color: #ff6b6b; text-align: center; margin-top: 15px; font-size: 14px; }
-        .register-link { text-align: center; margin-top: 20px; color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; }
-        .register-link span { color: #ff9800; text-decoration: underline; }
         .room-id { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 10px; }
     </style>
 </head>
@@ -53,7 +51,7 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    const ROOM_ID = "quiz_room_main"; // ژووری دیاریکراو - پێویست ناکات بەکارهێنەر بنووسێت
+    const ROOM_ID = "quiz_room_main";
     
     document.getElementById("roomIdDisplay").innerText = `ژوور: ${ROOM_ID}`;
     
@@ -72,23 +70,20 @@
             return;
         }
         
-        // پشکنینی بەکارهێنەر لە Firebase
         const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
         const user = snapshot.val();
         
         if(user && user.password === password) {
-            // چوونە ژوورەوە سەرکەوتوو
             localStorage.setItem("loggedInUser", JSON.stringify({
                 username: username,
                 role: user.role
             }));
             localStorage.setItem("roomId", ROOM_ID);
             
-            // ڕێدایرێکت بەپێی ڕۆڵ
-            if(user.role === "admin" || user.role === "question_creator") {
+            if(user.role === "super_admin") {
+                window.location.href = "user_management.html";
+            } else if(user.role === "admin" || user.role === "question_creator") {
                 window.location.href = "admin.html";
-            } else if(user.role === "player") {
-                window.location.href = "play.html";
             } else {
                 window.location.href = "play.html";
             }
