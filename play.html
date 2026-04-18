@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
+        /* هەمان ستایلەکانی پێشوو */
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; position: relative; }
@@ -60,7 +61,6 @@
 <div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div></div></div>
 
 <script>
-    // ========== Firebase پێکهێنان ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
         authDomain: "quizgamerebin.firebaseapp.com",
@@ -82,8 +82,14 @@
     let isModalOpen = false, isInQuestionScreen = false, waitingForEnter = false;
     let currentCorrectAnswer = null, currentQuestionData = null;
     let usedQuestions = {};
-    let roomId = localStorage.getItem("roomId") || "quiz_room_1";
+    let roomId = localStorage.getItem("roomId") || "quiz_room_main";
     let myId = Math.random().toString(36).substring(2, 8);
+    let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    
+    // پشکنینی ڕۆڵ - ئەگەر بەکارهێنەر not player بێت، ڕێگەی پێدراوە یاری بکات
+    if(!currentUser.username) {
+        window.location.href = "index.html";
+    }
     
     function loadData() {
         database.ref(`${roomId}/categories`).on('value', (snapshot) => {
