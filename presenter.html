@@ -12,7 +12,7 @@
         body { background: #1e1e2f; margin: 0; padding: 20px; min-height: 100vh; }
         .main-container { display: flex; gap: 20px; max-width: 1600px; margin: auto; }
         .left-panel { flex: 3; }
-        .right-panel { width: 300px; background: rgba(0,0,0,0.3); border-radius: 25px; padding: 20px; height: fit-content; }
+        .right-panel { width: 320px; background: rgba(0,0,0,0.3); border-radius: 25px; padding: 20px; height: fit-content; }
         h1 { color: white; text-align: center; margin-bottom: 20px; font-size: 24px; }
         .info-bar { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: center; color: white; }
         .category-tabs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
@@ -24,36 +24,57 @@
         .question-box { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); transition: all 0.2s; }
         .question-box:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
         .question-box-empty { background: rgba(255,255,255,0.05); opacity: 0.5; cursor: not-allowed; }
-        .selected-info { background: #4CAF50; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; color: white; }
+        .btn-back { background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 30px; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
+        .btn-back:hover { background: #e68900; }
         .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; }
         
-        /* ستایلەکانی پانێلی ڕاست */
+        /* شێوازی پرسیار */
+        .question-screen { text-align: center; }
+        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
+        .question-text { font-size: 26px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .option-box { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 15px; font-size: 18px; color: white; text-align: center; }
+        .option-correct { background: #4CAF50 !important; }
+        
+        /* شێوازی پانێلی ڕاست */
         .right-panel h3 { color: white; text-align: center; margin-bottom: 15px; }
-        .players-list { list-style: none; padding: 0; }
-        .player-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .players-list { list-style: none; padding: 0; max-height: 500px; overflow-y: auto; }
+        .player-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
         .player-name { font-weight: bold; }
         .player-answer { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 3px 10px; font-size: 14px; }
         .player-item-orange { background: #ff9800 !important; color: white; }
         .waiting-text { color: rgba(255,255,255,0.5); text-align: center; padding: 20px; }
         
         @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } .main-container { flex-direction: column; } .right-panel { width: 100%; } }
-        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } }
+        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-box { font-size: 14px; padding: 10px; } .timer { font-size: 36px; } }
     </style>
 </head>
 <body>
 <div class="main-container">
     <div class="left-panel">
-        <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار بۆ یاریکەران</h1>
-        <div class="info-bar">
-            📢 کەتەگۆری و ژمارەی پرسیار هەڵبژێرە، پرسیارەکە ڕاستەوخۆ بۆ هەموو یاریکەران دەنێردرێت
+        <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار</h1>
+        
+        <!-- کەتەگۆرییەکان -->
+        <div id="categoriesSection">
+            <div class="info-bar">📢 کەتەگۆرییەک هەڵبژێرە</div>
+            <div class="category-tabs" id="categoryTabs"></div>
         </div>
         
-        <div class="category-tabs" id="categoryTabs"></div>
+        <!-- بۆکسی پرسیارەکان (خۆی شاردەوە) -->
+        <div id="questionsSection" style="display:none;">
+            <button class="btn-back" onclick="backToCategories()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button>
+            <div class="glass-card">
+                <h3 id="selectedCategoryTitle"></h3>
+                <div class="questions-grid" id="questionsGrid"></div>
+            </div>
+        </div>
         
-        <div class="glass-card">
-            <h3>📋 پرسیارەکان</h3>
-            <div id="selectedInfo" class="selected-info" style="display:none;"></div>
-            <div class="questions-grid" id="questionsGrid"></div>
+        <!-- شاشەی پرسیار (خۆی شاردەوە) -->
+        <div id="questionScreenSection" style="display:none;">
+            <button class="btn-back" onclick="backToQuestionsList()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
+            <div class="glass-card">
+                <div id="questionDisplay" class="question-screen"></div>
+            </div>
         </div>
         
         <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
@@ -85,16 +106,17 @@
     const categoriesList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
     let categories = {};
     let currentCategory = "";
+    let currentSelectedQuestion = null;
     let roomId = localStorage.getItem("roomId") || "quiz_room_main";
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    let activePlayers = {}; // بۆ هەڵگرتنی زانیاری یاریکەران
+    let activePlayers = {};
     
     if(currentUser.role !== "admin" && currentUser.role !== "super_admin") {
         alert("⚠️ تۆ مافی پێشکەشکاریت نییە!");
         window.location.href = "play.html";
     }
     
-    // گوێگرتن لە یاریکەران
+    // گوێگرتن لە یاریکەران (ڕاستەوخۆ بۆ پرتەقاڵی کردن)
     database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
         activePlayers = snapshot.val() || {};
         renderPlayersList();
@@ -122,26 +144,26 @@
         container.innerHTML = html;
     }
     
+    // بارکردنی کەتەگۆرییەکان
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
         categories = snapshot.val() || {};
         categoriesList.forEach(c => { if(!categories[c]) categories[c] = []; });
-        if(!currentCategory && categoriesList.length) currentCategory = categoriesList[0];
-        renderTabs();
-        renderQuestions();
+        renderCategories();
     });
     
-    function renderTabs() {
+    function renderCategories() {
         const container = document.getElementById("categoryTabs");
         container.innerHTML = "";
         categoriesList.forEach(cat => {
             const btn = document.createElement("button");
             btn.textContent = `${cat} (${categories[cat]?.length || 0}/${MAX_QS})`;
-            btn.className = "tab-btn" + (cat === currentCategory ? " active" : "");
+            btn.className = "tab-btn";
             btn.onclick = () => {
                 currentCategory = cat;
-                renderTabs();
+                document.getElementById("categoriesSection").style.display = "none";
+                document.getElementById("questionsSection").style.display = "block";
+                document.getElementById("selectedCategoryTitle").innerHTML = `📋 پرسیارەکانی ${cat}`;
                 renderQuestions();
-                document.getElementById("selectedInfo").style.display = "none";
             };
             container.appendChild(btn);
         });
@@ -168,7 +190,7 @@
             return;
         }
         
-        const selectedQuestion = questions[index];
+        currentSelectedQuestion = questions[index];
         
         // پاککردنەوەی وەڵامەکانی پێشووی یاریکەران
         database.ref(`${roomId}/activePlayers`).once('value', (snapshot) => {
@@ -178,25 +200,48 @@
             });
         });
         
-        const infoDiv = document.getElementById("selectedInfo");
-        infoDiv.style.display = "block";
-        infoDiv.innerHTML = `✅ پرسیار ${index+1} نێردرا: "${selectedQuestion.text.substring(0, 50)}..."`;
-        
+        // ناردنی پرسیار بۆ یاریکەران
         database.ref(`${roomId}/activeQuestion`).set({
-            question: selectedQuestion,
-            correct: selectedQuestion.correct,
+            question: currentSelectedQuestion,
+            correct: currentSelectedQuestion.correct,
             category: currentCategory,
             index: index,
             timestamp: Date.now()
         });
         
-        setTimeout(() => {
-            infoDiv.style.opacity = "0.5";
-            setTimeout(() => {
-                infoDiv.style.display = "none";
-                infoDiv.style.opacity = "1";
-            }, 1000);
-        }, 2000);
+        // نمایشکردنی پرسیار لە شاشەی پێشکەشکار
+        document.getElementById("questionsSection").style.display = "none";
+        document.getElementById("questionScreenSection").style.display = "block";
+        displayQuestionForPresenter(currentSelectedQuestion);
+    }
+    
+    function displayQuestionForPresenter(question) {
+        const letters = ["A", "B", "C", "D"];
+        const container = document.getElementById("questionDisplay");
+        container.innerHTML = `
+            <div class="question-text">${question.text}</div>
+            <div class="options-grid">
+                ${question.options.map((opt, idx) => `
+                    <div class="option-box">${letters[idx]}. ${opt}</div>
+                `).join('')}
+            </div>
+            <div style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">
+                ✅ وەڵامی ڕاست: ${question.correct}
+            </div>
+        `;
+    }
+    
+    function backToCategories() {
+        document.getElementById("questionsSection").style.display = "none";
+        document.getElementById("categoriesSection").style.display = "block";
+        document.getElementById("questionScreenSection").style.display = "none";
+        currentSelectedQuestion = null;
+    }
+    
+    function backToQuestionsList() {
+        document.getElementById("questionScreenSection").style.display = "none";
+        document.getElementById("questionsSection").style.display = "block";
+        currentSelectedQuestion = null;
     }
     
     function logout() {
