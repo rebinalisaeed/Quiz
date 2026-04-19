@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html dir="rtl">
 <head>
-    <title>یاری پرسیار و وەڵام</title>
+    <title>یاری پرسیار و وەڵام - یاریکەر</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -9,49 +9,28 @@
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; padding: 30px 20px; display: flex; justify-content: center; align-items: center; }
-        .container { max-width: 1200px; width: 100%; margin: auto; }
-        .row { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; flex-wrap: wrap; }
-        .category-btn { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 18px 25px; width: 180px; text-align: center; cursor: pointer; }
-        .category-btn span { font-size: 24px; color: white; }
-        .category-btn-green { background: #4CAF50 !important; }
-        .category-btn-red { background: #f44336 !important; opacity: 0.6; cursor: not-allowed; pointer-events: none; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
-        .modal-content { max-width: 1000px; margin: 20px auto; background: rgba(30,30,50,0.95); border-radius: 30px; padding: 30px; }
-        .questions-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 30px 0; }
-        .question-number { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
-        .question-number-red { background: #f44336 !important; opacity: 0.6; cursor: not-allowed; pointer-events: none; }
-        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; }
-        .question-text { font-size: 24px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .waiting-container { text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 30px; padding: 50px; max-width: 500px; }
+        .waiting-message { color: #ff9800; font-size: 28px; margin-bottom: 20px; }
+        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 18px; }
+        .question-screen { text-align: center; max-width: 900px; margin: auto; }
+        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
+        .question-text { font-size: 28px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
         .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
-        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; }
-        .option-btn-orange { background: #ff9800 !important; }
-        .option-correct { background: #4CAF50 !important; }
-        .option-wrong { background: #f44336 !important; }
-        .waiting-message { color: #ff9800; font-size: 20px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 20px; }
-        @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-number { font-size: 14px; padding: 10px 3px; } }
+        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .option-btn-orange { background: #ff9800 !important; border-color: #e68900 !important; transform: scale(1.02); }
+        .option-correct { background: #4CAF50 !important; border-color: #2e7d32 !important; }
+        .option-wrong { background: #f44336 !important; border-color: #c62828 !important; }
+        @media (max-width: 600px) { .question-text { font-size: 20px; } .option-btn { font-size: 14px; padding: 12px; } .timer { font-size: 36px; } .waiting-message { font-size: 22px; } }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div class="category-btn" data-cat="مێژوو"><span>مێژوو</span></div>
-        <div class="category-btn" data-cat="زانست"><span>زانست</span></div>
-        <div class="category-btn" data-cat="ئەدەبیات"><span>ئەدەبیات</span></div>
-    </div>
-    <div class="row">
-        <div class="category-btn" data-cat="هونەر"><span>هونەر</span></div>
-        <div class="category-btn" data-cat="وەرزش"><span>وەرزش</span></div>
-        <div class="category-btn" data-cat="تەکنەلۆژیا"><span>تەکنەلۆژیا</span></div>
-    </div>
-    <div class="row">
-        <div class="category-btn" data-cat="تەندروستی"><span>تەندروستی</span></div>
-        <div class="category-btn" data-cat="جوگرافیا"><span>جوگرافیا</span></div>
-        <div class="category-btn" data-cat="ئاینی"><span>ئاینی</span></div>
-    </div>
+<div id="waitingContainer" class="waiting-container">
+    <div class="waiting-message">⏳ چاوەڕوان بە...</div>
+    <div class="waiting-sub">پێشکەشکار پرسیاری داهاتوو هەڵدەبژێرێت</div>
 </div>
-<div id="questionModal" class="modal"><div class="modal-content"><div id="questionsListDiv"></div><div id="questionScreenDiv" style="display:none;"></div></div></div>
+<div id="questionContainer" style="display:none;" class="question-screen"></div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
@@ -62,117 +41,142 @@
         messagingSenderId: "312376681830",
         appId: "1:312376681830:web:11262fa62cc9246bac14a7"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const MAX_QS = 45;
-    let categories = {}, currentCat = "", currentQIndex = null, timer = null, timeLeft = 40, answered = false;
-    let selectedAnswer = null, waitingEnter = false, currentQData = null, currentCorrect = null;
-    let usedQs = {};
-    let roomId = localStorage.getItem("roomId") || "quiz_room_main";
-    let myId = Math.random().toString(36).substring(2,8);
-    if(!JSON.parse(localStorage.getItem("loggedInUser")||"{}").username) window.location.href = "index.html";
-    database.ref(`${roomId}/categories`).on('value', (s) => {
-        categories = s.val() || {};
-        const list = ["مێژوو","زانست","ئەدەبیات","هونەر","وەرزش","تەکنەلۆژیا","تەندروستی","جوگرافیا","ئاینی"];
-        list.forEach(c => { if(!categories[c]) categories[c] = []; });
-        attachEvents();
-    });
-    database.ref(`${roomId}/usedQuestions`).on('value', (s) => { usedQs = s.val() || {}; });
-    database.ref(`${roomId}/sync`).on('value', (s) => {
-        const d = s.val();
-        if(d && d.by !== myId) {
-            if(d.type === 'openCategory' && d.cat) openCat(d.cat);
-            if(d.type === 'prepareQuestion' && d.index !== undefined) prepQ(d.index);
-            if(d.type === 'submitAnswer' && d.letter) submitFromSync(d.letter);
+    
+    const ROOM_ID = "quiz_room_main";
+    let timerInterval = null;
+    let timeLeft = 40;
+    let isAnswered = false;
+    let currentCorrectAnswer = null;
+    let selectedAnswerBtn = null;
+    let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    
+    if(!currentUser.username) {
+        window.location.href = "index.html";
+    }
+    
+    // گوێگرتن لە پرسیاری نوێ لە لایەن پێشکەشکارەوە
+    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data && data.question) {
+            showQuestion(data.question, data.correct);
         }
     });
-    function sendSync(type, data) { database.ref(`${roomId}/sync`).set({ type, by: myId, ts: Date.now(), ...data }); }
-    function markUsed(cat, idx) { if(!usedQs[cat]) usedQs[cat] = {}; usedQs[cat][idx] = true; database.ref(`${roomId}/usedQuestions`).set(usedQs); }
-    function openCat(cat) {
-        currentCat = cat;
-        let html = "";
-        for(let i=0;i<MAX_QS;i++) {
-            if(i < (categories[cat]||[]).length) {
-                if(usedQs[cat]?.[i]) html += `<div class="question-number question-number-red">${i+1}</div>`;
-                else html += `<div class="question-number" onclick="prepQ(${i})">${i+1}</div>`;
-            } else html += `<div class="question-number" style="opacity:0.3;">${i+1}</div>`;
-        }
-        document.getElementById("questionsListDiv").innerHTML = `<h2 style="color:white;text-align:center;">${cat}</h2><div class="questions-grid">${html}</div>`;
-        document.getElementById("questionScreenDiv").style.display = "none";
-        document.getElementById("questionsListDiv").style.display = "block";
-        document.getElementById("questionModal").style.display = "block";
-    }
-    function prepQ(idx) {
-        if(usedQs[currentCat]?.[idx]) return;
-        currentQIndex = idx;
-        currentQData = categories[currentCat][idx];
-        currentCorrect = currentQData.correct;
-        waitingEnter = true;
-        answered = false;
-        selectedAnswer = null;
-        document.getElementById("questionsListDiv").style.display = "none";
-        document.getElementById("questionScreenDiv").style.display = "block";
-        document.getElementById("questionScreenDiv").innerHTML = `<div class="question-screen"><div class="waiting-message">⏳ Enter دابگرە بۆ دەستپێکردن ⏳</div><div class="question-text">${currentQData.text}</div><div class="options-grid">${currentQData.options.map((o,i)=>`<div class="option-btn" data-opt="${String.fromCharCode(65+i)}">${String.fromCharCode(65+i)}. ${o}</div>`).join('')}</div></div>`;
-        sendSync('prepareQuestion', { index: idx });
-    }
-    function startTimerNow() {
-        if(!waitingEnter) return;
-        waitingEnter = false;
+    
+    function showQuestion(question, correctAnswer) {
+        // وەستاندنی کاتژمێری پێشوو
+        if(timerInterval) clearInterval(timerInterval);
+        
+        currentCorrectAnswer = correctAnswer;
+        isAnswered = false;
+        selectedAnswerBtn = null;
         timeLeft = 40;
-        if(timer) clearInterval(timer);
-        timer = setInterval(() => {
-            if(!answered && timeLeft>0 && !waitingEnter) {
+        
+        // شاردنەوەی پەڕەی چاوەڕوانی و نمایشکردنی پرسیار
+        document.getElementById("waitingContainer").style.display = "none";
+        const container = document.getElementById("questionContainer");
+        container.style.display = "block";
+        
+        renderQuestion(question);
+        startTimer();
+    }
+    
+    function renderQuestion(question) {
+        const letters = ["A", "B", "C", "D"];
+        const container = document.getElementById("questionContainer");
+        container.innerHTML = `
+            <div class="timer" id="timerDisplay">40 چرکە</div>
+            <div class="question-text">${question.text}</div>
+            <div class="options-grid" id="optionsGrid">
+                ${question.options.map((opt, idx) => `
+                    <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
+                        ${letters[idx]}. ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    function selectAnswer(letter) {
+        if(isAnswered) return;
+        if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
+        const btns = document.querySelectorAll(".option-btn");
+        for(let btn of btns) {
+            if(btn.getAttribute("data-opt") === letter) {
+                btn.classList.add("option-btn-orange");
+                selectedAnswerBtn = btn;
+                break;
+            }
+        }
+    }
+    
+    function submitAnswer(selectedLetter) {
+        if(isAnswered) return;
+        const isCorrect = (selectedLetter === currentCorrectAnswer);
+        isAnswered = true;
+        clearInterval(timerInterval);
+        
+        const btns = document.querySelectorAll(".option-btn");
+        btns.forEach(btn => {
+            btn.style.pointerEvents = "none";
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
+                btn.classList.add("option-correct");
+            }
+            if(btn.getAttribute("data-opt") === selectedLetter && !isCorrect) {
+                btn.classList.add("option-wrong");
+            }
+            btn.classList.remove("option-btn-orange");
+        });
+        
+        // دوای 3 چرکە بگەڕێوە بۆ پەڕەی چاوەڕوانی
+        setTimeout(() => {
+            document.getElementById("questionContainer").style.display = "none";
+            document.getElementById("waitingContainer").style.display = "block";
+            isAnswered = false;
+            selectedAnswerBtn = null;
+        }, 3000);
+    }
+    
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if(!isAnswered && timeLeft > 0) {
                 timeLeft--;
                 let td = document.getElementById("timerDisplay");
                 if(td) td.innerText = `${timeLeft} چرکە`;
-                if(timeLeft===0 && !answered) { clearInterval(timer); markUsed(currentCat, currentQIndex); showCorrect(); }
-            } else if(timeLeft<=0) clearInterval(timer);
-        },1000);
-        document.getElementById("questionScreenDiv").innerHTML = `<div class="question-screen"><div class="timer" id="timerDisplay">40 چرکە</div><div class="question-text">${currentQData.text}</div><div class="options-grid">${currentQData.options.map((o,i)=>`<div class="option-btn" data-opt="${String.fromCharCode(65+i)}" onclick="selectAnswer('${String.fromCharCode(65+i)}')">${String.fromCharCode(65+i)}. ${o}</div>`).join('')}</div></div>`;
+                if(timeLeft === 0 && !isAnswered) {
+                    clearInterval(timerInterval);
+                    // کات تەواو بوو، وەڵامی ڕاست پیشان بدە
+                    const btns = document.querySelectorAll(".option-btn");
+                    btns.forEach(btn => {
+                        btn.style.pointerEvents = "none";
+                        if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
+                            btn.classList.add("option-correct");
+                        }
+                    });
+                    setTimeout(() => {
+                        document.getElementById("questionContainer").style.display = "none";
+                        document.getElementById("waitingContainer").style.display = "block";
+                    }, 3000);
+                }
+            } else if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
     }
-    function selectAnswer(letter) {
-        if(answered || waitingEnter) return;
-        if(selectedAnswer) selectedAnswer.classList.remove("option-btn-orange");
-        const btns = document.querySelectorAll(".option-btn");
-        for(let b of btns) { if(b.getAttribute("data-opt") === letter) { b.classList.add("option-btn-orange"); selectedAnswer = b; break; } }
-    }
-    function submitAns(letter) {
-        if(answered) return;
-        const isCorrect = (letter === currentCorrect);
-        answered = true;
-        clearInterval(timer);
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(b => { b.style.pointerEvents = "none"; if(b.getAttribute("data-opt") === currentCorrect) b.classList.add("option-correct"); if(b.getAttribute("data-opt") === letter && !isCorrect) b.classList.add("option-wrong"); b.classList.remove("option-btn-orange"); });
-        markUsed(currentCat, currentQIndex);
-        sendSync('submitAnswer', { letter });
-    }
-    function submitFromSync(letter) {
-        if(answered) return;
-        answered = true;
-        clearInterval(timer);
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(b => { b.style.pointerEvents = "none"; if(b.getAttribute("data-opt") === currentCorrect) b.classList.add("option-correct"); if(b.getAttribute("data-opt") === letter && letter !== currentCorrect) b.classList.add("option-wrong"); });
-        markUsed(currentCat, currentQIndex);
-    }
-    function showCorrect() {
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(b => { if(b.getAttribute("data-opt") === currentCorrect) b.classList.add("option-correct"); });
-    }
-    function attachEvents() {
-        document.querySelectorAll(".category-btn").forEach(btn => {
-            btn.onclick = () => { const cat = btn.getAttribute("data-cat"); openCat(cat); sendSync('openCategory', { cat }); };
-        });
-    }
+    
     document.addEventListener('keydown', (e) => {
-        if(e.key === 'Backspace' && document.getElementById("questionModal").style.display === "block") {
-            e.preventDefault();
-            document.getElementById("questionModal").style.display = "none";
-            if(timer) clearInterval(timer);
-        }
-        if(document.getElementById("questionModal").style.display === "block" && document.getElementById("questionScreenDiv").style.display === "block") {
+        if(document.getElementById("questionContainer").style.display === "block") {
             const key = e.key.toUpperCase();
-            if(['A','B','C','D'].includes(key) && !waitingEnter && !answered) { e.preventDefault(); selectAnswer(key); }
-            if(e.key === 'Enter') { e.preventDefault(); if(waitingEnter) startTimerNow(); else if(selectedAnswer) submitAns(selectedAnswer.getAttribute("data-opt")); }
+            if(['A','B','C','D'].includes(key) && !isAnswered) {
+                e.preventDefault();
+                selectAnswer(key);
+            }
+            if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered) {
+                e.preventDefault();
+                submitAnswer(selectedAnswerBtn.getAttribute("data-opt"));
+            }
         }
     });
 </script>
