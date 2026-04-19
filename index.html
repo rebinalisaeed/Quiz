@@ -65,7 +65,8 @@
             localStorage.setItem("loggedInUser", JSON.stringify({ username: username, role: user.role }));
             localStorage.setItem("roomId", ROOM_ID);
             if(user.role === "super_admin") window.location.href = "user_management.html";
-            else if(user.role === "admin" || user.role === "question_creator") window.location.href = "admin.html";
+            else if(user.role === "admin") window.location.href = "presenter.html";
+            else if(user.role === "question_creator") window.location.href = "add_question.html";
             else window.location.href = "play.html";
         } else {
             document.getElementById("errorMsg").innerText = "❌ ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!";
