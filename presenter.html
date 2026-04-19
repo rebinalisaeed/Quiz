@@ -3,14 +3,16 @@
 <head>
     <title>پێشکەشکار - هەڵبژاردنی پرسیار</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { font-family: 'K24Kurdish', 'Segoe UI', sans-serif; box-sizing: border-box; }
         body { background: #1e1e2f; margin: 0; padding: 20px; min-height: 100vh; }
-        .container { max-width: 1400px; margin: auto; }
+        .main-container { display: flex; gap: 20px; max-width: 1600px; margin: auto; }
+        .left-panel { flex: 3; }
+        .right-panel { width: 300px; background: rgba(0,0,0,0.3); border-radius: 25px; padding: 20px; height: fit-content; }
         h1 { color: white; text-align: center; margin-bottom: 20px; font-size: 24px; }
         .info-bar { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: center; color: white; }
         .category-tabs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
@@ -24,26 +26,45 @@
         .question-box-empty { background: rgba(255,255,255,0.05); opacity: 0.5; cursor: not-allowed; }
         .selected-info { background: #4CAF50; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; color: white; }
         .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; }
-        @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } }
+        
+        /* ستایلەکانی پانێلی ڕاست */
+        .right-panel h3 { color: white; text-align: center; margin-bottom: 15px; }
+        .players-list { list-style: none; padding: 0; }
+        .player-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .player-name { font-weight: bold; }
+        .player-answer { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 3px 10px; font-size: 14px; }
+        .player-item-orange { background: #ff9800 !important; color: white; }
+        .waiting-text { color: rgba(255,255,255,0.5); text-align: center; padding: 20px; }
+        
+        @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } .main-container { flex-direction: column; } .right-panel { width: 100%; } }
         @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار بۆ یاریکەران</h1>
-    <div class="info-bar">
-        📢 کەتەگۆری و ژمارەی پرسیار هەڵبژێرە، پرسیارەکە ڕاستەوخۆ بۆ هەموو یاریکەران دەنێردرێت
+<div class="main-container">
+    <div class="left-panel">
+        <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار بۆ یاریکەران</h1>
+        <div class="info-bar">
+            📢 کەتەگۆری و ژمارەی پرسیار هەڵبژێرە، پرسیارەکە ڕاستەوخۆ بۆ هەموو یاریکەران دەنێردرێت
+        </div>
+        
+        <div class="category-tabs" id="categoryTabs"></div>
+        
+        <div class="glass-card">
+            <h3>📋 پرسیارەکان</h3>
+            <div id="selectedInfo" class="selected-info" style="display:none;"></div>
+            <div class="questions-grid" id="questionsGrid"></div>
+        </div>
+        
+        <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
     </div>
     
-    <div class="category-tabs" id="categoryTabs"></div>
-    
-    <div class="glass-card">
-        <h3>📋 پرسیارەکان</h3>
-        <div id="selectedInfo" class="selected-info" style="display:none;"></div>
-        <div class="questions-grid" id="questionsGrid"></div>
+    <div class="right-panel">
+        <h3>👥 یاریکەران</h3>
+        <div id="playersList" class="players-list">
+            <div class="waiting-text">بارکردن...</div>
+        </div>
     </div>
-    
-    <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
 </div>
 
 <script>
@@ -66,10 +87,39 @@
     let currentCategory = "";
     let roomId = localStorage.getItem("roomId") || "quiz_room_main";
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    let activePlayers = {}; // بۆ هەڵگرتنی زانیاری یاریکەران
     
     if(currentUser.role !== "admin" && currentUser.role !== "super_admin") {
         alert("⚠️ تۆ مافی پێشکەشکاریت نییە!");
         window.location.href = "play.html";
+    }
+    
+    // گوێگرتن لە یاریکەران
+    database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
+        activePlayers = snapshot.val() || {};
+        renderPlayersList();
+    });
+    
+    function renderPlayersList() {
+        const container = document.getElementById("playersList");
+        const players = Object.values(activePlayers);
+        
+        if(players.length === 0) {
+            container.innerHTML = "<div class='waiting-text'>هیچ یاریکەرێک نییە</div>";
+            return;
+        }
+        
+        let html = "";
+        players.forEach(player => {
+            const answerClass = player.currentAnswer ? "player-item-orange" : "";
+            html += `
+                <div class="player-item ${answerClass}">
+                    <span class="player-name">👤 ${player.username}</span>
+                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
     }
     
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
@@ -119,6 +169,14 @@
         }
         
         const selectedQuestion = questions[index];
+        
+        // پاککردنەوەی وەڵامەکانی پێشووی یاریکەران
+        database.ref(`${roomId}/activePlayers`).once('value', (snapshot) => {
+            const players = snapshot.val() || {};
+            Object.keys(players).forEach(playerId => {
+                database.ref(`${roomId}/activePlayers/${playerId}/currentAnswer`).remove();
+            });
+        });
         
         const infoDiv = document.getElementById("selectedInfo");
         infoDiv.style.display = "block";
