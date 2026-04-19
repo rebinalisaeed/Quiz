@@ -28,15 +28,12 @@
         .btn-back:hover { background: #e68900; }
         .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; }
         
-        /* شێوازی پرسیار */
         .question-screen { text-align: center; }
-        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
         .question-text { font-size: 26px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
         .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
         .option-box { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 15px; font-size: 18px; color: white; text-align: center; }
         .option-correct { background: #4CAF50 !important; }
         
-        /* شێوازی پانێلی ڕاست */
         .right-panel h3 { color: white; text-align: center; margin-bottom: 15px; }
         .players-list { list-style: none; padding: 0; max-height: 500px; overflow-y: auto; }
         .player-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
@@ -46,7 +43,7 @@
         .waiting-text { color: rgba(255,255,255,0.5); text-align: center; padding: 20px; }
         
         @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } .main-container { flex-direction: column; } .right-panel { width: 100%; } }
-        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-box { font-size: 14px; padding: 10px; } .timer { font-size: 36px; } }
+        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-box { font-size: 14px; padding: 10px; } }
     </style>
 </head>
 <body>
@@ -54,13 +51,11 @@
     <div class="left-panel">
         <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار</h1>
         
-        <!-- کەتەگۆرییەکان -->
         <div id="categoriesSection">
             <div class="info-bar">📢 کەتەگۆرییەک هەڵبژێرە</div>
             <div class="category-tabs" id="categoryTabs"></div>
         </div>
         
-        <!-- بۆکسی پرسیارەکان (خۆی شاردەوە) -->
         <div id="questionsSection" style="display:none;">
             <button class="btn-back" onclick="backToCategories()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button>
             <div class="glass-card">
@@ -69,7 +64,6 @@
             </div>
         </div>
         
-        <!-- شاشەی پرسیار (خۆی شاردەوە) -->
         <div id="questionScreenSection" style="display:none;">
             <button class="btn-back" onclick="backToQuestionsList()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
             <div class="glass-card">
@@ -144,7 +138,6 @@
         container.innerHTML = html;
     }
     
-    // بارکردنی کەتەگۆرییەکان
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
         categories = snapshot.val() || {};
         categoriesList.forEach(c => { if(!categories[c]) categories[c] = []; });
@@ -209,7 +202,6 @@
             timestamp: Date.now()
         });
         
-        // نمایشکردنی پرسیار لە شاشەی پێشکەشکار
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("questionScreenSection").style.display = "block";
         displayQuestionForPresenter(currentSelectedQuestion);
