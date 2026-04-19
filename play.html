@@ -52,21 +52,37 @@
     let currentCorrectAnswer = null;
     let selectedAnswerBtn = null;
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    let playerId = currentUser.username + "_" + Date.now();
     
     if(!currentUser.username) {
         window.location.href = "index.html";
     }
     
-    // گوێگرتن لە پرسیاری نوێ لە لایەن پێشکەشکارەوە
+    // تۆمارکردنی یاریکەر وەک چالاک
+    function registerPlayer() {
+        database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
+            username: currentUser.username,
+            joinedAt: Date.now(),
+            currentAnswer: null
+        });
+    }
+    
+    // لابردنی یاریکەر کە پەڕەکە دادەخرێت
+    window.addEventListener("beforeunload", () => {
+        database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
+    });
+    
+    // گوێگرتن لە پرسیاری نوێ
     database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
         const data = snapshot.val();
         if(data && data.question) {
+            // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
+            database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
             showQuestion(data.question, data.correct);
         }
     });
     
     function showQuestion(question, correctAnswer) {
-        // وەستاندنی کاتژمێری پێشوو
         if(timerInterval) clearInterval(timerInterval);
         
         currentCorrectAnswer = correctAnswer;
@@ -74,7 +90,6 @@
         selectedAnswerBtn = null;
         timeLeft = 40;
         
-        // شاردنەوەی پەڕەی چاوەڕوانی و نمایشکردنی پرسیار
         document.getElementById("waitingContainer").style.display = "none";
         const container = document.getElementById("questionContainer");
         container.style.display = "block";
@@ -118,6 +133,9 @@
         isAnswered = true;
         clearInterval(timerInterval);
         
+        // ناردنی وەڵام بۆ پێشکەشکار
+        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
+        
         const btns = document.querySelectorAll(".option-btn");
         btns.forEach(btn => {
             btn.style.pointerEvents = "none";
@@ -130,7 +148,6 @@
             btn.classList.remove("option-btn-orange");
         });
         
-        // دوای 3 چرکە بگەڕێوە بۆ پەڕەی چاوەڕوانی
         setTimeout(() => {
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("waitingContainer").style.display = "block";
@@ -147,7 +164,7 @@
                 if(td) td.innerText = `${timeLeft} چرکە`;
                 if(timeLeft === 0 && !isAnswered) {
                     clearInterval(timerInterval);
-                    // کات تەواو بوو، وەڵامی ڕاست پیشان بدە
+                    database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("کات تەواو بوو");
                     const btns = document.querySelectorAll(".option-btn");
                     btns.forEach(btn => {
                         btn.style.pointerEvents = "none";
@@ -179,6 +196,8 @@
             }
         }
     });
+    
+    registerPlayer();
 </script>
 </body>
 </html>
