@@ -9,19 +9,89 @@
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .waiting-container { text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 30px; padding: 50px; max-width: 500px; }
-        .waiting-message { color: #ff9800; font-size: 28px; margin-bottom: 20px; }
-        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 18px; }
-        .question-screen { text-align: center; max-width: 900px; margin: auto; }
-        .timer { font-size: 52px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 10px 35px; border-radius: 60px; margin: 20px 0; font-family: monospace; }
-        .question-text { font-size: 28px; color: white; margin: 30px 0; padding: 25px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
-        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 30px 0; }
-        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .option-btn-orange { background: #ff9800 !important; border-color: #e68900 !important; transform: scale(1.02); }
-        .option-correct { background: #4CAF50 !important; border-color: #2e7d32 !important; }
-        .option-wrong { background: #f44336 !important; border-color: #c62828 !important; }
-        @media (max-width: 600px) { .question-text { font-size: 20px; } .option-btn { font-size: 14px; padding: 12px; } .timer { font-size: 36px; } .waiting-message { font-size: 22px; } }
+        body { 
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+        }
+        .waiting-container { 
+            text-align: center; 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px); 
+            border-radius: 30px; 
+            padding: 40px 20px; 
+            width: 100%;
+            max-width: 400px;
+        }
+        .waiting-message { color: #ff9800; font-size: 24px; margin-bottom: 20px; }
+        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 16px; }
+        
+        .question-container { 
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+        }
+        .timer { 
+            font-size: 48px; 
+            color: #ff6b6b; 
+            background: rgba(0,0,0,0.6); 
+            display: inline-block; 
+            padding: 8px 25px; 
+            border-radius: 50px; 
+            margin: 10px 0;
+            font-family: monospace;
+            text-align: center;
+            width: 100%;
+        }
+        .question-text { 
+            font-size: 22px; 
+            color: white; 
+            margin: 20px 0; 
+            padding: 20px; 
+            background: rgba(0,0,0,0.4); 
+            border-radius: 20px; 
+            line-height: 1.5;
+            text-align: center;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .option-btn { 
+            background: rgba(255,255,255,0.15); 
+            border: 2px solid rgba(255,255,255,0.3); 
+            border-radius: 15px; 
+            padding: 14px 18px; 
+            font-size: 18px; 
+            color: white; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .option-btn-orange { 
+            background: #ff9800 !important; 
+            border-color: #e68900 !important; 
+            transform: scale(1.02); 
+        }
+        .option-correct { 
+            background: #4CAF50 !important; 
+            border-color: #2e7d32 !important; 
+        }
+        .option-wrong { 
+            background: #f44336 !important; 
+            border-color: #c62828 !important; 
+        }
+        @media (max-width: 600px) { 
+            .timer { font-size: 40px; }
+            .question-text { font-size: 18px; }
+            .option-btn { font-size: 16px; padding: 12px 16px; }
+        }
     </style>
 </head>
 <body>
@@ -29,7 +99,7 @@
     <div class="waiting-message">⏳ چاوەڕوان بە...</div>
     <div class="waiting-sub">پێشکەشکار پرسیاری داهاتوو هەڵدەبژێرێت</div>
 </div>
-<div id="questionContainer" style="display:none;" class="question-screen"></div>
+<div id="questionContainer" class="question-container" style="display:none;"></div>
 
 <script>
     const firebaseConfig = {
@@ -72,10 +142,13 @@
         database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
     });
     
-    // گوێگرتن لە پرسیاری نوێ
+    // گوێگرتن لە پرسیاری نوێ (تەنها لە پێشکەشکارەوە)
+    let firstQuestionReceived = false;
+    
     database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
         const data = snapshot.val();
         if(data && data.question) {
+            firstQuestionReceived = true;
             // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
             database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
             showQuestion(data.question, data.correct);
@@ -104,7 +177,7 @@
         container.innerHTML = `
             <div class="timer" id="timerDisplay">40 چرکە</div>
             <div class="question-text">${question.text}</div>
-            <div class="options-grid" id="optionsGrid">
+            <div class="options-container" id="optionsContainer">
                 ${question.options.map((opt, idx) => `
                     <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
                         ${letters[idx]}. ${opt}
@@ -133,7 +206,7 @@
         isAnswered = true;
         clearInterval(timerInterval);
         
-        // ناردنی وەڵام بۆ پێشکەشکار
+        // ناردنی وەڵام بۆ پێشکەشکار (ڕاستەوخۆ)
         database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
         
         const btns = document.querySelectorAll(".option-btn");
@@ -148,6 +221,7 @@
             btn.classList.remove("option-btn-orange");
         });
         
+        // دوای 3 چرکە بگەڕێوە بۆ پەڕەی چاوەڕوانی
         setTimeout(() => {
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("waitingContainer").style.display = "block";
