@@ -24,7 +24,6 @@
 <body>
 <div class="login-container">
     <h1>🎮 یاری پرسیار و وەڵام 🎮</h1>
-    
     <div class="glass-box">
         <label>👤 ناوی بەکارهێنەر</label>
         <input type="text" id="username" placeholder="ناوی بەکارهێنەر" autocomplete="off">
@@ -35,7 +34,6 @@
         <div class="room-id" id="roomIdDisplay"></div>
     </div>
 </div>
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
@@ -44,58 +42,37 @@
         projectId: "quizgamerebin",
         storageBucket: "quizgamerebin.firebasestorage.app",
         messagingSenderId: "312376681830",
-        appId: "1:312376681830:web:11262fa62cc9246bac14a7",
-        measurementId: "G-BJM04Q5X44"
+        appId: "1:312376681830:web:11262fa62cc9246bac14a7"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    
     const ROOM_ID = "quiz_room_main";
-    
     document.getElementById("roomIdDisplay").innerText = `ژوور: ${ROOM_ID}`;
-    
     document.addEventListener('contextmenu', e => e.preventDefault());
     window.addEventListener('keydown', e => {
-        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r'))
-            e.preventDefault();
+        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) e.preventDefault();
     });
-    
     async function login() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
-        
         if(!username || !password) {
             document.getElementById("errorMsg").innerText = "❌ تکایە ناوی بەکارهێنەر و وشەی نهێنی پڕ بکەوە!";
             return;
         }
-        
         const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
         const user = snapshot.val();
-        
         if(user && user.password === password) {
-            localStorage.setItem("loggedInUser", JSON.stringify({
-                username: username,
-                role: user.role
-            }));
+            localStorage.setItem("loggedInUser", JSON.stringify({ username: username, role: user.role }));
             localStorage.setItem("roomId", ROOM_ID);
-            
-            if(user.role === "super_admin") {
-                window.location.href = "user_management.html";
-            } else if(user.role === "admin" || user.role === "question_creator") {
-                window.location.href = "admin.html";
-            } else {
-                window.location.href = "play.html";
-            }
+            if(user.role === "super_admin") window.location.href = "user_management.html";
+            else if(user.role === "admin" || user.role === "question_creator") window.location.href = "admin.html";
+            else window.location.href = "play.html";
         } else {
             document.getElementById("errorMsg").innerText = "❌ ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!";
             document.getElementById("password").value = "";
         }
     }
-    
-    document.getElementById("password").addEventListener("keypress", function(e) {
-        if(e.key === "Enter") login();
-    });
+    document.getElementById("password").addEventListener("keypress", function(e) { if(e.key === "Enter") login(); });
 </script>
 </body>
 </html>
