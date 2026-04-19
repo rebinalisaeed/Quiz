@@ -123,6 +123,7 @@
     let selectedAnswerBtn = null;
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let playerId = currentUser.username + "_" + Date.now();
+    let isFirstLoad = true;
     
     if(!currentUser.username) {
         window.location.href = "index.html";
@@ -142,18 +143,33 @@
         database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
     });
     
-    // گوێگرتن لە پرسیاری نوێ (تەنها لە پێشکەشکارەوە)
-    let firstQuestionReceived = false;
+    // پاککردنەوەی activeQuestion ی پێشوو لە کاتی کردنەوەی پەڕەکەدا
+    function clearOldQuestion() {
+        database.ref(`${ROOM_ID}/activeQuestion`).once('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data && data.question) {
+                // ئەگەر پرسیارێکی کۆن هەبوو، بیسڕەوە
+                database.ref(`${ROOM_ID}/activeQuestion`).remove();
+            }
+        });
+    }
     
-    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
-        const data = snapshot.val();
-        if(data && data.question) {
-            firstQuestionReceived = true;
-            // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
-            database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
-            showQuestion(data.question, data.correct);
-        }
-    });
+    // گوێگرتن لە پرسیاری نوێ (تەنها دوای تۆمارکردنی یاریکەر)
+    let questionListenerStarted = false;
+    
+    function startQuestionListener() {
+        if(questionListenerStarted) return;
+        questionListenerStarted = true;
+        
+        database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data && data.question) {
+                // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
+                database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
+                showQuestion(data.question, data.correct);
+            }
+        });
+    }
     
     function showQuestion(question, correctAnswer) {
         if(timerInterval) clearInterval(timerInterval);
@@ -271,7 +287,17 @@
         }
     });
     
-    registerPlayer();
+    // ڕێکارەکانی کردنەوەی پەڕە
+    async function initialize() {
+        // یەکەم جار پرسیاری کۆن پاک بکەوە
+        await clearOldQuestion();
+        // تۆماری یاریکەر بکە
+        await registerPlayer();
+        // پاشان گوێگرتن دەست پێ بکە بۆ پرسیاری نوێ
+        startQuestionListener();
+    }
+    
+    initialize();
 </script>
 </body>
 </html>
