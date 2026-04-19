@@ -123,19 +123,20 @@
     let selectedAnswerBtn = null;
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let playerId = currentUser.username + "_" + Date.now();
-    let isFirstLoad = true;
+    let isReady = false; // ئەمە دەڵێت کە یاریکەر ئامادەیە پرسیار وەربگرێت
     
     if(!currentUser.username) {
         window.location.href = "index.html";
     }
     
     // تۆمارکردنی یاریکەر وەک چالاک
-    function registerPlayer() {
-        database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
+    async function registerPlayer() {
+        await database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
             username: currentUser.username,
             joinedAt: Date.now(),
             currentAnswer: null
         });
+        console.log("✅ یاریکەر تۆمار کرا:", playerId);
     }
     
     // لابردنی یاریکەر کە پەڕەکە دادەخرێت
@@ -143,33 +144,17 @@
         database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
     });
     
-    // پاککردنەوەی activeQuestion ی پێشوو لە کاتی کردنەوەی پەڕەکەدا
-    function clearOldQuestion() {
-        database.ref(`${ROOM_ID}/activeQuestion`).once('value', (snapshot) => {
-            const data = snapshot.val();
-            if(data && data.question) {
-                // ئەگەر پرسیارێکی کۆن هەبوو، بیسڕەوە
-                database.ref(`${ROOM_ID}/activeQuestion`).remove();
-            }
-        });
-    }
-    
-    // گوێگرتن لە پرسیاری نوێ (تەنها دوای تۆمارکردنی یاریکەر)
-    let questionListenerStarted = false;
-    
-    function startQuestionListener() {
-        if(questionListenerStarted) return;
-        questionListenerStarted = true;
-        
-        database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(data && data.question) {
-                // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
-                database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
-                showQuestion(data.question, data.correct);
-            }
-        });
-    }
+    // گوێگرتن لە پرسیاری نوێ - تەنها دوای ئامادەبوون
+    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
+        const data = snapshot.val();
+        // تەنها ئەگەر یاریکەر ئامادە بێت و پرسیارێکی ڕاستەقینە هاتبێت
+        if(isReady && data && data.question && data.timestamp) {
+            console.log("📢 پرسیار وەرگیرا:", data.question.text.substring(0, 30));
+            // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
+            database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
+            showQuestion(data.question, data.correct);
+        }
+    });
     
     function showQuestion(question, correctAnswer) {
         if(timerInterval) clearInterval(timerInterval);
@@ -222,7 +207,7 @@
         isAnswered = true;
         clearInterval(timerInterval);
         
-        // ناردنی وەڵام بۆ پێشکەشکار (ڕاستەوخۆ)
+        // ناردنی وەڵام بۆ پێشکەشکار
         database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
         
         const btns = document.querySelectorAll(".option-btn");
@@ -289,12 +274,21 @@
     
     // ڕێکارەکانی کردنەوەی پەڕە
     async function initialize() {
-        // یەکەم جار پرسیاری کۆن پاک بکەوە
-        await clearOldQuestion();
-        // تۆماری یاریکەر بکە
+        // 1. یەکەم جار یاریکەر تۆمار بکە
         await registerPlayer();
-        // پاشان گوێگرتن دەست پێ بکە بۆ پرسیاری نوێ
-        startQuestionListener();
+        
+        // 2. دوای 1 چرکە، یاریکەر بکە بە ئامادە بۆ وەرگرتنی پرسیار
+        setTimeout(() => {
+            isReady = true;
+            console.log("✅ یاریکەر ئامادەیە بۆ وەرگرتنی پرسیار");
+        }, 1000);
+        
+        // 3. دوای 5 چرکە، ئەگەر هیچ پرسیارێک نەهات، دڵنیابەرەوە لە شاشەی چاوەڕوانی
+        setTimeout(() => {
+            if(document.getElementById("waitingContainer").style.display !== "none") {
+                console.log("⏳ چاوەڕوانی پرسیار...");
+            }
+        }, 5000);
     }
     
     initialize();
