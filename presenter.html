@@ -259,12 +259,16 @@
     function updatePlayerScore(playerId, change) {
         const player = activePlayers[playerId];
         if(player && !player.eliminated) {
-            let newScore = (player.score || 5) + change;
+            let currentScore = player.score !== undefined ? player.score : 5;
+            let newScore = currentScore + change;
+            
             if(newScore < 0) newScore = 0;
+            
+            console.log(`📊 ${player.username}: خاڵی پێشوو: ${currentScore}, گۆڕان: ${change}, خاڵی نوێ: ${newScore}`);
+            
             if(newScore === 0) {
                 database.ref(`${roomId}/activePlayers/${playerId}/eliminated`).set(true);
                 database.ref(`${roomId}/activePlayers/${playerId}/score`).set(0);
-                // دوای دەرکردنی یاریکەر، 2 خاڵ لە یاریکەری تر کەم بکەرەوە
                 checkAndApplyGroupPenalty(player.group, playerId);
             } else {
                 database.ref(`${roomId}/activePlayers/${playerId}/score`).set(newScore);
@@ -278,7 +282,7 @@
         );
         
         playersInGroup.forEach(([id, player]) => {
-            let currentScore = player.score || 5;
+            let currentScore = player.score !== undefined ? player.score : 5;
             let newScore = currentScore - 2;
             if(newScore < 0) newScore = 0;
             database.ref(`${roomId}/activePlayers/${id}/score`).set(newScore);
@@ -406,24 +410,30 @@
             optionBoxes[correctIndex].classList.add("option-correct");
         }
         
-        // خاڵەکان بەپێی وەڵامەکان دیاری بکە
         evaluateAnswers();
     }
     
     function evaluateAnswers() {
         const players = {...activePlayers};
+        
         Object.entries(players).forEach(([playerId, player]) => {
             if(player.eliminated) return;
             
             const userAnswer = player.currentAnswer;
             const isCorrect = (userAnswer === currentSelectedQuestion.correct);
-            const timeSpent = (Date.now() - currentQuestionStartTime) / 1000;
-            const answeredInTime = userAnswer && timeSpent <= 30;
+            const answered = userAnswer !== null && userAnswer !== undefined;
             
-            if(answeredInTime && isCorrect) {
-                updatePlayerScore(playerId, 3);
-            } else if((answeredInTime && !isCorrect) || (!answeredInTime && !userAnswer)) {
+            if(answered) {
+                if(isCorrect) {
+                    updatePlayerScore(playerId, 3);
+                    console.log(`✅ ${player.username} وەڵامی ڕاستی دایەوە! +3 خاڵ`);
+                } else {
+                    updatePlayerScore(playerId, -1);
+                    console.log(`❌ ${player.username} وەڵامی هەڵەی دایەوە! -1 خاڵ`);
+                }
+            } else {
                 updatePlayerScore(playerId, -1);
+                console.log(`⏰ ${player.username} بێ وەڵام بوو! -1 خاڵ`);
             }
         });
     }
@@ -457,7 +467,7 @@
             group1List.innerHTML += `
                 <div class="player-item ${eliminatedClass}">
                     <span class="player-name">👤 ${player.username}</span>
-                    <span class="player-score">🏆 ${player.score || 5} خاڵ</span>
+                    <span class="player-score">🏆 ${player.score !== undefined ? player.score : 5} خاڵ</span>
                     <span class="player-answer">${player.currentAnswer || 'چاوەڕوان'}</span>
                 </div>
             `;
@@ -468,7 +478,7 @@
             group2List.innerHTML += `
                 <div class="player-item ${eliminatedClass}">
                     <span class="player-name">👤 ${player.username}</span>
-                    <span class="player-score">🏆 ${player.score || 5} خاڵ</span>
+                    <span class="player-score">🏆 ${player.score !== undefined ? player.score : 5} خاڵ</span>
                     <span class="player-answer">${player.currentAnswer || 'چاوەڕوان'}</span>
                 </div>
             `;
