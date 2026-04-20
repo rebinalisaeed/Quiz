@@ -87,6 +87,10 @@
             background: #f44336 !important; 
             border-color: #c62828 !important; 
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         @media (max-width: 600px) { 
             .timer { font-size: 40px; }
             .question-text { font-size: 18px; }
@@ -117,40 +121,39 @@
     
     const ROOM_ID = "quiz_room_main";
     let timerInterval = null;
-    let timeLeft = 40;
+    let timeLeft = 30;
     let isAnswered = false;
     let currentCorrectAnswer = null;
     let selectedAnswerBtn = null;
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let playerId = currentUser.username + "_" + Date.now();
-    let isReady = false; // ئەمە دەڵێت کە یاریکەر ئامادەیە پرسیار وەربگرێت
+    let isReady = false;
+    let questionStartTime = null;
     
     if(!currentUser.username) {
         window.location.href = "index.html";
     }
     
-    // تۆمارکردنی یاریکەر وەک چالاک
     async function registerPlayer() {
+        const userSnapshot = await database.ref(`${ROOM_ID}/users/${currentUser.username}`).once('value');
+        const userData = userSnapshot.val();
+        const group = userData?.group || "group1";
+        
         await database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
             username: currentUser.username,
+            group: group,
             joinedAt: Date.now(),
             currentAnswer: null
         });
-        console.log("✅ یاریکەر تۆمار کرا:", playerId);
     }
     
-    // لابردنی یاریکەر کە پەڕەکە دادەخرێت
     window.addEventListener("beforeunload", () => {
         database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
     });
     
-    // گوێگرتن لە پرسیاری نوێ - تەنها دوای ئامادەبوون
     database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
         const data = snapshot.val();
-        // تەنها ئەگەر یاریکەر ئامادە بێت و پرسیارێکی ڕاستەقینە هاتبێت
         if(isReady && data && data.question && data.timestamp) {
-            console.log("📢 پرسیار وەرگیرا:", data.question.text.substring(0, 30));
-            // پاککردنەوەی وەڵامی پێشووی ئەم یاریکەرە
             database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
             showQuestion(data.question, data.correct);
         }
@@ -162,81 +165,48 @@
         currentCorrectAnswer = correctAnswer;
         isAnswered = false;
         selectedAnswerBtn = null;
-        timeLeft = 40;
+        questionStartTime = Date.now();
         
         document.getElementById("waitingContainer").style.display = "none";
         const container = document.getElementById("questionContainer");
         container.style.display = "block";
         
-        renderQuestion(question);
-        startTimer();
+        renderQuestionWithAnimation(question);
     }
     
-    function renderQuestion(question) {
+    function renderQuestionWithAnimation(question) {
         const letters = ["A", "B", "C", "D"];
         const container = document.getElementById("questionContainer");
-        container.innerHTML = `
-            <div class="timer" id="timerDisplay">40 چرکە</div>
-            <div class="question-text">${question.text}</div>
-            <div class="options-container" id="optionsContainer">
-                ${question.options.map((opt, idx) => `
-                    <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
-                        ${letters[idx]}. ${opt}
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    function selectAnswer(letter) {
-        if(isAnswered) return;
-        if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
-        const btns = document.querySelectorAll(".option-btn");
-        for(let btn of btns) {
-            if(btn.getAttribute("data-opt") === letter) {
-                btn.classList.add("option-btn-orange");
-                selectedAnswerBtn = btn;
-                break;
-            }
-        }
-    }
-    
-    function submitAnswer(selectedLetter) {
-        if(isAnswered) return;
-        const isCorrect = (selectedLetter === currentCorrectAnswer);
-        isAnswered = true;
-        clearInterval(timerInterval);
         
-        // ناردنی وەڵام بۆ پێشکەشکار
-        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
+        container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>`;
         
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(btn => {
-            btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
-                btn.classList.add("option-correct");
-            }
-            if(btn.getAttribute("data-opt") === selectedLetter && !isCorrect) {
-                btn.classList.add("option-wrong");
-            }
-            btn.classList.remove("option-btn-orange");
-        });
-        
-        // دوای 3 چرکە بگەڕێوە بۆ پەڕەی چاوەڕوانی
         setTimeout(() => {
-            document.getElementById("questionContainer").style.display = "none";
-            document.getElementById("waitingContainer").style.display = "block";
-            isAnswered = false;
-            selectedAnswerBtn = null;
-        }, 3000);
+            const optionsHtml = `
+                <div class="options-container" style="animation: fadeIn 1s ease;">
+                    ${question.options.map((opt, idx) => `
+                        <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
+                            ${letters[idx]}. ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>${optionsHtml}`;
+        }, 1000);
+        
+        setTimeout(() => {
+            const timerHtml = `<div class="timer" id="timerDisplay">30</div>`;
+            container.innerHTML = timerHtml + container.innerHTML;
+            startTimer();
+        }, 2500);
     }
     
     function startTimer() {
+        timeLeft = 30;
         timerInterval = setInterval(() => {
             if(!isAnswered && timeLeft > 0) {
                 timeLeft--;
                 let td = document.getElementById("timerDisplay");
-                if(td) td.innerText = `${timeLeft} چرکە`;
+                if(td) td.innerText = `${timeLeft}`;
                 if(timeLeft === 0 && !isAnswered) {
                     clearInterval(timerInterval);
                     database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("کات تەواو بوو");
@@ -258,6 +228,47 @@
         }, 1000);
     }
     
+    function selectAnswer(letter) {
+        if(isAnswered) return;
+        if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
+        const btns = document.querySelectorAll(".option-btn");
+        for(let btn of btns) {
+            if(btn.getAttribute("data-opt") === letter) {
+                btn.classList.add("option-btn-orange");
+                selectedAnswerBtn = btn;
+                break;
+            }
+        }
+    }
+    
+    function submitAnswer(selectedLetter) {
+        if(isAnswered) return;
+        const isCorrect = (selectedLetter === currentCorrectAnswer);
+        isAnswered = true;
+        clearInterval(timerInterval);
+        
+        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
+        
+        const btns = document.querySelectorAll(".option-btn");
+        btns.forEach(btn => {
+            btn.style.pointerEvents = "none";
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
+                btn.classList.add("option-correct");
+            }
+            if(btn.getAttribute("data-opt") === selectedLetter && !isCorrect) {
+                btn.classList.add("option-wrong");
+            }
+            btn.classList.remove("option-btn-orange");
+        });
+        
+        setTimeout(() => {
+            document.getElementById("questionContainer").style.display = "none";
+            document.getElementById("waitingContainer").style.display = "block";
+            isAnswered = false;
+            selectedAnswerBtn = null;
+        }, 3000);
+    }
+    
     document.addEventListener('keydown', (e) => {
         if(document.getElementById("questionContainer").style.display === "block") {
             const key = e.key.toUpperCase();
@@ -272,23 +283,11 @@
         }
     });
     
-    // ڕێکارەکانی کردنەوەی پەڕە
     async function initialize() {
-        // 1. یەکەم جار یاریکەر تۆمار بکە
         await registerPlayer();
-        
-        // 2. دوای 1 چرکە، یاریکەر بکە بە ئامادە بۆ وەرگرتنی پرسیار
         setTimeout(() => {
             isReady = true;
-            console.log("✅ یاریکەر ئامادەیە بۆ وەرگرتنی پرسیار");
         }, 1000);
-        
-        // 3. دوای 5 چرکە، ئەگەر هیچ پرسیارێک نەهات، دڵنیابەرەوە لە شاشەی چاوەڕوانی
-        setTimeout(() => {
-            if(document.getElementById("waitingContainer").style.display !== "none") {
-                console.log("⏳ چاوەڕوانی پرسیار...");
-            }
-        }, 5000);
     }
     
     initialize();
