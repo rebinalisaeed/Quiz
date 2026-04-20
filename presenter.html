@@ -8,37 +8,47 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
-        * { font-family: 'K24Kurdish', 'Segoe UI', sans-serif; box-sizing: border-box; }
-        body { background: #1e1e2f; margin: 0; padding: 20px; min-height: 100vh; }
-        .main-container { display: flex; gap: 20px; max-width: 1600px; margin: auto; }
-        .left-panel { flex: 3; }
-        .right-panel { width: 320px; background: rgba(0,0,0,0.3); border-radius: 25px; padding: 20px; height: fit-content; }
-        h1 { color: white; text-align: center; margin-bottom: 20px; font-size: 24px; }
-        .info-bar { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: center; color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; user-select: none; }
+        body { 
+            background: linear-gradient(135deg, #1e3c72, #2a5298); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 40px;
+        }
+        .main-container {
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+        }
         
         /* کەتەگۆرییەکان - تۆڕی 3x3 */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 25px;
+            justify-items: center;
+            align-items: center;
         }
         .category-card {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px 15px;
+            border-radius: 25px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid rgba(255,255,255,0.2);
+            width: 100%;
+            max-width: 220px;
         }
         .category-card:hover {
-            background: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.3);
             transform: translateY(-5px);
         }
         .category-card span {
-            font-size: 20px;
+            font-size: 22px;
             color: white;
         }
         
@@ -47,7 +57,7 @@
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 12px;
-            margin: 20px 0;
+            margin-top: 20px;
         }
         .question-box {
             background: rgba(255,255,255,0.15);
@@ -70,68 +80,41 @@
             cursor: not-allowed;
         }
         
-        .btn-back {
-            background: #ff9800;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 30px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        .btn-back:hover { background: #e68900; }
-        .btn-logout {
-            background: #ff6b6b;
-            color: white;
-            display: block;
-            width: 200px;
-            margin: 20px auto 0;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        
         /* شاشەی پرسیار */
         .question-screen {
             text-align: center;
-            animation: fadeIn 0.3s ease;
         }
         .timer {
-            font-size: 52px;
+            font-size: 60px;
             color: #ff6b6b;
             background: rgba(0,0,0,0.6);
             display: inline-block;
-            padding: 10px 35px;
+            padding: 15px 40px;
             border-radius: 60px;
             margin: 20px 0;
             font-family: monospace;
-            animation: slideDown 0.3s ease;
+            font-weight: bold;
         }
         .question-text {
-            font-size: 26px;
+            font-size: 28px;
             color: white;
-            margin: 20px 0;
+            margin: 30px 0;
             padding: 25px;
             background: rgba(0,0,0,0.4);
             border-radius: 25px;
             line-height: 1.5;
-            animation: slideUp 0.2s ease;
         }
         .options-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin: 20px 0;
-            animation: slideUp 0.5s ease;
         }
         .option-box {
             background: rgba(255,255,255,0.15);
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 20px;
-            padding: 15px;
+            padding: 18px;
             font-size: 18px;
             color: white;
             text-align: center;
@@ -143,18 +126,37 @@
             animation: pulse 0.5s ease;
         }
         
-        /* یاریکەران */
+        /* گروپەکانی یاریکەران */
+        .groups-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .group-box {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .group-box h3 {
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
         .players-list {
             list-style: none;
             padding: 0;
-            max-height: 500px;
-            overflow-y: auto;
         }
         .player-item {
             background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 12px;
-            margin-bottom: 10px;
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -163,7 +165,6 @@
         }
         .player-item-orange {
             background: #ff9800 !important;
-            color: white;
         }
         .player-answer {
             background: rgba(255,255,255,0.2);
@@ -171,95 +172,43 @@
             padding: 3px 10px;
             font-size: 14px;
         }
-        .waiting-text {
-            color: rgba(255,255,255,0.5);
-            text-align: center;
-            padding: 20px;
-        }
         
-        /* ئەنیمەیشنەکان */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         
-        @media (max-width: 900px) {
-            .main-container { flex-direction: column; }
-            .right-panel { width: 100%; }
+        @media (max-width: 700px) {
+            .categories-grid { gap: 15px; }
+            .category-card { padding: 20px 15px; }
+            .category-card span { font-size: 16px; }
             .questions-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-        @media (max-width: 600px) {
-            .categories-grid { grid-template-columns: repeat(2, 1fr); }
-            .questions-grid { grid-template-columns: repeat(3, 1fr); }
-            .question-box { font-size: 14px; padding: 10px 3px; }
-            .question-text { font-size: 18px; }
-            .option-box { font-size: 14px; padding: 10px; }
-            .timer { font-size: 36px; }
+            .question-text { font-size: 20px; }
+            .option-box { font-size: 14px; padding: 12px; }
+            .timer { font-size: 40px; padding: 10px 25px; }
         }
     </style>
 </head>
 <body>
 <div class="main-container">
-    <div class="left-panel">
-        <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار</h1>
-        
-        <!-- کەتەگۆرییەکان - تۆڕی 3x3 -->
-        <div id="categoriesSection">
-            <div class="info-bar">📢 کەتەگۆرییەک هەڵبژێرە</div>
-            <div class="categories-grid" id="categoriesGrid"></div>
-        </div>
-        
-        <!-- پرسیارەکان - تۆڕی 6x6 -->
-        <div id="questionsSection" style="display:none;">
-            <button class="btn-back" onclick="backToCategories()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button>
-            <div class="glass-card">
-                <h3 id="selectedCategoryTitle" style="color:white; text-align:center;"></h3>
-                <div class="questions-grid" id="questionsGrid"></div>
-            </div>
-        </div>
-        
-        <!-- شاشەی پرسیار -->
-        <div id="questionScreenSection" style="display:none;">
-            <button class="btn-back" onclick="backToQuestionsList()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
-            <div class="glass-card">
-                <div id="questionDisplay" class="question-screen"></div>
-            </div>
-        </div>
-        
-        <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
+    <!-- کەتەگۆرییەکان - تۆڕی 3x3 -->
+    <div id="categoriesSection">
+        <div class="categories-grid" id="categoriesGrid"></div>
     </div>
     
-    <div class="right-panel" id="playersPanel" style="display:none;">
-        <h3>👥 یاریکەران</h3>
-        <div id="playersList" class="players-list">
-            <div class="waiting-text">بارکردن...</div>
-        </div>
+    <!-- پرسیارەکان - تۆڕی 6x6 -->
+    <div id="questionsSection" style="display:none;">
+        <div class="questions-grid" id="questionsGrid"></div>
     </div>
+    
+    <!-- شاشەی پرسیار -->
+    <div id="questionScreenSection" style="display:none;">
+        <div id="questionDisplay" class="question-screen"></div>
+    </div>
+    
+    <!-- گروپەکانی یاریکەران -->
+    <div id="groupsSection" style="display:none;" class="groups-container"></div>
 </div>
 
 <script>
@@ -276,7 +225,7 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    const MAX_QS = 36; // 6x6 = 36
+    const MAX_QS = 36;
     const categoriesList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
     let categories = {};
     let currentCategory = "";
@@ -285,7 +234,32 @@
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let activePlayers = {};
     let timerInterval = null;
+    let countdownInterval = null;
     let timeLeft = 30;
+    let isCountingDown = false;
+    
+    // ناچالاککردنی reload و refresh
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', e => {
+        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+            e.preventDefault();
+            return false;
+        }
+        // گەڕانەوە بە Backspace
+        if(e.key === 'Backspace') {
+            e.preventDefault();
+            if(document.getElementById("questionsSection").style.display === "block") {
+                backToCategories();
+            } else if(document.getElementById("questionScreenSection").style.display === "block") {
+                backToCategories();
+            }
+        }
+        // نمایش کردنی گروپەکان بە Enter
+        if(e.key === 'Enter' && document.getElementById("questionScreenSection").style.display === "block") {
+            e.preventDefault();
+            showGroups();
+        }
+    });
     
     if(currentUser.role !== "admin" && currentUser.role !== "super_admin") {
         alert("⚠️ تۆ مافی پێشکەشکاریت نییە!");
@@ -295,30 +269,7 @@
     // گوێگرتن لە یاریکەران
     database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
         activePlayers = snapshot.val() || {};
-        renderPlayersList();
     });
-    
-    function renderPlayersList() {
-        const container = document.getElementById("playersList");
-        const players = Object.values(activePlayers);
-        
-        if(players.length === 0) {
-            container.innerHTML = "<div class='waiting-text'>هیچ یاریکەرێک نییە</div>";
-            return;
-        }
-        
-        let html = "";
-        players.forEach(player => {
-            const answerClass = player.currentAnswer ? "player-item-orange" : "";
-            html += `
-                <div class="player-item ${answerClass}">
-                    <span class="player-name">👤 ${player.username}</span>
-                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
     
     // بارکردنی کەتەگۆرییەکان
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
@@ -338,10 +289,7 @@
                 currentCategory = cat;
                 document.getElementById("categoriesSection").style.display = "none";
                 document.getElementById("questionsSection").style.display = "block";
-                document.getElementById("selectedCategoryTitle").innerHTML = `📋 پرسیارەکانی ${cat} (${categories[cat]?.length || 0}/${MAX_QS})`;
                 renderQuestions();
-                // شاردنەوەی پانێلی یاریکەران تا پرسیار هەڵنەبژێردرێت
-                document.getElementById("playersPanel").style.display = "none";
             };
             container.appendChild(card);
         });
@@ -378,7 +326,7 @@
             });
         });
         
-        // ناردنی پرسیار بۆ یاریکەران (بە timestamp بۆ ئەنیمەیشن)
+        // ناردنی پرسیار بۆ یاریکەران
         database.ref(`${roomId}/activeQuestion`).set({
             question: currentSelectedQuestion,
             correct: currentSelectedQuestion.correct,
@@ -387,10 +335,8 @@
             timestamp: Date.now()
         });
         
-        // نمایشکردنی پرسیار لە شاشەی پێشکەشکار
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("questionScreenSection").style.display = "block";
-        document.getElementById("playersPanel").style.display = "block";
         
         displayQuestionWithAnimation(currentSelectedQuestion);
     }
@@ -399,87 +345,128 @@
         const letters = ["A", "B", "C", "D"];
         const container = document.getElementById("questionDisplay");
         
-        // ئەنیمەیشنی پرسیار (0.20 چرکە)
-        container.innerHTML = `<div class="question-text" style="animation: slideUp 0.2s ease;">${question.text}</div>`;
+        // ئەنیمەیشنی پرسیار (1 چرکە)
+        container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>`;
         
-        // دوای 0.20 چرکە، هەڵبژاردنەکان زیاد بکە (0.50 چرکە)
+        // دوای 1 چرکە، هەڵبژاردنەکان زیاد بکە (2.5 چرکە)
         setTimeout(() => {
             const optionsHtml = `
-                <div class="options-grid" style="animation: slideUp 0.5s ease;">
+                <div class="options-grid" style="animation: fadeIn 1s ease;">
                     ${question.options.map((opt, idx) => `
                         <div class="option-box" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>
                     `).join('')}
                 </div>
             `;
-            container.innerHTML = `<div class="question-text" style="animation: slideUp 0.2s ease;">${question.text}</div>${optionsHtml}`;
-        }, 200);
+            container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>${optionsHtml}`;
+        }, 1000);
         
-        // دوای 0.50 چرکە، چرکەکە زیاد بکە و دەست پێ بکات
+        // دوای 2.5 چرکە، چرکەکە زیاد بکە
         setTimeout(() => {
-            const timerHtml = `<div class="timer" id="presenterTimer" style="animation: slideDown 0.3s ease;">30 چرکە</div>`;
+            const timerHtml = `<div class="timer" id="presenterTimer">30</div>`;
             container.innerHTML = timerHtml + container.innerHTML;
-            startPresenterTimer(question);
-        }, 700);
+            startCountdown();
+        }, 2500);
     }
     
-    function startPresenterTimer(question) {
-        timeLeft = 30;
+    function startCountdown() {
+        let waitTime = 6; // 6 چرکە چاوەڕوانی
+        let displayTime = 30;
+        
+        const timerDiv = document.getElementById("presenterTimer");
+        if(!timerDiv) return;
+        
+        timerDiv.innerText = `${waitTime}`;
+        
+        const waitInterval = setInterval(() => {
+            if(waitTime > 1) {
+                waitTime--;
+                timerDiv.innerText = `${waitTime}`;
+            } else {
+                clearInterval(waitInterval);
+                // دەستپێکردنی کاتژمێرەکە لە 30 چرکەوە
+                timerDiv.innerText = `${displayTime}`;
+                startTimer(displayTime, timerDiv);
+            }
+        }, 1000);
+    }
+    
+    function startTimer(displayTime, timerDiv) {
         if(timerInterval) clearInterval(timerInterval);
         
         timerInterval = setInterval(() => {
-            if(timeLeft > 0) {
-                timeLeft--;
-                const timerDiv = document.getElementById("presenterTimer");
-                if(timerDiv) timerDiv.innerText = `${timeLeft} چرکە`;
+            if(displayTime > 0) {
+                displayTime--;
+                timerDiv.innerText = `${displayTime}`;
                 
-                if(timeLeft === 0) {
+                if(displayTime === 0) {
                     clearInterval(timerInterval);
-                    // کات تەواو بوو، وەڵامی ڕاست پیشان بدە
-                    showCorrectAnswer(question);
+                    showCorrectAnswer();
                 }
             }
         }, 1000);
     }
     
-    function showCorrectAnswer(question) {
+    function showCorrectAnswer() {
         const letters = ["A", "B", "C", "D"];
-        const correctLetter = question.correct;
+        const correctLetter = currentSelectedQuestion.correct;
         const correctIndex = letters.indexOf(correctLetter);
         
-        // وەڵامی ڕاست بدۆزەوە و ڕەنگی سەوزی بکە
         const optionBoxes = document.querySelectorAll(".option-box");
         if(optionBoxes[correctIndex]) {
             optionBoxes[correctIndex].classList.add("option-correct");
         }
+    }
+    
+    function showGroups() {
+        const players = Object.values(activePlayers);
+        const group1Players = players.filter(p => p.group === "group1");
+        const group2Players = players.filter(p => p.group === "group2");
         
-        // وەڵامی ڕاست لە database بنێرە بۆ یاریکەران (ئەگەر پێویست بێت)
-        database.ref(`${roomId}/activeQuestion/correct`).set({
-            revealed: true,
-            correctAnswer: correctLetter,
-            timestamp: Date.now()
+        const groupsContainer = document.getElementById("groupsSection");
+        groupsContainer.innerHTML = `
+            <div class="group-box">
+                <h3>🏆 گروپی یەکەم</h3>
+                <div class="players-list" id="group1List"></div>
+            </div>
+            <div class="group-box">
+                <h3>🏆 گروپی دووەم</h3>
+                <div class="players-list" id="group2List"></div>
+            </div>
+        `;
+        
+        const group1List = document.getElementById("group1List");
+        const group2List = document.getElementById("group2List");
+        
+        group1Players.forEach(player => {
+            const answerClass = player.currentAnswer ? "player-item-orange" : "";
+            group1List.innerHTML += `
+                <div class="player-item ${answerClass}">
+                    <span>👤 ${player.username}</span>
+                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
+                </div>
+            `;
         });
+        
+        group2Players.forEach(player => {
+            const answerClass = player.currentAnswer ? "player-item-orange" : "";
+            group2List.innerHTML += `
+                <div class="player-item ${answerClass}">
+                    <span>👤 ${player.username}</span>
+                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
+                </div>
+            `;
+        });
+        
+        groupsContainer.style.display = "flex";
     }
     
     function backToCategories() {
         if(timerInterval) clearInterval(timerInterval);
         document.getElementById("questionsSection").style.display = "none";
+        document.getElementById("questionScreenSection").style.display = "none";
+        document.getElementById("groupsSection").style.display = "none";
         document.getElementById("categoriesSection").style.display = "block";
-        document.getElementById("questionScreenSection").style.display = "none";
-        document.getElementById("playersPanel").style.display = "none";
         currentSelectedQuestion = null;
-    }
-    
-    function backToQuestionsList() {
-        if(timerInterval) clearInterval(timerInterval);
-        document.getElementById("questionScreenSection").style.display = "none";
-        document.getElementById("questionsSection").style.display = "block";
-        document.getElementById("playersPanel").style.display = "none";
-        currentSelectedQuestion = null;
-    }
-    
-    function logout() {
-        localStorage.clear();
-        window.location.href = "index.html";
     }
 </script>
 </body>
