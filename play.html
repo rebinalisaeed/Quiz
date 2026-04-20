@@ -28,6 +28,7 @@
         }
         .waiting-message { color: #ff9800; font-size: 24px; margin-bottom: 20px; }
         .waiting-sub { color: rgba(255,255,255,0.7); font-size: 16px; }
+        .eliminated-message { color: #ff6b6b; font-size: 18px; margin-top: 20px; }
         
         .question-container { 
             width: 100%;
@@ -87,10 +88,6 @@
             background: #f44336 !important; 
             border-color: #c62828 !important; 
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         @media (max-width: 600px) { 
             .timer { font-size: 40px; }
             .question-text { font-size: 18px; }
@@ -128,7 +125,7 @@
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let playerId = currentUser.username + "_" + Date.now();
     let isReady = false;
-    let questionStartTime = null;
+    let myEliminated = false;
     
     if(!currentUser.username) {
         window.location.href = "index.html";
@@ -143,15 +140,32 @@
             username: currentUser.username,
             group: group,
             joinedAt: Date.now(),
-            currentAnswer: null
+            currentAnswer: null,
+            score: 5,
+            eliminated: false
         });
     }
+    
+    database.ref(`${ROOM_ID}/activePlayers/${playerId}/eliminated`).on('value', (snapshot) => {
+        myEliminated = snapshot.val() === true;
+        if(myEliminated) {
+            if(timerInterval) clearInterval(timerInterval);
+            document.getElementById("questionContainer").style.display = "none";
+            document.getElementById("waitingContainer").style.display = "block";
+            const waitingContainer = document.getElementById("waitingContainer");
+            waitingContainer.innerHTML = `
+                <div class="waiting-message">❌ دەرکرایت!</div>
+                <div class="waiting-sub">خاڵەکانت بە 0 گەیشتن</div>
+            `;
+        }
+    });
     
     window.addEventListener("beforeunload", () => {
         database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
     });
     
     database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
+        if(myEliminated) return;
         const data = snapshot.val();
         if(isReady && data && data.question && data.timestamp) {
             database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
@@ -160,44 +174,35 @@
     });
     
     function showQuestion(question, correctAnswer) {
+        if(myEliminated) return;
         if(timerInterval) clearInterval(timerInterval);
         
         currentCorrectAnswer = correctAnswer;
         isAnswered = false;
         selectedAnswerBtn = null;
-        questionStartTime = Date.now();
         
         document.getElementById("waitingContainer").style.display = "none";
         const container = document.getElementById("questionContainer");
         container.style.display = "block";
         
-        renderQuestionWithAnimation(question);
+        renderQuestion(question);
+        startTimer();
     }
     
-    function renderQuestionWithAnimation(question) {
+    function renderQuestion(question) {
         const letters = ["A", "B", "C", "D"];
         const container = document.getElementById("questionContainer");
-        
-        container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>`;
-        
-        setTimeout(() => {
-            const optionsHtml = `
-                <div class="options-container" style="animation: fadeIn 1s ease;">
-                    ${question.options.map((opt, idx) => `
-                        <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
-                            ${letters[idx]}. ${opt}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>${optionsHtml}`;
-        }, 1000);
-        
-        setTimeout(() => {
-            const timerHtml = `<div class="timer" id="timerDisplay">30</div>`;
-            container.innerHTML = timerHtml + container.innerHTML;
-            startTimer();
-        }, 2500);
+        container.innerHTML = `
+            <div class="timer" id="timerDisplay">30</div>
+            <div class="question-text">${question.text}</div>
+            <div class="options-container" id="optionsContainer">
+                ${question.options.map((opt, idx) => `
+                    <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
+                        ${letters[idx]}. ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
     
     function startTimer() {
@@ -209,7 +214,7 @@
                 if(td) td.innerText = `${timeLeft}`;
                 if(timeLeft === 0 && !isAnswered) {
                     clearInterval(timerInterval);
-                    database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("کات تەواو بوو");
+                    database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(null);
                     const btns = document.querySelectorAll(".option-btn");
                     btns.forEach(btn => {
                         btn.style.pointerEvents = "none";
@@ -229,7 +234,7 @@
     }
     
     function selectAnswer(letter) {
-        if(isAnswered) return;
+        if(isAnswered || myEliminated) return;
         if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
         const btns = document.querySelectorAll(".option-btn");
         for(let btn of btns) {
@@ -242,7 +247,7 @@
     }
     
     function submitAnswer(selectedLetter) {
-        if(isAnswered) return;
+        if(isAnswered || myEliminated) return;
         const isCorrect = (selectedLetter === currentCorrectAnswer);
         isAnswered = true;
         clearInterval(timerInterval);
@@ -270,6 +275,7 @@
     }
     
     document.addEventListener('keydown', (e) => {
+        if(myEliminated) return;
         if(document.getElementById("questionContainer").style.display === "block") {
             const key = e.key.toUpperCase();
             if(['A','B','C','D'].includes(key) && !isAnswered) {
