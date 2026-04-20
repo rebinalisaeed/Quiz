@@ -14,14 +14,14 @@
         .waiting-message { color: #ff9800; font-size: 24px; margin-bottom: 20px; }
         .waiting-sub { color: rgba(255,255,255,0.7); font-size: 16px; }
         .question-container { width: 100%; max-width: 500px; margin: auto; }
-        .timer { font-size: 48px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 8px 25px; border-radius: 50px; margin: 10px 0; font-family: monospace; text-align: center; width: 100%; }
+        .timer { font-size: 48px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 8px 25px; border-radius: 50px; margin: 10px 0; text-align: center; width: 100%; }
         .question-text { font-size: 22px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 20px; text-align: center; }
         .options-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
         .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 14px 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; width: 100%; }
         .option-btn-orange { background: #ff9800 !important; }
         .option-correct { background: #4CAF50 !important; }
         .option-wrong { background: #f44336 !important; }
-        @media (max-width: 600px) { .timer { font-size: 40px; } .question-text { font-size: 18px; } .option-btn { font-size: 16px; padding: 12px 16px; } }
+        @media (max-width: 600px) { .timer { font-size: 40px; } .question-text { font-size: 18px; } .option-btn { font-size: 16px; } }
     </style>
 </head>
 <body>
@@ -46,83 +46,53 @@
     const database = firebase.database();
     
     const ROOM_ID = "quiz_room_main";
-    let timerInterval = null;
-    let timeLeft = 30;
-    let isAnswered = false;
-    let currentCorrectAnswer = null;
-    let selectedAnswerBtn = null;
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let playerId = currentUser.username;
     let isReady = false;
-    let myEliminated = false;
-    let hasAnswered = false;
+    let currentQuestionData = null;
+    let timerInterval = null;
+    let timeLeft = 30;
+    let answered = false;
     
     if(!currentUser.username) window.location.href = "index.html";
     
-    async function registerPlayer() {
-        const userSnapshot = await database.ref(`${ROOM_ID}/users/${currentUser.username}`).once('value');
-        const userData = userSnapshot.val();
-        const group = userData?.group || "group1";
-        
+    async function init() {
+        const userSnap = await database.ref(`${ROOM_ID}/users/${currentUser.username}`).once('value');
+        const userData = userSnap.val();
         await database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
             username: currentUser.username,
-            group: group,
-            joinedAt: Date.now(),
-            currentAnswer: null,
+            group: userData?.group || "group1",
             score: 5,
-            eliminated: false
+            eliminated: false,
+            currentAnswer: null
         });
         isReady = true;
-        console.log("✅ یاریکەر تۆمار کرا:", playerId);
     }
     
-    database.ref(`${ROOM_ID}/activePlayers/${playerId}/eliminated`).on('value', (snapshot) => {
-        myEliminated = snapshot.val() === true;
-        if(myEliminated) {
-            if(timerInterval) clearInterval(timerInterval);
-            document.getElementById("questionContainer").style.display = "none";
-            document.getElementById("waitingContainer").style.display = "block";
-            document.querySelector(".waiting-message").innerHTML = "❌ دەرکرایت!";
-            document.querySelector(".waiting-sub").innerHTML = "خاڵەکانت بە 0 گەیشتن";
-        }
-    });
-    
-    window.addEventListener("beforeunload", () => {
-        database.ref(`${ROOM_ID}/activePlayers/${playerId}`).remove();
-    });
-    
-    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snapshot) => {
-        if(myEliminated) return;
-        const data = snapshot.val();
-        if(isReady && data && data.question) {
-            // ڕێگەدان بە پرسیاری نوێ تەنها ئەگەر وەڵام نەدرابێت
-            hasAnswered = false;
+    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snap) => {
+        if(!isReady) return;
+        const data = snap.val();
+        if(data && data.question) {
+            currentQuestionData = data;
+            answered = false;
             database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
-            showQuestion(data.question, data.correct);
+            showQuestion();
         }
     });
     
-    function showQuestion(question, correctAnswer) {
-        if(myEliminated) return;
-        if(timerInterval) clearInterval(timerInterval);
-        
-        currentCorrectAnswer = correctAnswer;
-        isAnswered = false;
-        selectedAnswerBtn = null;
-        
+    function showQuestion() {
         document.getElementById("waitingContainer").style.display = "none";
         document.getElementById("questionContainer").style.display = "block";
         
-        const container = document.getElementById("questionContainer");
-        container.innerHTML = `
+        const q = currentQuestionData.question;
+        document.getElementById("questionContainer").innerHTML = `
             <div class="timer" id="timerDisplay">30</div>
-            <div class="question-text">${question.text}</div>
+            <div class="question-text">${q.text}</div>
             <div class="options-container">
-                ${question.options.map((opt, idx) => `
-                    <div class="option-btn" data-opt="${String.fromCharCode(65+idx)}" onclick="selectAnswer('${String.fromCharCode(65+idx)}')">
-                        ${String.fromCharCode(65+idx)}. ${opt}
-                    </div>
-                `).join('')}
+                <div class="option-btn" onclick="submitAnswer('A')">A. ${q.options[0]}</div>
+                <div class="option-btn" onclick="submitAnswer('B')">B. ${q.options[1]}</div>
+                <div class="option-btn" onclick="submitAnswer('C')">C. ${q.options[2]}</div>
+                <div class="option-btn" onclick="submitAnswer('D')">D. ${q.options[3]}</div>
             </div>
         `;
         startTimer();
@@ -130,17 +100,15 @@
     
     function startTimer() {
         timeLeft = 30;
+        if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            if(!isAnswered && timeLeft > 0) {
+            if(timeLeft > 0 && !answered) {
                 timeLeft--;
                 let td = document.getElementById("timerDisplay");
-                if(td) td.innerText = `${timeLeft}`;
-                if(timeLeft === 0 && !isAnswered && !hasAnswered) {
+                if(td) td.innerText = timeLeft;
+                if(timeLeft === 0 && !answered) {
                     clearInterval(timerInterval);
-                    // تەنها ئەگەر وەڵام نەدرابێت، NO_ANSWER بنێرە
                     database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("NO_ANSWER");
-                    const btns = document.querySelectorAll(".option-btn");
-                    btns.forEach(btn => btn.style.pointerEvents = "none");
                     setTimeout(() => {
                         document.getElementById("questionContainer").style.display = "none";
                         document.getElementById("waitingContainer").style.display = "block";
@@ -150,58 +118,19 @@
         }, 1000);
     }
     
-    function selectAnswer(letter) {
-        if(isAnswered || myEliminated) return;
-        if(selectedAnswerBtn) selectedAnswerBtn.classList.remove("option-btn-orange");
-        const btns = document.querySelectorAll(".option-btn");
-        for(let btn of btns) {
-            if(btn.getAttribute("data-opt") === letter) {
-                btn.classList.add("option-btn-orange");
-                selectedAnswerBtn = btn;
-                break;
-            }
-        }
-    }
-    
-    function submitAnswer(selectedLetter) {
-        if(isAnswered || myEliminated || hasAnswered) return;
-        isAnswered = true;
-        hasAnswered = true;
+    function submitAnswer(answer) {
+        if(answered) return;
+        answered = true;
         clearInterval(timerInterval);
-        
-        console.log("📤 ناردنی وەڵام:", selectedLetter, "بۆ یاریکەر:", playerId);
-        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
-        
-        const btns = document.querySelectorAll(".option-btn");
-        btns.forEach(btn => {
-            btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) btn.classList.add("option-correct");
-            if(btn.getAttribute("data-opt") === selectedLetter && selectedLetter !== currentCorrectAnswer) btn.classList.add("option-wrong");
-            btn.classList.remove("option-btn-orange");
-        });
+        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(answer);
         
         setTimeout(() => {
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("waitingContainer").style.display = "block";
-        }, 2000);
+        }, 1000);
     }
     
-    document.addEventListener('keydown', (e) => {
-        if(myEliminated) return;
-        if(document.getElementById("questionContainer").style.display === "block") {
-            const key = e.key.toUpperCase();
-            if(['A','B','C','D'].includes(key) && !isAnswered && !hasAnswered) {
-                e.preventDefault();
-                selectAnswer(key);
-            }
-            if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered && !hasAnswered) {
-                e.preventDefault();
-                submitAnswer(selectedAnswerBtn.getAttribute("data-opt"));
-            }
-        }
-    });
-    
-    registerPlayer();
+    init();
 </script>
 </body>
 </html>
