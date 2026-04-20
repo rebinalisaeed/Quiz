@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
+        /* هەمان ستایلەکانی پێشوو */
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; user-select: none; }
         body { background: linear-gradient(135deg, #1e3c72, #2a5298); min-height: 100vh; padding: 20px; }
@@ -132,7 +133,6 @@
         currentSelectedQuestion = questions[index];
         isEvaluating = false;
         
-        // پاککردنەوەی وەڵامەکانی پێشوو
         database.ref(`${roomId}/activePlayers`).once('value', (snapshot) => {
             const players = snapshot.val() || {};
             Object.keys(players).forEach(playerId => {
@@ -204,7 +204,6 @@
                 let scoreChange = 0;
                 let answerStatus = "";
                 
-                // پشکنینی وەڵام
                 if(userAnswer === currentSelectedQuestion.correct) {
                     scoreChange = 3;
                     answerStatus = "✅ ڕاست";
