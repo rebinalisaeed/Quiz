@@ -23,7 +23,6 @@
             margin: auto;
         }
         
-        /* کەتەگۆرییەکان - تۆڕی 3x3 */
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -52,7 +51,6 @@
             color: white;
         }
         
-        /* پرسیارەکان - تۆڕی 6x6 */
         .questions-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -80,7 +78,6 @@
             cursor: not-allowed;
         }
         
-        /* شاشەی پرسیار */
         .question-screen {
             text-align: center;
         }
@@ -118,15 +115,12 @@
             font-size: 18px;
             color: white;
             text-align: center;
-            transition: all 0.3s;
         }
         .option-correct {
             background: #4CAF50 !important;
             border-color: #2e7d32 !important;
-            animation: pulse 0.5s ease;
         }
         
-        /* گروپەکانی یاریکەران */
         .groups-container {
             display: flex;
             gap: 30px;
@@ -136,8 +130,8 @@
         }
         .group-box {
             flex: 1;
-            min-width: 250px;
-            background: rgba(0,0,0,0.3);
+            min-width: 300px;
+            background: rgba(0,0,0,0.4);
             border-radius: 20px;
             padding: 20px;
         }
@@ -161,22 +155,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s;
         }
-        .player-item-orange {
-            background: #ff9800 !important;
+        .player-eliminated {
+            background: rgba(255,0,0,0.3);
+            opacity: 0.6;
+        }
+        .player-name {
+            flex: 2;
+        }
+        .player-score {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            color: #ff9800;
         }
         .player-answer {
+            flex: 1;
+            text-align: center;
             background: rgba(255,255,255,0.2);
             border-radius: 20px;
             padding: 3px 10px;
-            font-size: 14px;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
         
         @media (max-width: 700px) {
@@ -187,27 +185,24 @@
             .question-text { font-size: 20px; }
             .option-box { font-size: 14px; padding: 12px; }
             .timer { font-size: 40px; padding: 10px 25px; }
+            .group-box { min-width: 250px; }
         }
     </style>
 </head>
 <body>
 <div class="main-container">
-    <!-- کەتەگۆرییەکان - تۆڕی 3x3 -->
     <div id="categoriesSection">
         <div class="categories-grid" id="categoriesGrid"></div>
     </div>
     
-    <!-- پرسیارەکان - تۆڕی 6x6 -->
     <div id="questionsSection" style="display:none;">
         <div class="questions-grid" id="questionsGrid"></div>
     </div>
     
-    <!-- شاشەی پرسیار -->
     <div id="questionScreenSection" style="display:none;">
         <div id="questionDisplay" class="question-screen"></div>
     </div>
     
-    <!-- گروپەکانی یاریکەران -->
     <div id="groupsSection" style="display:none;" class="groups-container"></div>
 </div>
 
@@ -234,18 +229,15 @@
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let activePlayers = {};
     let timerInterval = null;
-    let countdownInterval = null;
     let timeLeft = 30;
-    let isCountingDown = false;
+    let currentQuestionStartTime = null;
     
-    // ناچالاککردنی reload و refresh
     document.addEventListener('contextmenu', e => e.preventDefault());
     window.addEventListener('keydown', e => {
         if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
             e.preventDefault();
             return false;
         }
-        // گەڕانەوە بە Backspace
         if(e.key === 'Backspace') {
             e.preventDefault();
             if(document.getElementById("questionsSection").style.display === "block") {
@@ -254,24 +246,52 @@
                 backToCategories();
             }
         }
-        // نمایش کردنی گروپەکان بە Enter
         if(e.key === 'Enter' && document.getElementById("questionScreenSection").style.display === "block") {
             e.preventDefault();
-            showGroups();
+            endQuestionAndShowScores();
         }
     });
     
     if(currentUser.role !== "admin" && currentUser.role !== "super_admin") {
-        alert("⚠️ تۆ مافی پێشکەشکاریت نییە!");
         window.location.href = "play.html";
     }
     
-    // گوێگرتن لە یاریکەران
+    function updatePlayerScore(playerId, change) {
+        const player = activePlayers[playerId];
+        if(player && !player.eliminated) {
+            let newScore = (player.score || 5) + change;
+            if(newScore < 0) newScore = 0;
+            if(newScore === 0) {
+                database.ref(`${roomId}/activePlayers/${playerId}/eliminated`).set(true);
+                database.ref(`${roomId}/activePlayers/${playerId}/score`).set(0);
+                // دوای دەرکردنی یاریکەر، 2 خاڵ لە یاریکەری تر کەم بکەرەوە
+                checkAndApplyGroupPenalty(player.group, playerId);
+            } else {
+                database.ref(`${roomId}/activePlayers/${playerId}/score`).set(newScore);
+            }
+        }
+    }
+    
+    function checkAndApplyGroupPenalty(group, excludedPlayerId) {
+        const playersInGroup = Object.entries(activePlayers).filter(([id, p]) => 
+            p.group === group && !p.eliminated && id !== excludedPlayerId
+        );
+        
+        playersInGroup.forEach(([id, player]) => {
+            let currentScore = player.score || 5;
+            let newScore = currentScore - 2;
+            if(newScore < 0) newScore = 0;
+            database.ref(`${roomId}/activePlayers/${id}/score`).set(newScore);
+            if(newScore === 0) {
+                database.ref(`${roomId}/activePlayers/${id}/eliminated`).set(true);
+            }
+        });
+    }
+    
     database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
         activePlayers = snapshot.val() || {};
     });
     
-    // بارکردنی کەتەگۆرییەکان
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
         categories = snapshot.val() || {};
         categoriesList.forEach(c => { if(!categories[c]) categories[c] = []; });
@@ -312,13 +332,13 @@
     function selectQuestion(index) {
         const questions = categories[currentCategory];
         if(!questions || index >= questions.length) {
-            alert("⚠️ ئەم پرسیارە بوونی نییە! تکایە یەکەم پرسیار زیاد بکە.");
+            alert("⚠️ ئەم پرسیارە بوونی نییە!");
             return;
         }
         
         currentSelectedQuestion = questions[index];
+        currentQuestionStartTime = Date.now();
         
-        // پاککردنەوەی وەڵامەکانی پێشووی یاریکەران
         database.ref(`${roomId}/activePlayers`).once('value', (snapshot) => {
             const players = snapshot.val() || {};
             Object.keys(players).forEach(playerId => {
@@ -326,79 +346,49 @@
             });
         });
         
-        // ناردنی پرسیار بۆ یاریکەران
         database.ref(`${roomId}/activeQuestion`).set({
             question: currentSelectedQuestion,
             correct: currentSelectedQuestion.correct,
             category: currentCategory,
             index: index,
+            startTime: currentQuestionStartTime,
             timestamp: Date.now()
         });
         
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("questionScreenSection").style.display = "block";
         
-        displayQuestionWithAnimation(currentSelectedQuestion);
+        displayQuestion(currentSelectedQuestion);
     }
     
-    function displayQuestionWithAnimation(question) {
+    function displayQuestion(question) {
         const letters = ["A", "B", "C", "D"];
         const container = document.getElementById("questionDisplay");
         
-        // ئەنیمەیشنی پرسیار (1 چرکە)
-        container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>`;
+        container.innerHTML = `
+            <div class="timer" id="presenterTimer">30</div>
+            <div class="question-text">${question.text}</div>
+            <div class="options-grid">
+                ${question.options.map((opt, idx) => `
+                    <div class="option-box" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>
+                `).join('')}
+            </div>
+        `;
         
-        // دوای 1 چرکە، هەڵبژاردنەکان زیاد بکە (2.5 چرکە)
-        setTimeout(() => {
-            const optionsHtml = `
-                <div class="options-grid" style="animation: fadeIn 1s ease;">
-                    ${question.options.map((opt, idx) => `
-                        <div class="option-box" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>
-                    `).join('')}
-                </div>
-            `;
-            container.innerHTML = `<div class="question-text" style="animation: fadeIn 1s ease;">${question.text}</div>${optionsHtml}`;
-        }, 1000);
-        
-        // دوای 2.5 چرکە، چرکەکە زیاد بکە
-        setTimeout(() => {
-            const timerHtml = `<div class="timer" id="presenterTimer">30</div>`;
-            container.innerHTML = timerHtml + container.innerHTML;
-            startCountdown();
-        }, 2500);
+        startTimer();
     }
     
-    function startCountdown() {
-        let waitTime = 6; // 6 چرکە چاوەڕوانی
-        let displayTime = 30;
-        
-        const timerDiv = document.getElementById("presenterTimer");
-        if(!timerDiv) return;
-        
-        timerDiv.innerText = `${waitTime}`;
-        
-        const waitInterval = setInterval(() => {
-            if(waitTime > 1) {
-                waitTime--;
-                timerDiv.innerText = `${waitTime}`;
-            } else {
-                clearInterval(waitInterval);
-                // دەستپێکردنی کاتژمێرەکە لە 30 چرکەوە
-                timerDiv.innerText = `${displayTime}`;
-                startTimer(displayTime, timerDiv);
-            }
-        }, 1000);
-    }
-    
-    function startTimer(displayTime, timerDiv) {
+    function startTimer() {
+        timeLeft = 30;
         if(timerInterval) clearInterval(timerInterval);
         
         timerInterval = setInterval(() => {
-            if(displayTime > 0) {
-                displayTime--;
-                timerDiv.innerText = `${displayTime}`;
+            if(timeLeft > 0) {
+                timeLeft--;
+                const timerDiv = document.getElementById("presenterTimer");
+                if(timerDiv) timerDiv.innerText = `${timeLeft}`;
                 
-                if(displayTime === 0) {
+                if(timeLeft === 0) {
                     clearInterval(timerInterval);
                     showCorrectAnswer();
                 }
@@ -415,9 +405,34 @@
         if(optionBoxes[correctIndex]) {
             optionBoxes[correctIndex].classList.add("option-correct");
         }
+        
+        // خاڵەکان بەپێی وەڵامەکان دیاری بکە
+        evaluateAnswers();
     }
     
-    function showGroups() {
+    function evaluateAnswers() {
+        const players = {...activePlayers};
+        Object.entries(players).forEach(([playerId, player]) => {
+            if(player.eliminated) return;
+            
+            const userAnswer = player.currentAnswer;
+            const isCorrect = (userAnswer === currentSelectedQuestion.correct);
+            const timeSpent = (Date.now() - currentQuestionStartTime) / 1000;
+            const answeredInTime = userAnswer && timeSpent <= 30;
+            
+            if(answeredInTime && isCorrect) {
+                updatePlayerScore(playerId, 3);
+            } else if((answeredInTime && !isCorrect) || (!answeredInTime && !userAnswer)) {
+                updatePlayerScore(playerId, -1);
+            }
+        });
+    }
+    
+    function endQuestionAndShowScores() {
+        if(timerInterval) clearInterval(timerInterval);
+        
+        document.getElementById("questionScreenSection").style.display = "none";
+        
         const players = Object.values(activePlayers);
         const group1Players = players.filter(p => p.group === "group1");
         const group2Players = players.filter(p => p.group === "group2");
@@ -438,21 +453,23 @@
         const group2List = document.getElementById("group2List");
         
         group1Players.forEach(player => {
-            const answerClass = player.currentAnswer ? "player-item-orange" : "";
+            const eliminatedClass = player.eliminated ? "player-eliminated" : "";
             group1List.innerHTML += `
-                <div class="player-item ${answerClass}">
-                    <span>👤 ${player.username}</span>
-                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
+                <div class="player-item ${eliminatedClass}">
+                    <span class="player-name">👤 ${player.username}</span>
+                    <span class="player-score">🏆 ${player.score || 5} خاڵ</span>
+                    <span class="player-answer">${player.currentAnswer || 'چاوەڕوان'}</span>
                 </div>
             `;
         });
         
         group2Players.forEach(player => {
-            const answerClass = player.currentAnswer ? "player-item-orange" : "";
+            const eliminatedClass = player.eliminated ? "player-eliminated" : "";
             group2List.innerHTML += `
-                <div class="player-item ${answerClass}">
-                    <span>👤 ${player.username}</span>
-                    ${player.currentAnswer ? `<span class="player-answer">${player.currentAnswer}</span>` : '<span class="player-answer">چاوەڕوان</span>'}
+                <div class="player-item ${eliminatedClass}">
+                    <span class="player-name">👤 ${player.username}</span>
+                    <span class="player-score">🏆 ${player.score || 5} خاڵ</span>
+                    <span class="player-answer">${player.currentAnswer || 'چاوەڕوان'}</span>
                 </div>
             `;
         });
