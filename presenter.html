@@ -231,6 +231,7 @@
     let timerInterval = null;
     let timeLeft = 30;
     let currentQuestionStartTime = null;
+    let answersEvaluated = false; // تا ئەم پرسیارە دووبارە هەڵنەسەنگێنرێتەوە
     
     document.addEventListener('contextmenu', e => e.preventDefault());
     window.addEventListener('keydown', e => {
@@ -294,6 +295,7 @@
     
     database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
         activePlayers = snapshot.val() || {};
+        console.log("👥 یاریکەران نوێ کرانەوە:", Object.keys(activePlayers).length);
     });
     
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
@@ -342,7 +344,9 @@
         
         currentSelectedQuestion = questions[index];
         currentQuestionStartTime = Date.now();
+        answersEvaluated = false;
         
+        // پاککردنەوەی وەڵامەکانی پێشووی یاریکەران
         database.ref(`${roomId}/activePlayers`).once('value', (snapshot) => {
             const players = snapshot.val() || {};
             Object.keys(players).forEach(playerId => {
@@ -392,15 +396,15 @@
                 const timerDiv = document.getElementById("presenterTimer");
                 if(timerDiv) timerDiv.innerText = `${timeLeft}`;
                 
-                if(timeLeft === 0) {
+                if(timeLeft === 0 && !answersEvaluated) {
                     clearInterval(timerInterval);
-                    showCorrectAnswer();
+                    showCorrectAnswerAndEvaluate();
                 }
             }
         }, 1000);
     }
     
-    function showCorrectAnswer() {
+    function showCorrectAnswerAndEvaluate() {
         const letters = ["A", "B", "C", "D"];
         const correctLetter = currentSelectedQuestion.correct;
         const correctIndex = letters.indexOf(correctLetter);
@@ -414,32 +418,48 @@
     }
     
     function evaluateAnswers() {
+        if(answersEvaluated) return;
+        answersEvaluated = true;
+        
+        console.log("========== هەڵسەنگاندنی وەڵامەکان ==========");
+        console.log("وەڵامی ڕاست:", currentSelectedQuestion.correct);
+        
         const players = {...activePlayers};
         
         Object.entries(players).forEach(([playerId, player]) => {
-            if(player.eliminated) return;
+            if(player.eliminated) {
+                console.log(`⏭️ ${player.username} دەرکراوە - پشتگوێخرا`);
+                return;
+            }
             
             const userAnswer = player.currentAnswer;
             const isCorrect = (userAnswer === currentSelectedQuestion.correct);
             const answered = userAnswer !== null && userAnswer !== undefined;
             
-            if(answered) {
-                if(isCorrect) {
-                    updatePlayerScore(playerId, 3);
-                    console.log(`✅ ${player.username} وەڵامی ڕاستی دایەوە! +3 خاڵ`);
-                } else {
-                    updatePlayerScore(playerId, -1);
-                    console.log(`❌ ${player.username} وەڵامی هەڵەی دایەوە! -1 خاڵ`);
-                }
-            } else {
+            console.log(`👤 ${player.username}: وەڵام: ${userAnswer || 'بێ وەڵام'}, ڕاستە؟ ${isCorrect}, وەڵامی داوە؟ ${answered}`);
+            
+            if(answered && isCorrect) {
+                updatePlayerScore(playerId, 3);
+                console.log(`✅ ${player.username} +3 خاڵ`);
+            } else if(answered && !isCorrect) {
                 updatePlayerScore(playerId, -1);
-                console.log(`⏰ ${player.username} بێ وەڵام بوو! -1 خاڵ`);
+                console.log(`❌ ${player.username} -1 خاڵ (وەڵامی هەڵە)`);
+            } else if(!answered) {
+                updatePlayerScore(playerId, -1);
+                console.log(`⏰ ${player.username} -1 خاڵ (بێ وەڵام)`);
             }
         });
+        
+        console.log("==========================================");
     }
     
     function endQuestionAndShowScores() {
         if(timerInterval) clearInterval(timerInterval);
+        
+        // ئەگەر هێشتا وەڵامەکان هەڵنەسەنگێنرابن، ئێستا بیانەسەنگێنە
+        if(!answersEvaluated) {
+            evaluateAnswers();
+        }
         
         document.getElementById("questionScreenSection").style.display = "none";
         
@@ -489,6 +509,7 @@
     
     function backToCategories() {
         if(timerInterval) clearInterval(timerInterval);
+        answersEvaluated = false;
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("questionScreenSection").style.display = "none";
         document.getElementById("groupsSection").style.display = "none";
