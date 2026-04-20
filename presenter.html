@@ -15,35 +15,212 @@
         .right-panel { width: 320px; background: rgba(0,0,0,0.3); border-radius: 25px; padding: 20px; height: fit-content; }
         h1 { color: white; text-align: center; margin-bottom: 20px; font-size: 24px; }
         .info-bar { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: center; color: white; }
-        .category-tabs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
-        .tab-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.2); border-radius: 40px; padding: 10px 20px; font-size: 16px; color: white; cursor: pointer; }
-        .tab-btn.active { background: #4CAF50; }
-        .glass-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; margin-bottom: 30px; }
-        .glass-card h3 { color: white; text-align: center; margin-bottom: 20px; }
-        .questions-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 20px 0; }
-        .question-box { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 15px 5px; text-align: center; font-size: 18px; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); transition: all 0.2s; }
-        .question-box:hover { background: rgba(255,255,255,0.3); transform: scale(1.02); }
-        .question-box-empty { background: rgba(255,255,255,0.05); opacity: 0.5; cursor: not-allowed; }
-        .btn-back { background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 30px; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
+        
+        /* کەتەگۆرییەکان - تۆڕی 3x3 */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .category-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .category-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-5px);
+        }
+        .category-card span {
+            font-size: 20px;
+            color: white;
+        }
+        
+        /* پرسیارەکان - تۆڕی 6x6 */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .question-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 15px 5px;
+            text-align: center;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.2s;
+        }
+        .question-box:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+        .question-box-empty {
+            background: rgba(255,255,255,0.05);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-back {
+            background: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
         .btn-back:hover { background: #e68900; }
-        .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; }
+        .btn-logout {
+            background: #ff6b6b;
+            color: white;
+            display: block;
+            width: 200px;
+            margin: 20px auto 0;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
         
-        .question-screen { text-align: center; }
-        .question-text { font-size: 26px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 25px; line-height: 1.5; }
-        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
-        .option-box { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 15px; font-size: 18px; color: white; text-align: center; }
-        .option-correct { background: #4CAF50 !important; }
+        /* شاشەی پرسیار */
+        .question-screen {
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .timer {
+            font-size: 52px;
+            color: #ff6b6b;
+            background: rgba(0,0,0,0.6);
+            display: inline-block;
+            padding: 10px 35px;
+            border-radius: 60px;
+            margin: 20px 0;
+            font-family: monospace;
+            animation: slideDown 0.3s ease;
+        }
+        .question-text {
+            font-size: 26px;
+            color: white;
+            margin: 20px 0;
+            padding: 25px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 25px;
+            line-height: 1.5;
+            animation: slideUp 0.2s ease;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            animation: slideUp 0.5s ease;
+        }
+        .option-box {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 15px;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .option-correct {
+            background: #4CAF50 !important;
+            border-color: #2e7d32 !important;
+            animation: pulse 0.5s ease;
+        }
         
-        .right-panel h3 { color: white; text-align: center; margin-bottom: 15px; }
-        .players-list { list-style: none; padding: 0; max-height: 500px; overflow-y: auto; }
-        .player-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
-        .player-name { font-weight: bold; }
-        .player-answer { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 3px 10px; font-size: 14px; }
-        .player-item-orange { background: #ff9800 !important; color: white; }
-        .waiting-text { color: rgba(255,255,255,0.5); text-align: center; padding: 20px; }
+        /* یاریکەران */
+        .players-list {
+            list-style: none;
+            padding: 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .player-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .player-item-orange {
+            background: #ff9800 !important;
+            color: white;
+        }
+        .player-answer {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 14px;
+        }
+        .waiting-text {
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            padding: 20px;
+        }
         
-        @media (max-width: 900px) { .questions-grid { grid-template-columns: repeat(6, 1fr); } .main-container { flex-direction: column; } .right-panel { width: 100%; } }
-        @media (max-width: 600px) { .questions-grid { grid-template-columns: repeat(5, 1fr); } .question-box { font-size: 14px; padding: 10px 3px; } .question-text { font-size: 18px; } .option-box { font-size: 14px; padding: 10px; } }
+        /* ئەنیمەیشنەکان */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; }
+            .right-panel { width: 100%; }
+            .questions-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .categories-grid { grid-template-columns: repeat(2, 1fr); }
+            .questions-grid { grid-template-columns: repeat(3, 1fr); }
+            .question-box { font-size: 14px; padding: 10px 3px; }
+            .question-text { font-size: 18px; }
+            .option-box { font-size: 14px; padding: 10px; }
+            .timer { font-size: 36px; }
+        }
     </style>
 </head>
 <body>
@@ -51,19 +228,22 @@
     <div class="left-panel">
         <h1>🎯 پێشکەشکار - هەڵبژاردنی پرسیار</h1>
         
+        <!-- کەتەگۆرییەکان - تۆڕی 3x3 -->
         <div id="categoriesSection">
             <div class="info-bar">📢 کەتەگۆرییەک هەڵبژێرە</div>
-            <div class="category-tabs" id="categoryTabs"></div>
+            <div class="categories-grid" id="categoriesGrid"></div>
         </div>
         
+        <!-- پرسیارەکان - تۆڕی 6x6 -->
         <div id="questionsSection" style="display:none;">
             <button class="btn-back" onclick="backToCategories()">🔙 گەڕانەوە بۆ کەتەگۆرییەکان</button>
             <div class="glass-card">
-                <h3 id="selectedCategoryTitle"></h3>
+                <h3 id="selectedCategoryTitle" style="color:white; text-align:center;"></h3>
                 <div class="questions-grid" id="questionsGrid"></div>
             </div>
         </div>
         
+        <!-- شاشەی پرسیار -->
         <div id="questionScreenSection" style="display:none;">
             <button class="btn-back" onclick="backToQuestionsList()">🔙 گەڕانەوە بۆ لیستی پرسیارەکان</button>
             <div class="glass-card">
@@ -74,7 +254,7 @@
         <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
     </div>
     
-    <div class="right-panel">
+    <div class="right-panel" id="playersPanel" style="display:none;">
         <h3>👥 یاریکەران</h3>
         <div id="playersList" class="players-list">
             <div class="waiting-text">بارکردن...</div>
@@ -96,7 +276,7 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    const MAX_QS = 45;
+    const MAX_QS = 36; // 6x6 = 36
     const categoriesList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
     let categories = {};
     let currentCategory = "";
@@ -104,13 +284,15 @@
     let roomId = localStorage.getItem("roomId") || "quiz_room_main";
     let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
     let activePlayers = {};
+    let timerInterval = null;
+    let timeLeft = 30;
     
     if(currentUser.role !== "admin" && currentUser.role !== "super_admin") {
         alert("⚠️ تۆ مافی پێشکەشکاریت نییە!");
         window.location.href = "play.html";
     }
     
-    // گوێگرتن لە یاریکەران (ڕاستەوخۆ بۆ پرتەقاڵی کردن)
+    // گوێگرتن لە یاریکەران
     database.ref(`${roomId}/activePlayers`).on('value', (snapshot) => {
         activePlayers = snapshot.val() || {};
         renderPlayersList();
@@ -138,6 +320,7 @@
         container.innerHTML = html;
     }
     
+    // بارکردنی کەتەگۆرییەکان
     database.ref(`${roomId}/categories`).on('value', (snapshot) => {
         categories = snapshot.val() || {};
         categoriesList.forEach(c => { if(!categories[c]) categories[c] = []; });
@@ -145,20 +328,22 @@
     });
     
     function renderCategories() {
-        const container = document.getElementById("categoryTabs");
+        const container = document.getElementById("categoriesGrid");
         container.innerHTML = "";
         categoriesList.forEach(cat => {
-            const btn = document.createElement("button");
-            btn.textContent = `${cat} (${categories[cat]?.length || 0}/${MAX_QS})`;
-            btn.className = "tab-btn";
-            btn.onclick = () => {
+            const card = document.createElement("div");
+            card.className = "category-card";
+            card.innerHTML = `<span>${cat}</span>`;
+            card.onclick = () => {
                 currentCategory = cat;
                 document.getElementById("categoriesSection").style.display = "none";
                 document.getElementById("questionsSection").style.display = "block";
-                document.getElementById("selectedCategoryTitle").innerHTML = `📋 پرسیارەکانی ${cat}`;
+                document.getElementById("selectedCategoryTitle").innerHTML = `📋 پرسیارەکانی ${cat} (${categories[cat]?.length || 0}/${MAX_QS})`;
                 renderQuestions();
+                // شاردنەوەی پانێلی یاریکەران تا پرسیار هەڵنەبژێردرێت
+                document.getElementById("playersPanel").style.display = "none";
             };
-            container.appendChild(btn);
+            container.appendChild(card);
         });
     }
     
@@ -193,7 +378,7 @@
             });
         });
         
-        // ناردنی پرسیار بۆ یاریکەران
+        // ناردنی پرسیار بۆ یاریکەران (بە timestamp بۆ ئەنیمەیشن)
         database.ref(`${roomId}/activeQuestion`).set({
             question: currentSelectedQuestion,
             correct: currentSelectedQuestion.correct,
@@ -202,37 +387,93 @@
             timestamp: Date.now()
         });
         
+        // نمایشکردنی پرسیار لە شاشەی پێشکەشکار
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("questionScreenSection").style.display = "block";
-        displayQuestionForPresenter(currentSelectedQuestion);
+        document.getElementById("playersPanel").style.display = "block";
+        
+        displayQuestionWithAnimation(currentSelectedQuestion);
     }
     
-    function displayQuestionForPresenter(question) {
+    function displayQuestionWithAnimation(question) {
         const letters = ["A", "B", "C", "D"];
         const container = document.getElementById("questionDisplay");
-        container.innerHTML = `
-            <div class="question-text">${question.text}</div>
-            <div class="options-grid">
-                ${question.options.map((opt, idx) => `
-                    <div class="option-box">${letters[idx]}. ${opt}</div>
-                `).join('')}
-            </div>
-            <div style="color:rgba(255,255,255,0.5); text-align:center; margin-top:20px;">
-                ✅ وەڵامی ڕاست: ${question.correct}
-            </div>
-        `;
+        
+        // ئەنیمەیشنی پرسیار (0.20 چرکە)
+        container.innerHTML = `<div class="question-text" style="animation: slideUp 0.2s ease;">${question.text}</div>`;
+        
+        // دوای 0.20 چرکە، هەڵبژاردنەکان زیاد بکە (0.50 چرکە)
+        setTimeout(() => {
+            const optionsHtml = `
+                <div class="options-grid" style="animation: slideUp 0.5s ease;">
+                    ${question.options.map((opt, idx) => `
+                        <div class="option-box" data-opt="${letters[idx]}">${letters[idx]}. ${opt}</div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = `<div class="question-text" style="animation: slideUp 0.2s ease;">${question.text}</div>${optionsHtml}`;
+        }, 200);
+        
+        // دوای 0.50 چرکە، چرکەکە زیاد بکە و دەست پێ بکات
+        setTimeout(() => {
+            const timerHtml = `<div class="timer" id="presenterTimer" style="animation: slideDown 0.3s ease;">30 چرکە</div>`;
+            container.innerHTML = timerHtml + container.innerHTML;
+            startPresenterTimer(question);
+        }, 700);
+    }
+    
+    function startPresenterTimer(question) {
+        timeLeft = 30;
+        if(timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            if(timeLeft > 0) {
+                timeLeft--;
+                const timerDiv = document.getElementById("presenterTimer");
+                if(timerDiv) timerDiv.innerText = `${timeLeft} چرکە`;
+                
+                if(timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    // کات تەواو بوو، وەڵامی ڕاست پیشان بدە
+                    showCorrectAnswer(question);
+                }
+            }
+        }, 1000);
+    }
+    
+    function showCorrectAnswer(question) {
+        const letters = ["A", "B", "C", "D"];
+        const correctLetter = question.correct;
+        const correctIndex = letters.indexOf(correctLetter);
+        
+        // وەڵامی ڕاست بدۆزەوە و ڕەنگی سەوزی بکە
+        const optionBoxes = document.querySelectorAll(".option-box");
+        if(optionBoxes[correctIndex]) {
+            optionBoxes[correctIndex].classList.add("option-correct");
+        }
+        
+        // وەڵامی ڕاست لە database بنێرە بۆ یاریکەران (ئەگەر پێویست بێت)
+        database.ref(`${roomId}/activeQuestion/correct`).set({
+            revealed: true,
+            correctAnswer: correctLetter,
+            timestamp: Date.now()
+        });
     }
     
     function backToCategories() {
+        if(timerInterval) clearInterval(timerInterval);
         document.getElementById("questionsSection").style.display = "none";
         document.getElementById("categoriesSection").style.display = "block";
         document.getElementById("questionScreenSection").style.display = "none";
+        document.getElementById("playersPanel").style.display = "none";
         currentSelectedQuestion = null;
     }
     
     function backToQuestionsList() {
+        if(timerInterval) clearInterval(timerInterval);
         document.getElementById("questionScreenSection").style.display = "none";
         document.getElementById("questionsSection").style.display = "block";
+        document.getElementById("playersPanel").style.display = "none";
         currentSelectedQuestion = null;
     }
     
