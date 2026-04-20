@@ -72,6 +72,7 @@
             eliminated: false
         });
         isReady = true;
+        console.log("✅ یاریکەر تۆمار کرا:", playerId);
     }
     
     database.ref(`${ROOM_ID}/activePlayers/${playerId}/eliminated`).on('value', (snapshot) => {
@@ -163,6 +164,7 @@
         isAnswered = true;
         clearInterval(timerInterval);
         
+        console.log("📤 ناردنی وەڵام:", selectedLetter, "بۆ یاریکەر:", playerId);
         database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
         
         const btns = document.querySelectorAll(".option-btn");
