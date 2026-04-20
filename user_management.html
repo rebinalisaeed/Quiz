@@ -45,6 +45,12 @@
             <option value="question_creator">📝 دروستکری پرسیار - تەنها زیادکردنی پرسیار</option>
             <option value="admin">👑 بەڕێوەبەر (Admin) - هەموو دەسەلاتێک</option>
         </select>
+        <div id="groupSelect" style="display:none; margin-top:15px;">
+            <select id="playerGroup">
+                <option value="group1">🏆 گروپی یەکەم</option>
+                <option value="group2">🏆 گروپی دووەم</option>
+            </select>
+        </div>
         <button class="btn-add" onclick="createUser()" style="width:100%; margin-top:15px;">➕ دروستکردنی بەکارهێنەر</button>
     </div>
     <div class="users-list">
@@ -63,15 +69,28 @@
         messagingSenderId: "312376681830",
         appId: "1:312376681830:web:11262fa62cc9246bac14a7"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    
     const ROOM_ID = "quiz_room_main";
     const SUPER_ADMIN_USERNAME = "useradmin";
     const currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    
     if(currentUser.username !== SUPER_ADMIN_USERNAME) {
         alert("⚠️ تەنها بەڕێوەبەری سیستەم دەتوانێت بچێتە ئەم پەڕەیە!");
         window.location.href = "index.html";
     }
+    
+    document.getElementById("userRole").addEventListener("change", function() {
+        const groupDiv = document.getElementById("groupSelect");
+        if(this.value === "player") {
+            groupDiv.style.display = "block";
+        } else {
+            groupDiv.style.display = "none";
+        }
+    });
+    
     function loadUsers() {
         database.ref(`${ROOM_ID}/users`).on('value', (snapshot) => {
             const users = snapshot.val() || {};
@@ -82,7 +101,10 @@
                 if(userData.role === "super_admin") { roleText = "⭐ بەڕێوەبەری سیستەم"; roleClass = "role-super-admin"; }
                 else if(userData.role === "admin") { roleText = "👑 بەڕێوەبەر"; roleClass = "role-admin"; }
                 else if(userData.role === "question_creator") { roleText = "📝 دروستکری پرسیار"; roleClass = "role-creator"; }
-                else { roleText = "🎮 یاریکەر"; roleClass = "role-player"; }
+                else { 
+                    roleText = `🎮 یاریکەر (${userData.group === "group1" ? "گروپی یەکەم" : "گروپی دووەم"})`;
+                    roleClass = "role-player";
+                }
                 const userDiv = document.createElement("div");
                 userDiv.className = "user-item";
                 userDiv.innerHTML = `
@@ -91,23 +113,31 @@
                 `;
                 container.appendChild(userDiv);
             }
-            if(Object.keys(users).length === 0) container.innerHTML = "<div style='color:white;text-align:center;'>هیچ بەکارهێنەرێک نییە</div>";
         });
     }
+    
     async function createUser() {
         const username = document.getElementById("newUsername").value.trim();
         const password = document.getElementById("newPassword").value.trim();
         const role = document.getElementById("userRole").value;
+        const group = document.getElementById("playerGroup").value;
+        
         if(!username || !password) { alert("پڕ بکەوە!"); return; }
         if(username === SUPER_ADMIN_USERNAME) { alert("ئەم ناوە تەرخان کراوە!"); return; }
+        
         const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
         if(snapshot.exists()) { alert("پێشتر هەیە!"); return; }
-        await database.ref(`${ROOM_ID}/users/${username}`).set({ username, password, role, createdAt: Date.now() });
+        
+        const userData = { username, password, role, createdAt: Date.now() };
+        if(role === "player") userData.group = group;
+        
+        await database.ref(`${ROOM_ID}/users/${username}`).set(userData);
         document.getElementById("newUsername").value = "";
         document.getElementById("newPassword").value = "";
         alert("✅ دروست کرا!");
         loadUsers();
     }
+    
     async function deleteUser(username) {
         if(confirm(`سڕینەوەی "${username}"؟`)) {
             await database.ref(`${ROOM_ID}/users/${username}`).remove();
@@ -115,7 +145,9 @@
             loadUsers();
         }
     }
+    
     function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    
     loadUsers();
 </script>
 </body>
