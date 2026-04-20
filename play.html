@@ -55,6 +55,7 @@
     let playerId = currentUser.username;
     let isReady = false;
     let myEliminated = false;
+    let hasAnswered = false;
     
     if(!currentUser.username) window.location.href = "index.html";
     
@@ -94,6 +95,8 @@
         if(myEliminated) return;
         const data = snapshot.val();
         if(isReady && data && data.question) {
+            // ڕێگەدان بە پرسیاری نوێ تەنها ئەگەر وەڵام نەدرابێت
+            hasAnswered = false;
             database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
             showQuestion(data.question, data.correct);
         }
@@ -132,8 +135,9 @@
                 timeLeft--;
                 let td = document.getElementById("timerDisplay");
                 if(td) td.innerText = `${timeLeft}`;
-                if(timeLeft === 0 && !isAnswered) {
+                if(timeLeft === 0 && !isAnswered && !hasAnswered) {
                     clearInterval(timerInterval);
+                    // تەنها ئەگەر وەڵام نەدرابێت، NO_ANSWER بنێرە
                     database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("NO_ANSWER");
                     const btns = document.querySelectorAll(".option-btn");
                     btns.forEach(btn => btn.style.pointerEvents = "none");
@@ -160,8 +164,9 @@
     }
     
     function submitAnswer(selectedLetter) {
-        if(isAnswered || myEliminated) return;
+        if(isAnswered || myEliminated || hasAnswered) return;
         isAnswered = true;
+        hasAnswered = true;
         clearInterval(timerInterval);
         
         console.log("📤 ناردنی وەڵام:", selectedLetter, "بۆ یاریکەر:", playerId);
@@ -185,11 +190,11 @@
         if(myEliminated) return;
         if(document.getElementById("questionContainer").style.display === "block") {
             const key = e.key.toUpperCase();
-            if(['A','B','C','D'].includes(key) && !isAnswered) {
+            if(['A','B','C','D'].includes(key) && !isAnswered && !hasAnswered) {
                 e.preventDefault();
                 selectAnswer(key);
             }
-            if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered) {
+            if(e.key === 'Enter' && selectedAnswerBtn && !isAnswered && !hasAnswered) {
                 e.preventDefault();
                 submitAnswer(selectedAnswerBtn.getAttribute("data-opt"));
             }
