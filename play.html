@@ -1,136 +1,602 @@
 <!DOCTYPE html>
-<html dir="rtl">
+<html dir="rtl" lang="ckb">
 <head>
-    <title>یاری پرسیار و وەڵام - یاریکەر</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>یاریکەر - یاری پرسیار و وەڵام</title>
     <style>
-        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .waiting-container { text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 30px; padding: 40px 20px; width: 100%; max-width: 400px; }
-        .waiting-message { color: #ff9800; font-size: 24px; margin-bottom: 20px; }
-        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 16px; }
-        .question-container { width: 100%; max-width: 500px; margin: auto; }
-        .timer { font-size: 48px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 8px 25px; border-radius: 50px; margin: 10px 0; text-align: center; width: 100%; }
-        .question-text { font-size: 22px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 20px; text-align: center; }
-        .options-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 14px 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; width: 100%; }
-        .option-btn-orange { background: #ff9800 !important; }
-        .option-correct { background: #4CAF50 !important; }
-        .option-wrong { background: #f44336 !important; }
-        @media (max-width: 600px) { .timer { font-size: 40px; } .question-text { font-size: 18px; } .option-btn { font-size: 16px; } }
+        @font-face {
+            font-family: 'K24KurdishBold';
+            src: url('K24KurdishBold-Bold.ttf') format('truetype');
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'K24KurdishBold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Score Card */
+        .score-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .player-name {
+            font-size: 20px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        .score {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .score-label {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        /* Waiting Screen */
+        .waiting-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .waiting-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .waiting-text {
+            font-size: 20px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        .waiting-subtext {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        /* Question Screen */
+        .question-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .timer {
+            font-size: 48px;
+            text-align: center;
+            color: #e53e3e;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #2d3748;
+        }
+        
+        .option-btn:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+        }
+        
+        .option-btn.selected {
+            background: #ed8936;
+            color: white;
+            border-color: #ed8936;
+        }
+        
+        .option-btn.correct {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+        
+        .option-btn.wrong {
+            background: #e53e3e;
+            color: white;
+            border-color: #e53e3e;
+        }
+        
+        .option-btn.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* Result Screen */
+        .result-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .result-text {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .result-points {
+            font-size: 18px;
+            color: #718096;
+        }
+        
+        /* Eliminated Screen */
+        .eliminated-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .eliminated-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .eliminated-text {
+            font-size: 24px;
+            color: #e53e3e;
+            margin-bottom: 10px;
+        }
+        
+        .eliminated-subtext {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        @media (max-width: 768px) {
+            .question-text {
+                font-size: 16px;
+            }
+            
+            .option-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .timer {
+                font-size: 36px;
+            }
+            
+            .score {
+                font-size: 36px;
+            }
+        }
     </style>
 </head>
 <body>
-<div id="waitingContainer" class="waiting-container">
-    <div class="waiting-message">⏳ چاوەڕوان بە...</div>
-    <div class="waiting-sub">پێشکەشکار پرسیاری داهاتوو هەڵدەبژێرێت</div>
-</div>
-<div id="questionContainer" class="question-container" style="display:none;"></div>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
-        authDomain: "quizgamerebin.firebaseapp.com",
-        databaseURL: "https://quizgamerebin-default-rtdb.firebaseio.com",
-        projectId: "quizgamerebin",
-        storageBucket: "quizgamerebin.firebasestorage.app",
-        messagingSenderId: "312376681830",
-        appId: "1:312376681830:web:11262fa62cc9246bac14a7"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    
-    const ROOM_ID = "quiz_room_main";
-    let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
-    let playerId = currentUser.username;
-    let isReady = false;
-    let currentQuestionData = null;
-    let timerInterval = null;
-    let timeLeft = 30;
-    let answered = false;
-    
-    if(!currentUser.username) window.location.href = "index.html";
-    
-    async function init() {
-        const userSnap = await database.ref(`${ROOM_ID}/users/${currentUser.username}`).once('value');
-        const userData = userSnap.val();
-        await database.ref(`${ROOM_ID}/activePlayers/${playerId}`).set({
-            username: currentUser.username,
-            group: userData?.group || "group1",
-            score: 5,
-            eliminated: false,
-            currentAnswer: null
-        });
-        isReady = true;
-    }
-    
-    database.ref(`${ROOM_ID}/activeQuestion`).on('value', (snap) => {
-        if(!isReady) return;
-        const data = snap.val();
-        if(data && data.question) {
-            currentQuestionData = data;
-            answered = false;
-            database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).remove();
-            showQuestion();
-        }
-    });
-    
-    function showQuestion() {
-        document.getElementById("waitingContainer").style.display = "none";
-        document.getElementById("questionContainer").style.display = "block";
+    <div class="container">
+        <!-- Score Card -->
+        <div class="score-card" id="scoreCard">
+            <div class="player-name" id="playerName">بارکردن...</div>
+            <div class="score" id="playerScore">0</div>
+            <div class="score-label">خاڵەکانت</div>
+        </div>
         
-        const q = currentQuestionData.question;
-        document.getElementById("questionContainer").innerHTML = `
-            <div class="timer" id="timerDisplay">30</div>
-            <div class="question-text">${q.text}</div>
-            <div class="options-container">
-                <div class="option-btn" onclick="submitAnswer('A')">A. ${q.options[0]}</div>
-                <div class="option-btn" onclick="submitAnswer('B')">B. ${q.options[1]}</div>
-                <div class="option-btn" onclick="submitAnswer('C')">C. ${q.options[2]}</div>
-                <div class="option-btn" onclick="submitAnswer('D')">D. ${q.options[3]}</div>
+        <!-- Waiting Screen -->
+        <div class="waiting-screen" id="waitingScreen">
+            <div class="waiting-spinner"></div>
+            <div class="waiting-text">⏳ چاوەڕوان بە...</div>
+            <div class="waiting-subtext">تا پێشکەشکار پرسیارێک بنێرێت</div>
+        </div>
+        
+        <!-- Question Screen -->
+        <div class="question-screen" id="questionScreen">
+            <div class="timer" id="timer">30</div>
+            <div class="question-text" id="questionText">پرسیارەکە لێرە دەرکەوێت</div>
+            <div class="options" id="options">
+                <div class="option-btn" data-opt="A">🅰 بارکردن...</div>
+                <div class="option-btn" data-opt="B">🅱 بارکردن...</div>
+                <div class="option-btn" data-opt="C">🅲 بارکردن...</div>
+                <div class="option-btn" data-opt="D">🅳 بارکردن...</div>
             </div>
-        `;
-        startTimer();
-    }
-    
-    function startTimer() {
-        timeLeft = 30;
-        if(timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            if(timeLeft > 0 && !answered) {
-                timeLeft--;
-                let td = document.getElementById("timerDisplay");
-                if(td) td.innerText = timeLeft;
-                if(timeLeft === 0 && !answered) {
-                    clearInterval(timerInterval);
-                    database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set("NO_ANSWER");
-                    setTimeout(() => {
-                        document.getElementById("questionContainer").style.display = "none";
-                        document.getElementById("waitingContainer").style.display = "block";
-                    }, 2000);
-                }
-            }
-        }, 1000);
-    }
-    
-    function submitAnswer(answer) {
-        if(answered) return;
-        answered = true;
-        clearInterval(timerInterval);
-        database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(answer);
+        </div>
         
-        setTimeout(() => {
-            document.getElementById("questionContainer").style.display = "none";
-            document.getElementById("waitingContainer").style.display = "block";
-        }, 1000);
-    }
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-icon" id="resultIcon">✅</div>
+            <div class="result-text" id="resultText">وەڵامەکە ڕاست بوو!</div>
+            <div class="result-points" id="resultPoints">+3 خاڵت پێدرا</div>
+        </div>
+        
+        <!-- Eliminated Screen -->
+        <div class="eliminated-screen" id="eliminatedScreen">
+            <div class="eliminated-icon">🚫</div>
+            <div class="eliminated-text">تۆ لە یاری دەرکراویت!</div>
+            <div class="eliminated-subtext">خاڵەکانت بوون بە سفر، ناتوانیت زیاتر یاری بکەیت</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
-    init();
-</script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
+            authDomain: "quizgamerebin.firebaseapp.com",
+            databaseURL: "https://quizgamerebin-default-rtdb.firebaseio.com",
+            projectId: "quizgamerebin",
+            storageBucket: "quizgamerebin.firebasestorage.app",
+            messagingSenderId: "312376681830",
+            appId: "1:312376681830:web:11262fa62cc9246bac14a7",
+            measurementId: "G-BJM04Q5X44"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let currentUser = null;
+        let currentQuestion = null;
+        let timerInterval = null;
+        let hasAnswered = false;
+        let selectedOption = null;
+        let questionStartTime = null;
+        
+        function checkAuth() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            currentUser = JSON.parse(loggedInUser);
+            
+            if (currentUser.role !== 'player') {
+                alert('تەنها یاریکەر دەتوانێت ئەم پەڕەیە بەکاربهێنێت!');
+                window.location.href = currentUser.role === 'admin' ? 'user_management.html' : 'presenter.html';
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function loadPlayerData() {
+            document.getElementById('playerName').textContent = currentUser.displayName;
+            
+            database.ref(`users/${currentUser.id}`).on('value', (snapshot) => {
+                const user = snapshot.val();
+                if (user) {
+                    currentUser.score = user.score || 0;
+                    document.getElementById('playerScore').textContent = currentUser.score;
+                    
+                    // Check if eliminated
+                    if (user.eliminated === true || (user.score <= 0 && user.isActive === true)) {
+                        eliminatePlayer();
+                    } else if (user.score > 0 && user.isActive === true) {
+                        // Player is active
+                    }
+                }
+            });
+        }
+        
+        function eliminatePlayer() {
+            // Mark as eliminated in database
+            database.ref(`users/${currentUser.id}/eliminated`).set(true);
+            database.ref(`users/${currentUser.id}/isActive`).set(false);
+            
+            // Hide all screens and show eliminated screen
+            document.getElementById('waitingScreen').style.display = 'none';
+            document.getElementById('questionScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('eliminatedScreen').style.display = 'block';
+            
+            // Store in localStorage that this player is eliminated
+            localStorage.setItem('eliminated_' + currentUser.id, 'true');
+        }
+        
+        function checkIfEliminated() {
+            const eliminatedFlag = localStorage.getItem('eliminated_' + currentUser.id);
+            if (eliminatedFlag === 'true') {
+                document.getElementById('waitingScreen').style.display = 'none';
+                document.getElementById('questionScreen').style.display = 'none';
+                document.getElementById('resultScreen').style.display = 'none';
+                document.getElementById('eliminatedScreen').style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+        
+        function listenForQuestions() {
+            database.ref('gameState/currentQuestion').on('value', (snapshot) => {
+                const questionData = snapshot.val();
+                
+                if (questionData && questionData.question && !hasAnswered) {
+                    // Check if player is eliminated
+                    if (checkIfEliminated()) return;
+                    
+                    // Check if player score is 0
+                    if (currentUser.score <= 0) {
+                        eliminatePlayer();
+                        return;
+                    }
+                    
+                    currentQuestion = questionData;
+                    questionStartTime = Date.now();
+                    showQuestion();
+                }
+            });
+        }
+        
+        function showQuestion() {
+            // Hide waiting screen, show question screen
+            document.getElementById('waitingScreen').style.display = 'none';
+            document.getElementById('questionScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+            
+            const q = currentQuestion.question;
+            
+            document.getElementById('questionText').textContent = q.text;
+            
+            const options = ['A', 'B', 'C', 'D'];
+            options.forEach(opt => {
+                const btn = document.querySelector(`.option-btn[data-opt="${opt}"]`);
+                if (btn) {
+                    btn.textContent = `${opt === 'A' ? '🅰' : opt === 'B' ? '🅱' : opt === 'C' ? '🅲' : '🅳'} ${q.options[opt]}`;
+                    btn.classList.remove('selected', 'correct', 'wrong', 'disabled');
+                    btn.style.pointerEvents = 'auto';
+                }
+            });
+            
+            hasAnswered = false;
+            selectedOption = null;
+            
+            let timeLeft = 30;
+            const timerDiv = document.getElementById('timer');
+            timerDiv.textContent = timeLeft;
+            
+            // Start timer after 3 seconds
+            setTimeout(() => {
+                if (timerInterval) clearInterval(timerInterval);
+                
+                timerInterval = setInterval(() => {
+                    if (!hasAnswered) {
+                        timeLeft--;
+                        timerDiv.textContent = timeLeft;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            if (!hasAnswered) {
+                                // Time's up - auto show answer
+                                showAnswerAndResult(null);
+                            }
+                        }
+                    }
+                }, 1000);
+            }, 3000);
+        }
+        
+        // Option click handler
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (hasAnswered) return;
+                if (currentUser.score <= 0) return;
+                
+                // Remove selected class from all
+                document.querySelectorAll('.option-btn').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked button
+                btn.classList.add('selected');
+                selectedOption = btn.dataset.opt;
+                
+                // Auto submit after selection (optional)
+                // submitAnswer();
+            });
+        });
+        
+        function submitAnswer() {
+            if (hasAnswered) return;
+            if (!selectedOption) return;
+            if (currentUser.score <= 0) return;
+            
+            hasAnswered = true;
+            clearInterval(timerInterval);
+            
+            const isCorrect = (selectedOption === currentQuestion.question.correct);
+            
+            // Show result
+            showAnswerAndResult(isCorrect);
+            
+            // Update score in Firebase
+            const scoreChange = isCorrect ? 3 : -1;
+            const newScore = (currentUser.score || 5) + scoreChange;
+            
+            database.ref(`users/${currentUser.id}/score`).set(Math.max(0, newScore));
+            
+            // Record answer
+            database.ref(`gameState/answers/${currentUser.id}`).set({
+                answer: selectedOption,
+                isCorrect: isCorrect,
+                answeredAt: Date.now()
+            });
+            
+            // Check if player should be eliminated
+            if (newScore <= 0) {
+                setTimeout(() => {
+                    eliminatePlayer();
+                }, 10000);
+            }
+        }
+        
+        function showAnswerAndResult(isCorrect) {
+            // If isCorrect is null, it means time's up - show correct answer
+            const q = currentQuestion.question;
+            const correctOpt = q.correct;
+            
+            // Highlight correct and wrong answers
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.classList.add('disabled');
+                
+                if (btn.dataset.opt === correctOpt) {
+                    btn.classList.add('correct');
+                }
+                
+                if (selectedOption && btn.dataset.opt === selectedOption && selectedOption !== correctOpt) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            // Determine result
+            let isAnswerCorrect = false;
+            if (isCorrect !== null) {
+                isAnswerCorrect = isCorrect;
+            } else {
+                isAnswerCorrect = false;
+            }
+            
+            // Show result screen
+            setTimeout(() => {
+                document.getElementById('questionScreen').style.display = 'none';
+                document.getElementById('resultScreen').style.display = 'block';
+                
+                const resultIcon = document.getElementById('resultIcon');
+                const resultText = document.getElementById('resultText');
+                const resultPoints = document.getElementById('resultPoints');
+                
+                if (isAnswerCorrect) {
+                    resultIcon.textContent = '✅';
+                    resultText.textContent = 'وەڵامەکە ڕاست بوو!';
+                    resultPoints.textContent = '+3 خاڵت پێدرا';
+                } else {
+                    resultIcon.textContent = '❌';
+                    resultText.textContent = 'وەڵامەکە هەڵە بوو!';
+                    const correctLetter = correctOpt;
+                    const correctText = q.options[correctOpt];
+                    resultPoints.textContent = `وەڵامی ڕاست: ${correctLetter} - ${correctText} | -1 خاڵت کەم کرایەوە`;
+                }
+                
+                // After 10 seconds, go back to waiting
+                setTimeout(() => {
+                    document.getElementById('resultScreen').style.display = 'none';
+                    document.getElementById('waitingScreen').style.display = 'block';
+                    hasAnswered = false;
+                    selectedOption = null;
+                    currentQuestion = null;
+                    
+                    // Reload player score
+                    database.ref(`users/${currentUser.id}/score`).once('value')
+                        .then(snapshot => {
+                            currentUser.score = snapshot.val() || 0;
+                            document.getElementById('playerScore').textContent = currentUser.score;
+                            
+                            if (currentUser.score <= 0) {
+                                eliminatePlayer();
+                            }
+                        });
+                }, 10000);
+            }, 1500);
+        }
+        
+        // Listen for group penalty when player eliminated
+        function listenForPenalties() {
+            database.ref('users').on('child_changed', (snapshot) => {
+                const user = snapshot.val();
+                if (user.role === 'player' && user.eliminated === true && user.group === currentUser.group) {
+                    // Someone in same group was eliminated
+                    // Check if penalty already applied for this elimination
+                    const penaltyKey = `penalty_${snapshot.key}_${currentUser.id}`;
+                    if (!localStorage.getItem(penaltyKey)) {
+                        // Apply -2 penalty
+                        const newScore = Math.max(0, (currentUser.score || 5) - 2);
+                        database.ref(`users/${currentUser.id}/score`).set(newScore);
+                        localStorage.setItem(penaltyKey, 'true');
+                        
+                        // Show notification
+                        if (document.getElementById('waitingScreen').style.display === 'block') {
+                            const waitingText = document.querySelector('.waiting-text');
+                            const originalText = waitingText.textContent;
+                            waitingText.textContent = '⚠️ یاریکەرێک لە گروپەکەت دەرکرا! -2 خاڵ';
+                            setTimeout(() => {
+                                waitingText.textContent = originalText;
+                            }, 3000);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize
+        if (checkAuth()) {
+            // Check if already eliminated
+            if (checkIfEliminated()) {
+                // Do nothing, already showing eliminated screen
+            } else {
+                loadPlayerData();
+                listenForQuestions();
+                listenForPenalties();
+            }
+        }
+    </script>
 </body>
 </html>
