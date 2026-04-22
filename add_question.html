@@ -1,652 +1,159 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ckb">
+<html dir="rtl">
 <head>
+    <title>زیادکردنی پرسیار - دروستکری پرسیار</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>زیادکردنی پرسیار - یاری پرسیار و وەڵام</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        @font-face {
-            font-family: 'K24KurdishBold';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'K24KurdishBold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            padding: 30px;
-        }
-        
-        h1 {
-            text-align: center;
-            color: #4a5568;
-            margin-bottom: 30px;
-            font-size: 28px;
-            border-bottom: 3px solid #667eea;
-            display: inline-block;
-            width: 100%;
-            padding-bottom: 15px;
-        }
-        
-        /* Categories Tabs */
-        .categories-tabs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 30px;
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 15px;
-        }
-        
-        .category-tab {
-            padding: 12px 8px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: bold;
-            color: #4a5568;
-        }
-        
-        .category-tab:hover {
-            border-color: #667eea;
-            background: #edf2f7;
-        }
-        
-        .category-tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-        }
-        
-        /* Form Section */
-        .form-section {
-            background: #f7fafc;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2d3748;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: white;
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-        }
-        
-        .row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        
-        .btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-        
-        .btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-        }
-        
-        .btn-success {
-            background: #48bb78;
-        }
-        
-        .btn-success:hover {
-            background: #38a169;
-        }
-        
-        .btn-danger {
-            background: #e53e3e;
-        }
-        
-        .btn-danger:hover {
-            background: #c53030;
-        }
-        
-        .btn-warning {
-            background: #ed8936;
-        }
-        
-        .btn-warning:hover {
-            background: #dd6b20;
-        }
-        
-        .logout-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: auto;
-            padding: 12px 24px;
-            background: #e53e3e;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Questions List */
-        .questions-list {
-            margin-top: 30px;
-        }
-        
-        .questions-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .questions-header h3 {
-            color: #4a5568;
-            font-size: 20px;
-        }
-        
-        .questions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-        
-        .question-card {
-            background: #f7fafc;
-            border-radius: 15px;
-            padding: 15px;
-            border-right: 4px solid #667eea;
-            transition: all 0.3s;
-        }
-        
-        .question-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .question-text {
-            font-size: 14px;
-            color: #2d3748;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        
-        .question-options {
-            font-size: 12px;
-            color: #718096;
-            margin-bottom: 10px;
-        }
-        
-        .question-correct {
-            font-size: 12px;
-            color: #48bb78;
-            margin-bottom: 10px;
-        }
-        
-        .question-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .question-actions button {
-            padding: 6px 12px;
-            font-size: 12px;
-            margin: 0;
-        }
-        
-        .counter {
-            font-size: 14px;
-            color: #718096;
-            margin-top: 10px;
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .categories-tabs {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .category-tab {
-                font-size: 11px;
-                padding: 8px 4px;
-            }
-            
-            .questions-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .message.success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-            display: block;
-        }
-        
-        .message.error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
-            display: block;
-        }
+        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
+        * { font-family: 'K24Kurdish', 'Segoe UI', sans-serif; box-sizing: border-box; }
+        body { background: #1e1e2f; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1400px; margin: auto; }
+        h1 { color: white; text-align: center; margin-bottom: 30px; font-size: 24px; }
+        .category-tabs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        .tab-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.2); border-radius: 40px; padding: 10px 20px; font-size: 16px; color: white; cursor: pointer; }
+        .tab-btn.active { background: #4CAF50; }
+        .glass-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; margin-bottom: 30px; }
+        .glass-card h3 { color: white; text-align: center; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 15px; border: none; background: rgba(255,255,255,0.9); }
+        .options-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0; }
+        button { padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: #2196F3; color: white; }
+        .btn-logout { background: #ff6b6b; color: white; display: block; width: 200px; margin: 20px auto 0; }
+        .questions-list { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-top: 20px; max-height: 500px; overflow-y: auto; }
+        .question-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .question-text { flex: 1; font-size: 13px; }
+        .delete-question { background: #f44336; border-radius: 20px; padding: 5px 12px; cursor: pointer; color: white; border: none; }
+        .progress-bar { background: rgba(255,255,255,0.2); border-radius: 20px; height: 8px; margin-bottom: 15px; }
+        .progress-fill { background: #4CAF50; border-radius: 20px; height: 8px; width: 0%; }
+        @media (max-width: 600px) { .options-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📝 زیادکردنی پرسیار</h1>
-        
-        <div id="message" class="message"></div>
-        
-        <!-- Categories Tabs -->
-        <div class="categories-tabs" id="categoriesTabs">
-            <div class="category-tab active" data-cat="history">مێژوو</div>
-            <div class="category-tab" data-cat="science">زانست</div>
-            <div class="category-tab" data-cat="literature">ئەدەبییات</div>
-            <div class="category-tab" data-cat="art">هونەر</div>
-            <div class="category-tab" data-cat="sports">وەرزش</div>
-            <div class="category-tab" data-cat="technology">تەکنەلۆژیا</div>
-            <div class="category-tab" data-cat="health">تەندروستی</div>
-            <div class="category-tab" data-cat="geography">جوگرافیا</div>
-            <div class="category-tab" data-cat="religion">ئایینی</div>
+<div class="container">
+    <h1>📝 زیادکردنی پرسیار (٣٦ پرسیار بۆ هەر کەتەگۆری)</h1>
+    
+    <div class="category-tabs" id="categoryTabs"></div>
+    
+    <div class="glass-card">
+        <h3>➕ زیادکردنی پرسیاری نوێ</h3>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <input type="text" id="questionText" placeholder="پرسیارەکە لێرە بنووسە">
+        <div class="options-row">
+            <input type="text" id="optA" placeholder="هەڵبژاردەی A">
+            <input type="text" id="optB" placeholder="هەڵبژاردەی B">
+            <input type="text" id="optC" placeholder="هەڵبژاردەی C">
+            <input type="text" id="optD" placeholder="هەڵبژاردەی D">
         </div>
-        
-        <!-- Add Question Form -->
-        <div class="form-section">
-            <div class="row">
-                <div class="form-group">
-                    <label>📋 پرسیار:</label>
-                    <textarea id="questionText" placeholder="پرسیارەکە لێرە بنووسە..."></textarea>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label>🅰 وەڵامی A:</label>
-                    <input type="text" id="optionA" placeholder="وەڵامی یەکەم">
-                </div>
-                <div class="form-group">
-                    <label>🅱 وەڵامی B:</label>
-                    <input type="text" id="optionB" placeholder="وەڵامی دووەم">
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label>🅲 وەڵامی C:</label>
-                    <input type="text" id="optionC" placeholder="وەڵامی سێیەم">
-                </div>
-                <div class="form-group">
-                    <label>🅳 وەڵامی D:</label>
-                    <input type="text" id="optionD" placeholder="وەڵامی چوارەم">
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label>✅ وەڵامی ڕاست:</label>
-                    <select id="correctAnswer">
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label> </label>
-                    <button class="btn btn-success" onclick="addQuestion()">➕ زیادکردنی پرسیار</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Questions List -->
-        <div class="questions-list">
-            <div class="questions-header">
-                <h3>📚 لیستی پرسیارەکان</h3>
-                <div class="counter" id="questionCounter">0 / 36 پرسیار</div>
-            </div>
-            <div class="questions-grid" id="questionsList">
-                <div style="text-align: center; grid-column: 1/-1;">بارکردن...</div>
-            </div>
-        </div>
+        <select id="correctOpt">
+            <option value="A">وەڵامی ڕاست: A</option>
+            <option value="B">وەڵامی ڕاست: B</option>
+            <option value="C">وەڵامی ڕاست: C</option>
+            <option value="D">وەڵامی ڕاست: D</option>
+        </select>
+        <button class="btn-add" onclick="addQuestion()" style="width:100%; margin-top:15px;">➕ زیادکردنی پرسیار</button>
     </div>
     
-    <button class="btn btn-danger logout-btn" onclick="logout()">🚪 دەرچوون</button>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <div class="questions-list">
+        <h4>📋 پرسیارەکان</h4>
+        <div id="questionsContainer"></div>
+    </div>
     
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtiW-RBMY0emCOFZdQCA7ynPESraUknxI",
-            authDomain: "quizgamerebin.firebaseapp.com",
-            databaseURL: "https://quizgamerebin-default-rtdb.firebaseio.com",
-            projectId: "quizgamerebin",
-            storageBucket: "quizgamerebin.firebasestorage.app",
-            messagingSenderId: "312376681830",
-            appId: "1:312376681830:web:11262fa62cc9246bac14a7",
-            measurementId: "G-BJM04Q5X44"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        
-        let currentCategory = 'history';
-        let currentUser = null;
-        
-        // Category names mapping
-        const categoryNames = {
-            'history': 'مێژوو',
-            'science': 'زانست',
-            'literature': 'ئەدەبییات',
-            'art': 'هونەر',
-            'sports': 'وەرزش',
-            'technology': 'تەکنەلۆژیا',
-            'health': 'تەندروستی',
-            'geography': 'جوگرافیا',
-            'religion': 'ئایینی'
-        };
-        
-        // Check authentication
-        function checkAuth() {
-            const loggedInUser = localStorage.getItem('loggedInUser');
-            if (!loggedInUser) {
-                window.location.href = 'login.html';
-                return false;
-            }
-            
-            currentUser = JSON.parse(loggedInUser);
-            if (currentUser.role !== 'admin' && currentUser.role !== 'question_creator') {
-                alert('تەنها ئەدمین و دروستکەری پرسیار دەتوانن ئەم پەڕەیە بەکاربهێنن!');
-                window.location.href = currentUser.role === 'player' ? 'play.html' : 'presenter.html';
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // Load questions for current category
-        function loadQuestions() {
-            database.ref(`categories/${currentCategory}/questions`).once('value')
-                .then(snapshot => {
-                    const questions = snapshot.val();
-                    const container = document.getElementById('questionsList');
-                    const counter = document.getElementById('questionCounter');
-                    
-                    const questionCount = questions ? Object.keys(questions).length : 0;
-                    counter.textContent = `${questionCount} / 36 پرسیار`;
-                    
-                    if (!questions) {
-                        container.innerHTML = '<div style="text-align: center; grid-column: 1/-1;">هیچ پرسیارێک نییە</div>';
-                        return;
-                    }
-                    
-                    let html = '';
-                    let index = 1;
-                    for (let id in questions) {
-                        const q = questions[id];
-                        html += `
-                            <div class="question-card">
-                                <div class="question-text"><strong>${index}.</strong> ${q.text}</div>
-                                <div class="question-options">
-                                    🅰 ${q.options.A}<br>
-                                    🅱 ${q.options.B}<br>
-                                    🅲 ${q.options.C}<br>
-                                    🅳 ${q.options.D}
-                                </div>
-                                <div class="question-correct">✅ وەڵامی ڕاست: ${q.correct}</div>
-                                <div class="question-actions">
-                                    <button class="btn btn-warning" onclick="editQuestion('${id}')">✏️ دەستکاری</button>
-                                    <button class="btn btn-danger" onclick="deleteQuestion('${id}')">🗑️ سڕینەوە</button>
-                                </div>
-                            </div>
-                        `;
-                        index++;
-                    }
-                    container.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading questions:', error);
-                });
-        }
-        
-        // Add question
-        window.addQuestion = function() {
-            const questionText = document.getElementById('questionText').value.trim();
-            const optionA = document.getElementById('optionA').value.trim();
-            const optionB = document.getElementById('optionB').value.trim();
-            const optionC = document.getElementById('optionC').value.trim();
-            const optionD = document.getElementById('optionD').value.trim();
-            const correctAnswer = document.getElementById('correctAnswer').value;
-            
-            if (!questionText || !optionA || !optionB || !optionC || !optionD) {
-                showMessage('تکایە هەموو خانەکان پڕ بکەوە', 'error');
-                return;
-            }
-            
-            // Check question count
-            database.ref(`categories/${currentCategory}/questions`).once('value')
-                .then(snapshot => {
-                    const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-                    
-                    if (count >= 36) {
-                        showMessage('ناتوانیت زیاتر لە 36 پرسیار زیاد بکەیت!', 'error');
-                        return;
-                    }
-                    
-                    const newQuestionId = `q${Date.now()}`;
-                    const questionData = {
-                        text: questionText,
-                        options: {
-                            A: optionA,
-                            B: optionB,
-                            C: optionC,
-                            D: optionD
-                        },
-                        correct: correctAnswer,
-                        isUsed: false,
-                        createdAt: Date.now()
-                    };
-                    
-                    database.ref(`categories/${currentCategory}/questions/${newQuestionId}`).set(questionData)
-                        .then(() => {
-                            showMessage('✅ پرسیار بە سەرکەوتوویی زیاد کرا!', 'success');
-                            clearForm();
-                            loadQuestions();
-                        })
-                        .catch(error => {
-                            showMessage('❌ هەڵە لە زیادکردنی پرسیار: ' + error.message, 'error');
-                        });
-                });
-        };
-        
-        // Edit question
-        window.editQuestion = function(questionId) {
-            database.ref(`categories/${currentCategory}/questions/${questionId}`).once('value')
-                .then(snapshot => {
-                    const q = snapshot.val();
-                    if (q) {
-                        document.getElementById('questionText').value = q.text;
-                        document.getElementById('optionA').value = q.options.A;
-                        document.getElementById('optionB').value = q.options.B;
-                        document.getElementById('optionC').value = q.options.C;
-                        document.getElementById('optionD').value = q.options.D;
-                        document.getElementById('correctAnswer').value = q.correct;
-                        
-                        const addBtn = document.querySelector('.btn-success');
-                        addBtn.textContent = '🔄 نوێکردنەوە';
-                        addBtn.onclick = () => updateQuestion(questionId);
-                    }
-                });
-        };
-        
-        // Update question
-        window.updateQuestion = function(questionId) {
-            const questionText = document.getElementById('questionText').value.trim();
-            const optionA = document.getElementById('optionA').value.trim();
-            const optionB = document.getElementById('optionB').value.trim();
-            const optionC = document.getElementById('optionC').value.trim();
-            const optionD = document.getElementById('optionD').value.trim();
-            const correctAnswer = document.getElementById('correctAnswer').value;
-            
-            const questionData = {
-                text: questionText,
-                options: {
-                    A: optionA,
-                    B: optionB,
-                    C: optionC,
-                    D: optionD
-                },
-                correct: correctAnswer,
-                updatedAt: Date.now()
-            };
-            
-            database.ref(`categories/${currentCategory}/questions/${questionId}`).update(questionData)
-                .then(() => {
-                    showMessage('✅ پرسیار نوێ کرایەوە!', 'success');
-                    clearForm();
-                    loadQuestions();
-                    resetAddButton();
-                })
-                .catch(error => {
-                    showMessage('❌ هەڵە لە نوێکردنەوە: ' + error.message, 'error');
-                });
-        };
-        
-        // Delete question
-        window.deleteQuestion = function(questionId) {
-            if (confirm('دڵنیایت دەتەوێت ئەم پرسیارە بسڕیتەوە؟')) {
-                database.ref(`categories/${currentCategory}/questions/${questionId}`).remove()
-                    .then(() => {
-                        showMessage('✅ پرسیار سڕایەوە!', 'success');
-                        loadQuestions();
-                    })
-                    .catch(error => {
-                        showMessage('❌ هەڵە لە سڕینەوە: ' + error.message, 'error');
-                    });
-            }
-        };
-        
-        // Clear form
-        function clearForm() {
-            document.getElementById('questionText').value = '';
-            document.getElementById('optionA').value = '';
-            document.getElementById('optionB').value = '';
-            document.getElementById('optionC').value = '';
-            document.getElementById('optionD').value = '';
-            document.getElementById('correctAnswer').value = 'A';
-        }
-        
-        // Reset add button
-        function resetAddButton() {
-            const addBtn = document.querySelector('.btn-success');
-            addBtn.textContent = '➕ زیادکردنی پرسیار';
-            addBtn.onclick = addQuestion;
-        }
-        
-        // Show message
-        function showMessage(msg, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = msg;
-            messageDiv.className = 'message ' + type;
-            
-            setTimeout(() => {
-                messageDiv.className = 'message';
-            }, 3000);
-        }
-        
-        // Logout
-        window.logout = function() {
-            localStorage.removeItem('loggedInUser');
-            window.location.href = 'login.html';
-        };
-        
-        // Category tabs
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                currentCategory = this.dataset.cat;
-                clearForm();
-                resetAddButton();
-                loadQuestions();
-            });
+    <button class="btn-logout" onclick="logout()">🚪 دەرچوون</button>
+</div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAaKPSq0gBKaFG7Pfe-bGOpgEkz2TLnBS8",
+        authDomain: "quizinrebin.firebaseapp.com",
+        databaseURL: "https://quizinrebin-default-rtdb.firebaseio.com",
+        projectId: "quizinrebin",
+        storageBucket: "quizinrebin.firebasestorage.app",
+        messagingSenderId: "40466121073",
+        appId: "1:40466121073:web:766379012a8846c9d836d0",
+        measurementId: "G-1TT4ZDJYCM"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    const MAX_QS = 36;
+    const categoriesList = ["مێژوو", "زانست", "ئەدەبیات", "هونەر", "وەرزش", "تەکنەلۆژیا", "تەندروستی", "جوگرافیا", "ئاینی"];
+    let categories = {}, currentCat = "";
+    let roomId = localStorage.getItem("roomId") || "quiz_room_main";
+    let currentUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+    
+    if(currentUser.role !== "question_creator" && currentUser.role !== "admin" && currentUser.role !== "super_admin") {
+        alert("⚠️ تۆ مافی زیادکردنی پرسیارت نییە!");
+        window.location.href = "play.html";
+    }
+    
+    database.ref(`${roomId}/categories`).on('value', (s) => {
+        categories = s.val() || {};
+        categoriesList.forEach(c => { if(!categories[c]) categories[c] = []; });
+        if(!currentCat && categoriesList.length) currentCat = categoriesList[0];
+        renderTabs(); renderQuestions(); updateProgress();
+    });
+    
+    function renderTabs() {
+        const cont = document.getElementById("categoryTabs");
+        cont.innerHTML = "";
+        categoriesList.forEach(c => {
+            const btn = document.createElement("button");
+            btn.textContent = `${c} (${categories[c]?.length||0}/${MAX_QS})`;
+            btn.className = "tab-btn" + (c === currentCat ? " active" : "");
+            btn.onclick = () => { currentCat = c; renderTabs(); renderQuestions(); updateProgress(); };
+            cont.appendChild(btn);
         });
-        
-        // Initialize
-        if (checkAuth()) {
-            loadQuestions();
+    }
+    
+    function updateProgress() {
+        const count = categories[currentCat]?.length || 0;
+        document.getElementById("progressFill").style.width = (count/MAX_QS)*100 + "%";
+    }
+    
+    function addQuestion() {
+        const q = document.getElementById("questionText").value.trim();
+        const a = document.getElementById("optA").value.trim();
+        const b = document.getElementById("optB").value.trim();
+        const c = document.getElementById("optC").value.trim();
+        const d = document.getElementById("optD").value.trim();
+        const cor = document.getElementById("correctOpt").value;
+        if(!q || !a || !b || !c || !d) return alert("هەموو خانەکان پڕ بکەوە!");
+        if(categories[currentCat].length >= MAX_QS) return alert("پڕە!");
+        categories[currentCat].push({ text: q, options: [a,b,c,d], correct: cor });
+        database.ref(`${roomId}/categories`).set(categories);
+        document.getElementById("questionText").value = "";
+        document.getElementById("optA").value = "";
+        document.getElementById("optB").value = "";
+        document.getElementById("optC").value = "";
+        document.getElementById("optD").value = "";
+        renderTabs(); renderQuestions(); updateProgress();
+        alert("✅ پرسیار زیاد کرا!");
+    }
+    
+    function renderQuestions() {
+        const cont = document.getElementById("questionsContainer");
+        const qs = categories[currentCat] || [];
+        if(qs.length === 0) { cont.innerHTML = "<div style='color:white;text-align:center;'>هیچ پرسیارێک نییە</div>"; return; }
+        let html = "";
+        qs.forEach((q, i) => {
+            html += `<div class="question-item"><div class="question-text"><strong>${i+1}.</strong> ${q.text.substring(0, 60)}<br><small>${q.options.map((o,j)=>String.fromCharCode(65+j)+'. '+o.substring(0,20)).join(' | ')}</small><br><span style="color:#4CAF50;">✅ ڕاست: ${q.correct}</span></div><button class="delete-question" onclick="deleteQ(${i})">🗑️ سڕینەوە</button></div>`;
+        });
+        cont.innerHTML = html;
+    }
+    
+    function deleteQ(i) {
+        if(confirm("دڵنیایت لە سڕینەوەی ئەم پرسیارە؟")) {
+            categories[currentCat].splice(i,1);
+            database.ref(`${roomId}/categories`).set(categories);
+            renderQuestions(); renderTabs(); updateProgress();
+            alert("✅ پرسیار سڕایەوە!");
         }
-    </script>
+    }
+    
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+</script>
 </body>
 </html>
