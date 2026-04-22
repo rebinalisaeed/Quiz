@@ -11,13 +11,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #1e3c72, #2a5298); min-height: 100vh; padding: 30px 20px; }
         .container { max-width: 1000px; margin: auto; }
-        h1 { color: white; text-align: center; margin-bottom: 30px; }
+        h1 { color: white; text-align: center; margin-bottom: 30px; font-size: 28px; }
         .glass-card { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 25px; padding: 25px; margin-bottom: 30px; }
-        .glass-card h3 { color: white; margin-bottom: 20px; text-align: center; }
+        .glass-card h3 { color: white; margin-bottom: 20px; text-align: center; font-size: 22px; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 15px; border: none; background: rgba(255,255,255,0.9); font-size: 14px; }
         button { padding: 12px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #4CAF50; color: white; }
+        .btn-add { background: #4CAF50; color: white; width: 100%; }
+        .btn-add:hover { background: #45a049; transform: scale(1.02); }
         .btn-logout { background: #ff6b6b; color: white; margin-top: 20px; display: block; width: 200px; margin-left: auto; margin-right: auto; }
+        .btn-logout:hover { background: #ff5252; transform: scale(1.02); }
         .users-list { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-top: 20px; }
         .user-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; margin-bottom: 10px; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .user-info { flex: 1; }
@@ -27,6 +29,7 @@
         .role-creator { background: #ff9800; }
         .role-player { background: #4CAF50; }
         .delete-user { background: #f44336; color: white; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; }
+        .delete-user:hover { background: #d32f2f; }
         .row-2cols { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 600px) { .row-2cols { grid-template-columns: 1fr; } }
     </style>
@@ -51,7 +54,7 @@
                 <option value="group2">🏆 گروپی دووەم</option>
             </select>
         </div>
-        <button class="btn-add" onclick="createUser()" style="width:100%; margin-top:15px;">➕ دروستکردنی بەکارهێنەر</button>
+        <button class="btn-add" onclick="createUser()">➕ دروستکردنی بەکارهێنەر</button>
     </div>
     <div class="users-list">
         <h3 style="color:white; text-align:center; margin-bottom:15px;">📋 لیستی بەکارهێنەران</h3>
@@ -101,6 +104,7 @@
                 role: "super_admin",
                 createdAt: Date.now()
             });
+            console.log("✅ Super admin created!");
         }
     }
     
@@ -121,10 +125,16 @@
                 const userDiv = document.createElement("div");
                 userDiv.className = "user-item";
                 userDiv.innerHTML = `
-                    <div class="user-info"><strong>👤 ${username}</strong><br><span class="role-badge ${roleClass}">${roleText}</span></div>
-                    ${username !== SUPER_ADMIN_USERNAME ? `<button class="delete-user" onclick="deleteUser('${username}')">🗑️ سڕینەوە</button>` : '<span style="color:rgba(255,255,255,0.5);">(ناسڕێتەوە)</span>'}
+                    <div class="user-info">
+                        <strong>👤 ${username}</strong><br>
+                        <span class="role-badge ${roleClass}">${roleText}</span>
+                    </div>
+                    ${username !== SUPER_ADMIN_USERNAME ? `<button class="delete-user" onclick="deleteUser('${username}')">🗑️ سڕینەوە</button>` : '<span style="color:rgba(255,255,255,0.5);">(بەڕێوەبەری سیستەم - ناسڕێتەوە)</span>'}
                 `;
                 container.appendChild(userDiv);
+            }
+            if(Object.keys(users).length === 0) {
+                container.innerHTML = "<div class='empty-msg' style='color:white;text-align:center;'>هیچ بەکارهێنەرێک نییە</div>";
             }
         });
     }
@@ -135,11 +145,20 @@
         const role = document.getElementById("userRole").value;
         const group = document.getElementById("playerGroup").value;
         
-        if(!username || !password) { alert("پڕ بکەوە!"); return; }
-        if(username === SUPER_ADMIN_USERNAME) { alert("ئەم ناوە تەرخان کراوە!"); return; }
+        if(!username || !password) {
+            alert("❌ تکایە ناوی بەکارهێنەر و وشەی نهێنی پڕ بکەوە!");
+            return;
+        }
+        if(username === SUPER_ADMIN_USERNAME) {
+            alert("❌ ئەم ناوە بۆ بەڕێوەبەری سیستەم تەرخان کراوە!");
+            return;
+        }
         
         const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
-        if(snapshot.exists()) { alert("پێشتر هەیە!"); return; }
+        if(snapshot.exists()) {
+            alert("❌ ئەم ناوی بەکارهێنەرە پێشتر هەیە!");
+            return;
+        }
         
         const userData = { username, password, role, createdAt: Date.now() };
         if(role === "player") userData.group = group;
@@ -147,19 +166,22 @@
         await database.ref(`${ROOM_ID}/users/${username}`).set(userData);
         document.getElementById("newUsername").value = "";
         document.getElementById("newPassword").value = "";
-        alert("✅ دروست کرا!");
+        alert("✅ بەکارهێنەر بە سەرکەوتوویی دروست کرا!");
         loadUsers();
     }
     
     async function deleteUser(username) {
-        if(confirm(`سڕینەوەی "${username}"؟`)) {
+        if(confirm(`دڵنیایت لە سڕینەوەی بەکارهێنەر "${username}"؟`)) {
             await database.ref(`${ROOM_ID}/users/${username}`).remove();
-            alert("✅ سڕایەوە!");
+            alert("✅ بەکارهێنەر سڕایەوە!");
             loadUsers();
         }
     }
     
-    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+    }
     
     createSuperAdminIfNotExists().then(() => loadUsers());
 </script>
