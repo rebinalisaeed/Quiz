@@ -1,205 +1,89 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ckb">
+<html dir="rtl">
 <head>
+    <title>چوونە ژوورەوە - یاری پرسیار و وەڵام</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>یاری پرسیار و وەڵام - پەڕەی سەرەکی</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        @font-face {
-            font-family: 'K24KurdishBold';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'K24KurdishBold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            overflow: hidden;
-            animation: fadeIn 0.5s ease;
-            text-align: center;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 50px 30px;
-        }
-        
-        .logo {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        
-        .header h1 {
-            color: white;
-            font-size: 32px;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 14px;
-        }
-        
-        .content {
-            padding: 40px 30px;
-            background: white;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 16px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102,126,234,0.3);
-        }
-        
-        .btn-secondary {
-            background: #f7fafc;
-            color: #4a5568;
-            border: 2px solid #e2e8f0;
-        }
-        
-        .btn-secondary:hover {
-            background: #edf2f7;
-            transform: translateY(-2px);
-        }
-        
-        .info-text {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            color: #718096;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-        
-        .info-text a {
-            color: #667eea;
-            text-decoration: none;
-        }
-        
-        @media (max-width: 480px) {
-            .header {
-                padding: 30px 20px;
-            }
-            
-            .logo {
-                font-size: 60px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .content {
-                padding: 30px 20px;
-            }
-            
-            .btn {
-                padding: 14px;
-                font-size: 16px;
-            }
-        }
+        @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', Tahoma, sans-serif; }
+        body { background: linear-gradient(135deg, #1e3c72, #2a5298); width: 100%; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .login-container { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 30px; padding: 40px; width: 90%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        h1 { text-align: center; color: white; margin-bottom: 30px; font-size: 28px; }
+        .glass-box { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 25px; }
+        .glass-box label { color: white; display: block; margin-bottom: 8px; font-size: 14px; text-align: right; }
+        input { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: none; border-radius: 15px; font-size: 16px; text-align: right; background: rgba(255,255,255,0.9); }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 15px; font-size: 18px; cursor: pointer; font-weight: bold; background: #4CAF50; color: white; transition: 0.3s; }
+        button:hover { background: #45a049; transform: scale(1.02); }
+        .error { color: #ff6b6b; text-align: center; margin-top: 15px; font-size: 14px; }
+        .room-id { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🎮</div>
-            <h1>یاری پرسیار و وەڵام</h1>
-            <p>بەخێربێیت بۆ یارییەکە</p>
-        </div>
-        
-        <div class="content">
-            <button class="btn btn-primary" onclick="goToLogin()">
-                🚪 چوونە ژوورەوە
-            </button>
-            <button class="btn btn-secondary" onclick="goToPlay()">
-                🎮 یاری کردن (میوان)
-            </button>
-            
-            <div class="info-text">
-                <p>📌 تێبینی:</p>
-                <p>• بۆ چوونە ژوورەوە پێویستت بە ناوی بەکارهێنەر و پاسوۆردە</p>
-                <p>• ئەگەر هێشتا هەژمارت نییە، پەیوەندی بە ئەدمینەوە بکە</p>
-                <p>• ئەم یارییە بۆ کۆمپیوتەر و مۆبایل و تابلێت ڕێکخراوە</p>
-            </div>
-        </div>
+<div class="login-container">
+    <h1>🎮 یاری پرسیار و وەڵام 🎮</h1>
+    <div class="glass-box">
+        <label>👤 ناوی بەکارهێنەر</label>
+        <input type="text" id="username" placeholder="ناوی بەکارهێنەر" autocomplete="off">
+        <label>🔐 وشەی نهێنی</label>
+        <input type="password" id="password" placeholder="وشەی نهێنی" autocomplete="off">
+        <button onclick="login()">🚪 چوونە ژوورەوە</button>
+        <div id="errorMsg" class="error"></div>
+        <div class="room-id" id="roomIdDisplay"></div>
     </div>
-
-    <script>
-        function goToLogin() {
-            window.location.href = 'login.html';
+</div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAaKPSq0gBKaFG7Pfe-bGOpgEkz2TLnBS8",
+        authDomain: "quizinrebin.firebaseapp.com",
+        databaseURL: "https://quizinrebin-default-rtdb.firebaseio.com",
+        projectId: "quizinrebin",
+        storageBucket: "quizinrebin.firebasestorage.app",
+        messagingSenderId: "40466121073",
+        appId: "1:40466121073:web:766379012a8846c9d836d0",
+        measurementId: "G-1TT4ZDJYCM"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    const ROOM_ID = "quiz_room_main";
+    document.getElementById("roomIdDisplay").innerText = `ژوور: ${ROOM_ID}`;
+    
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    window.addEventListener('keydown', e => {
+        if(e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) e.preventDefault();
+    });
+    
+    async function login() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        
+        if(!username || !password) {
+            document.getElementById("errorMsg").innerText = "❌ تکایە ناوی بەکارهێنەر و وشەی نهێنی پڕ بکەوە!";
+            return;
         }
         
-        function goToPlay() {
-            // Check if already logged in
-            const loggedInUser = localStorage.getItem('loggedInUser');
-            if (loggedInUser) {
-                const user = JSON.parse(loggedInUser);
-                if (user.role === 'player') {
-                    window.location.href = 'play.html';
-                } else if (user.role === 'admin') {
-                    window.location.href = 'user_management.html';
-                } else if (user.role === 'presenter') {
-                    window.location.href = 'presenter.html';
-                } else if (user.role === 'question_creator') {
-                    window.location.href = 'add_question.html';
-                } else {
-                    window.location.href = 'login.html';
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
+        const snapshot = await database.ref(`${ROOM_ID}/users/${username}`).once('value');
+        const user = snapshot.val();
+        
+        if(user && user.password === password) {
+            localStorage.setItem("loggedInUser", JSON.stringify({ username: username, role: user.role }));
+            localStorage.setItem("roomId", ROOM_ID);
+            
+            if(user.role === "super_admin") window.location.href = "user_management.html";
+            else if(user.role === "admin") window.location.href = "presenter.html";
+            else if(user.role === "question_creator") window.location.href = "add_question.html";
+            else window.location.href = "play.html";
+        } else {
+            document.getElementById("errorMsg").innerText = "❌ ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!";
+            document.getElementById("password").value = "";
         }
-    </script>
+    }
+    
+    document.getElementById("password").addEventListener("keypress", function(e) { if(e.key === "Enter") login(); });
+</script>
 </body>
 </html>
