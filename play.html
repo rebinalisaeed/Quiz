@@ -9,19 +9,132 @@
     <style>
         @font-face { font-family: 'K24Kurdish'; src: url('K24KurdishBold-Bold.ttf') format('truetype'); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'K24Kurdish', 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .waiting-container { text-align: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 30px; padding: 40px 20px; width: 100%; max-width: 400px; }
-        .waiting-message { color: #ff9800; font-size: 24px; margin-bottom: 20px; }
-        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 16px; }
-        .question-container { width: 100%; max-width: 500px; margin: auto; }
-        .timer { font-size: 48px; color: #ff6b6b; background: rgba(0,0,0,0.6); display: inline-block; padding: 8px 25px; border-radius: 50px; margin: 10px 0; font-family: monospace; text-align: center; width: 100%; }
-        .question-text { font-size: 22px; color: white; margin: 20px 0; padding: 20px; background: rgba(0,0,0,0.4); border-radius: 20px; text-align: center; }
-        .options-container { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .option-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 14px 18px; font-size: 18px; color: white; cursor: pointer; text-align: center; width: 100%; }
-        .option-btn-orange { background: #ff9800 !important; }
-        .option-correct { background: #4CAF50 !important; }
-        .option-wrong { background: #f44336 !important; }
-        @media (max-width: 600px) { .timer { font-size: 40px; } .question-text { font-size: 18px; } .option-btn { font-size: 16px; padding: 12px 16px; } }
+        body { 
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+        }
+        .waiting-container { 
+            text-align: center; 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px); 
+            border-radius: 30px; 
+            padding: 50px 30px; 
+            width: 100%;
+            max-width: 400px;
+        }
+        .waiting-message { color: #ff9800; font-size: 28px; margin-bottom: 20px; }
+        .waiting-sub { color: rgba(255,255,255,0.7); font-size: 18px; }
+        .eliminated-message { color: #ff6b6b; font-size: 18px; margin-top: 20px; }
+        
+        .question-container { 
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+        }
+        .timer { 
+            font-size: 52px; 
+            color: #ff6b6b; 
+            background: rgba(0,0,0,0.6); 
+            display: inline-block; 
+            padding: 10px 35px; 
+            border-radius: 60px; 
+            margin: 15px 0;
+            font-family: monospace;
+            text-align: center;
+            width: 100%;
+            animation: slideDown 0.3s ease;
+        }
+        .question-text { 
+            font-size: 24px; 
+            color: white; 
+            margin: 25px 0; 
+            padding: 25px; 
+            background: rgba(0,0,0,0.4); 
+            border-radius: 25px; 
+            line-height: 1.5;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 25px 0;
+            animation: slideUp 0.5s ease;
+        }
+        .option-btn { 
+            background: rgba(255,255,255,0.15); 
+            border: 2px solid rgba(255,255,255,0.3); 
+            border-radius: 15px; 
+            padding: 16px 20px; 
+            font-size: 18px; 
+            color: white; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+        .option-btn-orange { 
+            background: #ff9800 !important; 
+            border-color: #e68900 !important; 
+            transform: scale(1.02); 
+        }
+        .option-correct { 
+            background: #4CAF50 !important; 
+            border-color: #2e7d32 !important; 
+            animation: pulse 0.5s ease;
+        }
+        .option-wrong { 
+            background: #f44336 !important; 
+            border-color: #c62828 !important; 
+            animation: shake 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @media (max-width: 600px) { 
+            .timer { font-size: 40px; padding: 8px 25px; }
+            .question-text { font-size: 20px; padding: 18px; }
+            .option-btn { font-size: 16px; padding: 14px 18px; }
+            .waiting-message { font-size: 24px; }
+            .waiting-sub { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -58,7 +171,9 @@
     let myEliminated = false;
     let hasAnswered = false;
     
-    if(!currentUser.username) window.location.href = "index.html";
+    if(!currentUser.username) {
+        window.location.href = "index.html";
+    }
     
     async function registerPlayer() {
         const userSnapshot = await database.ref(`${ROOM_ID}/users/${currentUser.username}`).once('value');
@@ -74,6 +189,7 @@
             eliminated: false
         });
         isReady = true;
+        console.log("✅ یاریکەر تۆمار کرا:", playerId);
     }
     
     database.ref(`${ROOM_ID}/activePlayers/${playerId}/eliminated`).on('value', (snapshot) => {
@@ -110,21 +226,36 @@
         selectedAnswerBtn = null;
         
         document.getElementById("waitingContainer").style.display = "none";
-        document.getElementById("questionContainer").style.display = "block";
-        
         const container = document.getElementById("questionContainer");
-        container.innerHTML = `
-            <div class="timer" id="timerDisplay">30</div>
-            <div class="question-text">${question.text}</div>
-            <div class="options-container">
-                ${question.options.map((opt, idx) => `
-                    <div class="option-btn" data-opt="${String.fromCharCode(65+idx)}" onclick="selectAnswer('${String.fromCharCode(65+idx)}')">
-                        ${String.fromCharCode(65+idx)}. ${opt}
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        container.style.display = "block";
+        
+        renderQuestionWithAnimation(question);
         startTimer();
+    }
+    
+    function renderQuestionWithAnimation(question) {
+        const letters = ["A", "B", "C", "D"];
+        const container = document.getElementById("questionContainer");
+        
+        container.innerHTML = `<div class="question-text" style="animation: slideUp 0.3s ease;">${question.text}</div>`;
+        
+        setTimeout(() => {
+            const optionsHtml = `
+                <div class="options-container" style="animation: slideUp 0.5s ease;">
+                    ${question.options.map((opt, idx) => `
+                        <div class="option-btn" data-opt="${letters[idx]}" onclick="selectAnswer('${letters[idx]}')">
+                            ${letters[idx]}. ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML = `<div class="question-text" style="animation: slideUp 0.3s ease;">${question.text}</div>${optionsHtml}`;
+        }, 300);
+        
+        setTimeout(() => {
+            const timerHtml = `<div class="timer" id="timerDisplay" style="animation: slideDown 0.3s ease;">30</div>`;
+            container.innerHTML = timerHtml + container.innerHTML;
+        }, 800);
     }
     
     function startTimer() {
@@ -142,6 +273,8 @@
                     setTimeout(() => {
                         document.getElementById("questionContainer").style.display = "none";
                         document.getElementById("waitingContainer").style.display = "block";
+                        isAnswered = false;
+                        selectedAnswerBtn = null;
                     }, 2000);
                 }
             }
@@ -167,19 +300,26 @@
         hasAnswered = true;
         clearInterval(timerInterval);
         
+        console.log("📤 ناردنی وەڵام:", selectedLetter, "بۆ یاریکەر:", playerId);
         database.ref(`${ROOM_ID}/activePlayers/${playerId}/currentAnswer`).set(selectedLetter);
         
         const btns = document.querySelectorAll(".option-btn");
         btns.forEach(btn => {
             btn.style.pointerEvents = "none";
-            if(btn.getAttribute("data-opt") === currentCorrectAnswer) btn.classList.add("option-correct");
-            if(btn.getAttribute("data-opt") === selectedLetter && selectedLetter !== currentCorrectAnswer) btn.classList.add("option-wrong");
+            if(btn.getAttribute("data-opt") === currentCorrectAnswer) {
+                btn.classList.add("option-correct");
+            }
+            if(btn.getAttribute("data-opt") === selectedLetter && selectedLetter !== currentCorrectAnswer) {
+                btn.classList.add("option-wrong");
+            }
             btn.classList.remove("option-btn-orange");
         });
         
         setTimeout(() => {
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("waitingContainer").style.display = "block";
+            isAnswered = false;
+            selectedAnswerBtn = null;
         }, 2000);
     }
     
