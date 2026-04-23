@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>زیادکردنی پرسیار</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+        
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+        
+        /* Category Tabs */
+        .categories-tabs {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .category-tab {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        
+        .category-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .category-tab:hover:not(.active) {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+            border-right: 4px solid #667eea;
+            padding-right: 15px;
+        }
+        
+        .question-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        
+        .correct-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Questions List */
+        .questions-list-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .category-questions {
+            margin-top: 20px;
+        }
+        
+        .question-item {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .question-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .question-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .edit-question-btn, .delete-question-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .edit-question-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .delete-question-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .question-count {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .message.success {
+            background: #4CAF50;
+        }
+        
+        .message.error {
+            background: #f44336;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .limit-reached {
+            background: #ff4757;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .category-tab {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .question-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .question-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 زیادکردنی پرسیار</h1>
+            <button class="logout-btn" onclick="logout()">🚪 دەرچوون</button>
+        </div>
+        
+        <!-- Categories Tabs -->
+        <div class="categories-tabs" id="categoriesTabs"></div>
+        
+        <!-- Add Question Form -->
+        <div class="form-card">
+            <h2 class="form-title">➕ زیادکردنی پرسیاری نوێ</h2>
+            <textarea id="questionText" class="question-input" rows="3" placeholder="پرسیارەکە لێرە بنوسە..."></textarea>
+            <div class="options-grid">
+                <input type="text" id="option0" class="option-input" placeholder="هەڵبژاردەی 1">
+                <input type="text" id="option1" class="option-input" placeholder="هەڵبژاردەی 2">
+                <input type="text" id="option2" class="option-input" placeholder="هەڵبژاردەی 3">
+                <input type="text" id="option3" class="option-input" placeholder="هەڵبژاردەی 4">
+            </div>
+            <select id="correctAnswer" class="correct-select">
+                <option value="0">هەڵبژاردەی 1</option>
+                <option value="1">هەڵبژاردەی 2</option>
+                <option value="2">هەڵبژاردەی 3</option>
+                <option value="3">هەڵبژاردەی 4</option>
+            </select>
+            <button class="add-btn" onclick="addQuestion()">➕ زیادکردنی پرسیار</button>
+            <div id="limitWarning" style="display: none;" class="limit-reached">⚠️ ئەم کەتەگۆریە پڕە! (36 پرسیار)</div>
+        </div>
+        
+        <!-- Questions List -->
+        <div class="questions-list-container">
+            <h2 class="form-title">📋 پرسیارەکان</h2>
+            <div id="questionsList"></div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { db, ref, get, set, push, remove, update, onValue } from './firebase-config.js';
+        
+        const categories = [
+            'مێژوو', 'زانست', 'ئەدەبییات', 'هونەر', 'وەرزش', 
+            'تەکنەلۆژیا', 'تەندروستی', 'جوگرافیا', 'ئایینی'
+        ];
+        
+        const categoryKeys = [
+            'history', 'science', 'literature', 'art', 'sports',
+            'technology', 'health', 'geography', 'religion'
+        ];
+        
+        let currentCategory = 'history';
+        let editingQuestionId = null;
+        let editingCategory = null;
+        
+        // دروستکردنی تاپەکان
+        function createTabs() {
+            const container = document.getElementById('categoriesTabs');
+            container.innerHTML = '';
+            categories.forEach((cat, index) => {
+                const button = document.createElement('button');
+                button.className = `category-tab ${index === 0 ? 'active' : ''}`;
+                button.textContent = cat;
+                button.onclick = () => {
+                    document.querySelectorAll('.category-tab').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    currentCategory = categoryKeys[index];
+                    loadQuestionsForCategory(currentCategory);
+                    clearForm();
+                };
+                container.appendChild(button);
+            });
+        }
+        
+        // بارکردنی پرسیارەکان بۆ کەتەگۆریەک
+        async function loadQuestionsForCategory(categoryKey) {
+            const questionsRef = ref(db, `categories/${categoryKey}/questions`);
+            onValue(questionsRef, (snapshot) => {
+                const container = document.getElementById('questionsList');
+                if (snapshot.exists()) {
+                    const questions = snapshot.val();
+                    const questionCount = Object.keys(questions).length;
+                    
+                    // نیشاندانی ژمارەی پرسیارەکان
+                    const title = document.querySelector('.form-title');
+                    if (questionCount >= 36) {
+                        document.getElementById('limitWarning').style.display = 'block';
+                    } else {
+                        document.getElementById('limitWarning').style.display = 'none';
+                    }
+                    
+                    let html = `<div style="margin-bottom: 10px;">📊 ژمارەی پرسیارەکان: ${questionCount}/36</div>`;
+                    
+                    for (let qId in questions) {
+                        const q = questions[qId];
+                        html += `
+                            <div class="question-item" data-id="${qId}" data-category="${categoryKey}">
+                                <div class="question-text">
+                                    <strong>📌 پرسیار:</strong> ${q.text}<br>
+                                    <small>✅ وەڵامی ڕاست: ${q.options[q.correct]}</small>
+                                </div>
+                                <div class="question-actions">
+                                    <button class="edit-question-btn" onclick='editQuestion("${categoryKey}", "${qId}", ${JSON.stringify(q)})'>✏️ دەستکاری</button>
+                                    <button class="delete-question-btn" onclick='deleteQuestion("${categoryKey}", "${qId}")'>🗑️ سڕینەوە</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (questionCount === 0) {
+                        html += '<div style="text-align: center; padding: 40px; color: #999;">هیچ پرسیارێک نییە. تکایە پرسیارێک زیاد بکە</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">هیچ پرسیارێک نییە. تکایە پرسیارێک زیاد بکە</div>';
+                    document.getElementById('limitWarning').style.display = 'none';
+                }
+            });
+        }
+        
+        // زیادکردنی پرسیار
+        window.addQuestion = async function() {
+            const questionText = document.getElementById('questionText').value.trim();
+            const options = [
+                document.getElementById('option0').value.trim(),
+                document.getElementById('option1').value.trim(),
+                document.getElementById('option2').value.trim(),
+                document.getElementById('option3').value.trim()
+            ];
+            const correct = parseInt(document.getElementById('correctAnswer').value);
+            
+            if (!questionText) {
+                showMessage('تکایە پرسیارەکە بنوسە', 'error');
+                return;
+            }
+            
+            for (let i = 0; i < options.length; i++) {
+                if (!options[i]) {
+                    showMessage(`تکایە هەڵبژاردەی ${i+1} پڕ بکەرەوە`, 'error');
+                    return;
+                }
+            }
+            
+            // پشکنینی ژمارەی پرسیارەکان
+            const questionsRef = ref(db, `categories/${currentCategory}/questions`);
+            const snapshot = await get(questionsRef);
+            let currentCount = 0;
+            if (snapshot.exists()) {
+                currentCount = Object.keys(snapshot.val()).length;
+            }
+            
+            if (currentCount >= 36) {
+                showMessage('ئەم کەتەگۆریە پڕە! ناتوانیت زیاتر پرسیار زیاد بکەیت', 'error');
+                return;
+            }
+            
+            const questionData = {
+                text: questionText,
+                options: options,
+                correct: correct,
+                used: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            if (editingQuestionId && editingCategory === currentCategory) {
+                // نوێکردنەوەی پرسیار
+                await update(ref(db, `categories/${currentCategory}/questions/${editingQuestionId}`), questionData);
+                showMessage('پرسیار نوێ کرایەوە', 'success');
+                editingQuestionId = null;
+                editingCategory = null;
+                document.querySelector('.add-btn').innerHTML = '➕ زیادکردنی پرسیار';
+            } else {
+                // زیادکردنی پرسیاری نوێ
+                const newQuestionRef = push(ref(db, `categories/${currentCategory}/questions`));
+                await set(newQuestionRef, questionData);
+                showMessage('پرسیار بە سەرکەوتوویی زیاد کرا', 'success');
+            }
+            
+            clearForm();
+        }
+        
+        // دەستکاری پرسیار
+        window.editQuestion = function(categoryKey, questionId, question) {
+            editingQuestionId = questionId;
+            editingCategory = categoryKey;
+            
+            // گۆڕینی کەتەگۆری ئەگەر پێویست بێت
+            const categoryIndex = categoryKeys.indexOf(categoryKey);
+            if (categoryIndex !== -1) {
+                document.querySelectorAll('.category-tab')[categoryIndex].click();
+            }
+            
+            document.getElementById('questionText').value = question.text;
+            document.getElementById('option0').value = question.options[0];
+            document.getElementById('option1').value = question.options[1];
+            document.getElementById('option2').value = question.options[2];
+            document.getElementById('option3').value = question.options[3];
+            document.getElementById('correctAnswer').value = question.correct;
+            
+            document.querySelector('.add-btn').innerHTML = '✏️ نوێکردنەوەی پرسیار';
+            
+            // Scrolling to form
+            document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // سڕینەوەی پرسیار
+        window.deleteQuestion = async function(categoryKey, questionId) {
+            if (confirm('دڵنیایت دەتەوێت ئەم پرسیارە بسڕیتەوە؟')) {
+                await remove(ref(db, `categories/${categoryKey}/questions/${questionId}`));
+                showMessage('پرسیار سڕایەوە', 'success');
+            }
+        }
+        
+        function clearForm() {
+            document.getElementById('questionText').value = '';
+            document.getElementById('option0').value = '';
+            document.getElementById('option1').value = '';
+            document.getElementById('option2').value = '';
+            document.getElementById('option3').value = '';
+            document.getElementById('correctAnswer').value = '0';
+            document.querySelector('.add-btn').innerHTML = '➕ زیادکردنی پرسیار';
+            editingQuestionId = null;
+            editingCategory = null;
+        }
+        
+        window.logout = function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+        
+        function showMessage(msg, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = msg;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // پشکنینی ڕێگەپێدان
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (currentUser.role !== 'admin' && currentUser.role !== 'question_creator') {
+            alert('تەنها ئەدمین و دروستکەری پرسیار دەتوانن ئەم پەڕەیە ببینن!');
+            window.location.href = 'login.html';
+        }
+        
+        // Initialize
+        createTabs();
+        loadQuestionsForCategory('history');
+    </script>
+</body>
+</html>

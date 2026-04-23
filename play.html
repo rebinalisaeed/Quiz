@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>یاریکەر - یاری پرسیار و وەڵام</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Score Header */
+        .score-header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .score-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .score-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        /* Waiting Screen */
+        .waiting-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .waiting-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .waiting-text {
+            font-size: 24px;
+            color: #666;
+        }
+        
+        /* Question Screen */
+        .question-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+        }
+        
+        .timer {
+            font-size: 60px;
+            font-weight: bold;
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .question-text {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            text-align: center;
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: right;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            background: #e0e0e0;
+            transform: scale(1.02);
+        }
+        
+        .option-btn.selected {
+            background: #ff9800;
+            color: white;
+            border-color: #ff9800;
+        }
+        
+        .option-btn.correct-answer {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .option-btn.wrong-answer {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .result-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        .result-message.correct {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .result-message.wrong {
+            background: #f44336;
+            color: white;
+        }
+        
+        /* Eliminated Screen */
+        .eliminated-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .eliminated-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .eliminated-text {
+            font-size: 28px;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+        
+        .eliminated-subtext {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .question-text {
+                font-size: 18px;
+            }
+            
+            .timer {
+                font-size: 48px;
+            }
+            
+            .option-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Score Header -->
+        <div class="score-header">
+            <div class="score-title">🌟 خاڵەکانی تۆ</div>
+            <div class="score-value" id="playerScore">5</div>
+        </div>
+        
+        <!-- Waiting Screen -->
+        <div id="waitingScreen" class="waiting-screen">
+            <div class="waiting-spinner"></div>
+            <div class="waiting-text">⏳ چاوەڕوانی پرسیاری داهاتوو...</div>
+        </div>
+        
+        <!-- Question Screen -->
+        <div id="questionScreen" class="question-screen hidden">
+            <div class="timer" id="timer">30</div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options-list" id="optionsList"></div>
+            <div id="resultMessage" class="result-message hidden"></div>
+        </div>
+        
+        <!-- Eliminated Screen -->
+        <div id="eliminatedScreen" class="eliminated-screen hidden">
+            <div class="eliminated-icon">😢</div>
+            <div class="eliminated-text">تۆ لە یاریەکە دەرکرایت</div>
+            <div class="eliminated-subtext">خاڵەکانت بە سفر گەیشتن</div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { db, ref, get, set, update, onValue } from './firebase-config.js';
+        
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        let currentQuestion = null;
+        let hasAnswered = false;
+        let timerInterval = null;
+        let isEliminated = false;
+        let currentScore = 5;
+        
+        // Check if player is eliminated
+        async function checkEliminated() {
+            const userRef = ref(db, `users/${currentUser.userId}`);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const user = snapshot.val();
+                if (user.isEliminated === true || (user.score !== undefined && user.score <= 0)) {
+                    isEliminated = true;
+                    showEliminatedScreen();
+                    return true;
+                }
+                currentScore = user.score || 5;
+                document.getElementById('playerScore').textContent = currentScore;
+            }
+            return false;
+        }
+        
+        // Listen for questions
+        function listenForQuestions() {
+            const gameRef = ref(db, 'game');
+            onValue(gameRef, async (snapshot) => {
+                if (isEliminated) return;
+                
+                const eliminated = await checkEliminated();
+                if (eliminated) return;
+                
+                const game = snapshot.val();
+                
+                if (game && game.questionActive === true && game.currentQuestion) {
+                    // New question arrived
+                    if (!currentQuestion || game.currentQuestion.timestamp !== currentQuestion.timestamp) {
+                        currentQuestion = game.currentQuestion;
+                        hasAnswered = false;
+                        showQuestion(game.currentQuestion);
+                    }
+                } else if (game && game.showAnswer === true && currentQuestion && !hasAnswered) {
+                    // Show answer after timeout
+                    showAnswer();
+                } else if (game && game.questionActive === false && !game.showAnswer) {
+                    // Go back to waiting screen
+                    if (!document.getElementById('waitingScreen').classList.contains('hidden')) {
+                        // Already waiting
+                    } else {
+                        hideQuestionScreen();
+                        await checkEliminated();
+                        updateScoreDisplay();
+                    }
+                    currentQuestion = null;
+                }
+            });
+        }
+        
+        function showQuestion(question) {
+            document.getElementById('waitingScreen').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            document.getElementById('resultMessage').classList.add('hidden');
+            
+            document.getElementById('questionText').textContent = question.text;
+            
+            const optionsContainer = document.getElementById('optionsList');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = `${idx+1}. ${opt}`;
+                btn.onclick = () => submitAnswer(idx, question.correct);
+                optionsContainer.appendChild(btn);
+            });
+            
+            // Start timer
+            startTimer();
+        }
+        
+        function startTimer() {
+            let seconds = 30;
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = seconds;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                seconds--;
+                timerElement.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    if (!hasAnswered) {
+                        // Auto submit wrong answer
+                        submitAnswer(-1, null);
+                    }
+                }
+            }, 1000);
+        }
+        
+        async function submitAnswer(selectedIndex, correctIndex) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            clearInterval(timerInterval);
+            
+            const options = document.querySelectorAll('.option-btn');
+            
+            // Highlight selected answer
+            if (selectedIndex !== -1) {
+                options[selectedIndex].classList.add('selected');
+            }
+            
+            const isCorrect = (selectedIndex === correctIndex);
+            const resultMessage = document.getElementById('resultMessage');
+            
+            if (isCorrect) {
+                // +3 points
+                currentScore += 3;
+                resultMessage.textContent = '✅ وەڵامەکەت ڕاست بوو! +3 خاڵ';
+                resultMessage.classList.add('correct');
+                resultMessage.classList.remove('wrong', 'hidden');
+                
+                // Update score in Firebase
+                const userRef = ref(db, `users/${currentUser.userId}`);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    await update(userRef, { score: (user.score || 5) + 3 });
+                }
+            } else {
+                // -1 point
+                currentScore -= 1;
+                resultMessage.textContent = '❌ وەڵامەکەت هەڵە بوو! -1 خاڵ';
+                resultMessage.classList.add('wrong');
+                resultMessage.classList.remove('correct', 'hidden');
+                
+                // Show correct answer
+                options[correctIndex].classList.add('correct-answer');
+                if (selectedIndex !== -1) {
+                    options[selectedIndex].classList.add('wrong-answer');
+                }
+                
+                // Update score in Firebase
+                const userRef = ref(db, `users/${currentUser.userId}`);
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    const newScore = (user.score || 5) - 1;
+                    await update(userRef, { score: newScore });
+                    
+                    // Check if eliminated
+                    if (newScore <= 0) {
+                        await update(userRef, { isEliminated: true, isActive: false });
+                        
+                        // Penalty for group
+                        const group = user.group;
+                        const usersRef = ref(db, 'users');
+                        const usersSnapshot = await get(usersRef);
+                        if (usersSnapshot.exists()) {
+                            const users = usersSnapshot.val();
+                            for (let uid in users) {
+                                if (users[uid].role === 'player' && users[uid].group === group && users[uid].isEliminated !== true) {
+                                    const currentGroupScore = users[uid].score || 5;
+                                    await update(ref(db, `users/${uid}`), { score: currentGroupScore - 2 });
+                                }
+                            }
+                        }
+                        
+                        isEliminated = true;
+                        setTimeout(() => {
+                            showEliminatedScreen();
+                        }, 3000);
+                    }
+                }
+            }
+            
+            updateScoreDisplay();
+            
+            // Wait 10 seconds then go back to waiting
+            setTimeout(() => {
+                hideQuestionScreen();
+                // Reset game showAnswer flag
+                set(ref(db, 'game/showAnswer'), false);
+            }, 10000);
+        }
+        
+        function showAnswer() {
+            if (hasAnswered) return;
+            
+            const options = document.querySelectorAll('.option-btn');
+            if (currentQuestion) {
+                options[currentQuestion.correct].classList.add('correct-answer');
+            }
+            
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.textContent = '⏰ کاتی وەڵامدان تەواو بوو!';
+            resultMessage.classList.add('wrong');
+            resultMessage.classList.remove('hidden');
+            
+            hasAnswered = true;
+            clearInterval(timerInterval);
+            
+            // -1 point for not answering
+            const userRef = ref(db, `users/${currentUser.userId}`);
+            get(userRef).then(async (snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    const newScore = (user.score || 5) - 1;
+                    await update(userRef, { score: newScore });
+                    currentScore = newScore;
+                    updateScoreDisplay();
+                    
+                    if (newScore <= 0) {
+                        await update(userRef, { isEliminated: true, isActive: false });
+                        isEliminated = true;
+                        setTimeout(() => showEliminatedScreen(), 3000);
+                    }
+                }
+            });
+            
+            setTimeout(() => {
+                hideQuestionScreen();
+                set(ref(db, 'game/showAnswer'), false);
+            }, 10000);
+        }
+        
+        function hideQuestionScreen() {
+            document.getElementById('questionScreen').classList.add('hidden');
+            document.getElementById('waitingScreen').classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
+        }
+        
+        function showEliminatedScreen() {
+            document.getElementById('waitingScreen').classList.add('hidden');
+            document.getElementById('questionScreen').classList.add('hidden');
+            document.getElementById('eliminatedScreen').classList.remove('hidden');
+        }
+        
+        function updateScoreDisplay() {
+            document.getElementById('playerScore').textContent = currentScore;
+        }
+        
+        // Listen for score updates
+        function listenForScoreUpdates() {
+            const userRef = ref(db, `users/${currentUser.userId}`);
+            onValue(userRef, (snapshot) => {
+                if (snapshot.exists() && !isEliminated) {
+                    const user = snapshot.val();
+                    currentScore = user.score || 5;
+                    document.getElementById('playerScore').textContent = currentScore;
+                    
+                    if (user.isEliminated === true || currentScore <= 0) {
+                        isEliminated = true;
+                        showEliminatedScreen();
+                    }
+                }
+            });
+        }
+        
+        // Check if player is allowed to play
+        async function init() {
+            if (!currentUser.userId) {
+                alert('تکایە بچۆرە ژوورەوە!');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (currentUser.role !== 'player') {
+                alert('ئەم پەڕەیە تەنها بۆ یاریکەرە!');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const eliminated = await checkEliminated();
+            if (!eliminated) {
+                listenForQuestions();
+                listenForScoreUpdates();
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>

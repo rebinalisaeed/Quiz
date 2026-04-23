@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>چوونە ژوورەوە - یاری پرسیار و وەڵام</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .login-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .login-box h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+        .error-msg {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 30px 20px;
+            }
+            .login-box h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 یاری پرسیار و وەڵام</h1>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>👤 ناوی بەکارهێنەر</label>
+                    <input type="text" id="username" required placeholder="ناوی بەکارهێنەر">
+                </div>
+                <div class="input-group">
+                    <label>🔑 پاسوۆرد</label>
+                    <input type="password" id="password" required placeholder="پاسوۆرد">
+                </div>
+                <div class="input-group">
+                    <label>📍 پلە</label>
+                    <select id="role">
+                        <option value="player">یاریکەر</option>
+                        <option value="question_creator">دروستکەری پرسیار</option>
+                        <option value="admin">بەڕێوەبەر</option>
+                        <option value="presenter">پێشکەشکار</option>
+                    </select>
+                </div>
+                <button type="submit" class="login-btn">🚪 چوونە ژوورەوە</button>
+                <div class="error-msg" id="errorMsg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, ref, get } from './firebase-config.js';
+        
+        // سوپەر ئەدمین دەستەبەری یەکەم
+        async function setupSuperAdmin() {
+            const adminRef = ref(db, 'users/super_admin');
+            const snapshot = await get(adminRef);
+            if (!snapshot.exists()) {
+                await set(adminRef, {
+                    username: 'username_admin',
+                    password: 'userpass11',
+                    role: 'admin',
+                    name: 'سوپەر ئەدمین',
+                    isActive: true,
+                    isSuperAdmin: true
+                });
+                console.log('سوپەر ئەدمین دروست کرا');
+            }
+        }
+        setupSuperAdmin();
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            // بۆ سوپەر ئەدمین
+            if (username === 'username_admin' && password === 'userpass11') {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: username,
+                    role: 'admin',
+                    name: 'سوپەر ئەدمین'
+                }));
+                window.location.href = 'user_management.html';
+                return;
+            }
+
+            // گەڕان بەدوای یوزەر لە داتابیس
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            let found = false;
+            
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                for (let userId in users) {
+                    const user = users[userId];
+                    if (user.username === username && user.password === password && user.role === role && user.isActive !== false) {
+                        found = true;
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            userId: userId,
+                            username: user.username,
+                            role: user.role,
+                            name: user.name,
+                            group: user.group
+                        }));
+                        
+                        // ڕەوانەکردن بە پێی پلە
+                        if (role === 'admin') {
+                            window.location.href = 'user_management.html';
+                        } else if (role === 'question_creator') {
+                            window.location.href = 'add_question.html';
+                        } else if (role === 'presenter') {
+                            window.location.href = 'presenter.html';
+                        } else if (role === 'player') {
+                            window.location.href = 'play.html';
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            if (!found) {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = '❌ ناوی بەکارهێنەر یان پاسوۆرد هەڵەیە یان پلەکەت نییە!';
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
