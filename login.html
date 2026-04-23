@@ -2,118 +2,328 @@
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, shrink-to-fit=no">
     <title>چوونە ژوورەوە - یاری پرسیار و وەڵام</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        .login-container {
-            min-height: 100vh;
+        /* قەدەغەکردنی هەڵبژاردن و کلیکی ڕاست */
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* قەدەغەکردنی Refresh و Reload */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        body {
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+        
+        /* قەدەغەکردنی Refresh بە Ctrl+R و F5 */
+        .disable-refresh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: transparent;
+            display: none;
+        }
+        
+        /* ستایلی کۆنتەینەر */
+        .login-container {
+            width: 100%;
             padding: 20px;
+            animation: fadeInUp 0.8s ease-out;
         }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* بۆکسی چوونە ژوورەوە */
         .login-box {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 28px;
+            padding: 45px 35px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        .login-box h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+        
+        /* لە مۆبایلدا */
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 35px 25px;
+                max-width: 90%;
+                border-radius: 24px;
+            }
         }
+        
+        /* لە تابلێتدا */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .login-box {
+                max-width: 450px;
+                padding: 40px 30px;
+            }
+        }
+        
+        /* لە کۆمپیوتەردا */
+        @media (min-width: 1025px) {
+            .login-box {
+                max-width: 520px;
+                padding: 50px 40px;
+            }
+        }
+        
+        /* فۆرم */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        /* گروپی ئینپوتەکان */
         .input-group {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
+        
+        /* لیبڵەکان */
         .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
+            font-size: 18px;
             font-weight: bold;
+            color: #333;
+            letter-spacing: 0.5px;
         }
-        .input-group input, .input-group select {
+        
+        @media (min-width: 1025px) {
+            .input-group label {
+                font-size: 20px;
+            }
+        }
+        
+        /* ئینپوتەکان */
+        .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 16px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 18px;
             font-family: inherit;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            box-sizing: border-box;
         }
-        .input-group input:focus, .input-group select:focus {
+        
+        @media (min-width: 1025px) {
+            .input-group input {
+                padding: 18px 20px;
+                font-size: 20px;
+            }
+        }
+        
+        .input-group input:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
+        
+        /* دوگمەی چوونە ژوورەوە */
         .login-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
+            border-radius: 16px;
+            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
+        
+        @media (min-width: 1025px) {
+            .login-btn {
+                padding: 18px;
+                font-size: 24px;
+            }
+        }
+        
         .login-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* پەیامی هەڵە */
         .error-msg {
             background: #fee;
             color: #c33;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 15px;
+            padding: 14px;
+            border-radius: 14px;
             text-align: center;
             display: none;
+            font-size: 16px;
+            font-weight: bold;
+            border-right: 4px solid #c33;
+            margin-top: 5px;
         }
-        @media (max-width: 768px) {
-            .login-box {
-                padding: 30px 20px;
+        
+        @media (min-width: 1025px) {
+            .error-msg {
+                font-size: 18px;
+                padding: 16px;
             }
-            .login-box h1 {
-                font-size: 24px;
+        }
+        
+        /* لۆدینگ */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* تێکستی ژێرەوە */
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            color: #888;
+            font-size: 14px;
+        }
+        
+        @media (min-width: 1025px) {
+            .footer-text {
+                font-size: 16px;
+                margin-top: 30px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="disable-refresh" id="disableRefresh"></div>
+    
     <div class="login-container">
         <div class="login-box">
-            <h1>🔐 یاری پرسیار و وەڵام</h1>
-            <form id="loginForm">
+            <form class="login-form" id="loginForm">
                 <div class="input-group">
                     <label>👤 ناوی بەکارهێنەر</label>
-                    <input type="text" id="username" required placeholder="ناوی بەکارهێنەر">
+                    <input type="text" id="username" required placeholder="ناوی بەکارهێنەر" autocomplete="off">
                 </div>
+                
                 <div class="input-group">
                     <label>🔑 پاسوۆرد</label>
-                    <input type="password" id="password" required placeholder="پاسوۆرد">
+                    <input type="password" id="password" required placeholder="پاسوۆرد" autocomplete="off">
                 </div>
-                <div class="input-group">
-                    <label>📍 پلە</label>
-                    <select id="role">
-                        <option value="player">یاریکەر</option>
-                        <option value="question_creator">دروستکەری پرسیار</option>
-                        <option value="admin">بەڕێوەبەر</option>
-                        <option value="presenter">پێشکەشکار</option>
-                    </select>
-                </div>
+                
                 <button type="submit" class="login-btn">🚪 چوونە ژوورەوە</button>
+                
                 <div class="error-msg" id="errorMsg"></div>
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                </div>
             </form>
+            <div class="footer-text">
+                یاری پرسیار و وەڵام
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { db, ref, get } from './firebase-config.js';
+        
+        // قەدەغەکردنی کلیکی ڕاست
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // قەدەغەکردنی هەڵبژاردنی تێکست
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // قەدەغەکردنی Ctrl+R, Ctrl+Shift+R, F5, Ctrl+F5
+        document.addEventListener('keydown', function(e) {
+            // F5
+            if (e.key === 'F5') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+R یان Ctrl+Shift+R
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+F5
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                return false;
+            }
+            // Back button on some browsers
+            if (e.key === 'BrowserBack' || (e.ctrlKey && e.key === '[')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // قەدەغەکردنی Refresh بەهۆی وشەکانی تر
+        window.addEventListener('beforeunload', function(e) {
+            // هیچ شتێک نەکە - بەڵام دەتوانین ئاگاداری بکەین
+            // بەڵام بۆ ئەم پڕۆژەیە باشترە نەکەین
+        });
         
         // سوپەر ئەدمین دەستەبەری یەکەم
         async function setupSuperAdmin() {
@@ -126,31 +336,52 @@
                     role: 'admin',
                     name: 'سوپەر ئەدمین',
                     isActive: true,
-                    isSuperAdmin: true
+                    isSuperAdmin: true,
+                    score: 0,
+                    createdAt: new Date().toISOString()
                 });
                 console.log('سوپەر ئەدمین دروست کرا');
             }
         }
+        
         setupSuperAdmin();
-
+        
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
+            
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
             const errorMsg = document.getElementById('errorMsg');
-
+            const loginBtn = document.querySelector('.login-btn');
+            const loading = document.getElementById('loading');
+            
+            if (!username || !password) {
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = '❌ تکایە ناوی بەکارهێنەر و پاسوۆرد پڕ بکەرەوە';
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+                return;
+            }
+            
+            // نیشاندانی لۆدینگ
+            loading.style.display = 'block';
+            loginBtn.disabled = true;
+            loginBtn.style.opacity = '0.7';
+            
             // بۆ سوپەر ئەدمین
             if (username === 'username_admin' && password === 'userpass11') {
                 localStorage.setItem('currentUser', JSON.stringify({
                     username: username,
                     role: 'admin',
-                    name: 'سوپەر ئەدمین'
+                    name: 'سوپەر ئەدمین',
+                    userId: 'super_admin'
                 }));
+                loading.style.display = 'none';
                 window.location.href = 'user_management.html';
                 return;
             }
-
+            
             // گەڕان بەدوای یوزەر لە داتابیس
             const usersRef = ref(db, 'users');
             const snapshot = await get(usersRef);
@@ -160,7 +391,7 @@
                 const users = snapshot.val();
                 for (let userId in users) {
                     const user = users[userId];
-                    if (user.username === username && user.password === password && user.role === role && user.isActive !== false) {
+                    if (user.username === username && user.password === password && user.isActive !== false) {
                         found = true;
                         localStorage.setItem('currentUser', JSON.stringify({
                             userId: userId,
@@ -170,14 +401,16 @@
                             group: user.group
                         }));
                         
+                        loading.style.display = 'none';
+                        
                         // ڕەوانەکردن بە پێی پلە
-                        if (role === 'admin') {
+                        if (user.role === 'admin') {
                             window.location.href = 'user_management.html';
-                        } else if (role === 'question_creator') {
+                        } else if (user.role === 'question_creator') {
                             window.location.href = 'add_question.html';
-                        } else if (role === 'presenter') {
+                        } else if (user.role === 'presenter') {
                             window.location.href = 'presenter.html';
-                        } else if (role === 'player') {
+                        } else if (user.role === 'player') {
                             window.location.href = 'play.html';
                         }
                         break;
@@ -185,13 +418,37 @@
                 }
             }
             
+            loading.style.display = 'none';
+            loginBtn.disabled = false;
+            loginBtn.style.opacity = '1';
+            
             if (!found) {
                 errorMsg.style.display = 'block';
-                errorMsg.textContent = '❌ ناوی بەکارهێنەر یان پاسوۆرد هەڵەیە یان پلەکەت نییە!';
+                errorMsg.textContent = '❌ ناوی بەکارهێنەر یان پاسوۆرد هەڵەیە!';
                 setTimeout(() => {
                     errorMsg.style.display = 'none';
                 }, 3000);
             }
+        });
+        
+        // قەدەغەکردنی کۆپی کردن
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // قەدەغەکردنی paste لە ئینپوتەکان (بۆ ئاسایش)
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+        
+        // ڕێگری کردن لە گەڕانەوە بە back button
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function() {
+            history.pushState(null, null, location.href);
         });
     </script>
 </body>
