@@ -10,6 +10,11 @@
             src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
         }
         
+        @font-face {
+            font-family: 'K24KurdishLight-Light';
+            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -70,7 +75,7 @@
             border-radius: 60px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: inherit;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
         
@@ -122,6 +127,7 @@
             animation: fadeInScale 0.4s ease-out forwards;
             opacity: 0;
             transform: scale(0.9);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         @keyframes fadeInScale {
@@ -184,6 +190,7 @@
             font-weight: bold;
             color: white;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .question-number:hover {
@@ -203,7 +210,7 @@
         
         /* Question Display */
         .question-display {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
             text-align: center;
@@ -212,84 +219,104 @@
         .timer-circle {
             width: 100px;
             height: 100px;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 25px auto;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
         }
         
         .timer {
             font-size: 48px;
             font-weight: bold;
             color: #667eea;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .question-card {
-            background: white;
-            border-radius: 24px;
-            padding: 35px 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
-        }
-        
+        /* Question Text Box */
         .question-text {
-            font-size: 24px;
+            font-size: 26px;
             color: #333;
             line-height: 1.5;
             text-align: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 30px 20px;
-            border-radius: 20px;
+            background: #FFB56B;
+            padding: 35px 25px;
+            border-radius: 24px;
             margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        /* Options Grid - Order Swapped */
         .options-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 18px;
         }
         
+        /* Reordering: Position 1 goes to Position 2, Position 2 goes to Position 1 */
+        .options-grid .option-card:nth-child(1) { order: 2; }
+        .options-grid .option-card:nth-child(2) { order: 1; }
+        .options-grid .option-card:nth-child(3) { order: 4; }
+        .options-grid .option-card:nth-child(4) { order: 3; }
+        
         .option-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 16px;
-            padding: 18px;
+            background: #FFB56B;
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
             position: relative;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         
         .option-letter {
             position: absolute;
             top: -12px;
             right: 15px;
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
+            background: #fff;
+            color: #FFB56B;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .option-text {
             font-size: 18px;
             color: #333;
-            padding: 5px;
+            padding: 8px;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .option-card.correct {
             background: #4CAF50;
-            color: white;
         }
         
         .option-card.correct .option-text {
             color: white;
+        }
+        
+        .option-card.correct .option-letter {
+            background: white;
+            color: #4CAF50;
         }
         
         /* Groups Display */
@@ -317,6 +344,7 @@
             padding-bottom: 10px;
             border-bottom: 3px solid #667eea;
             color: #333;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .players-list {
@@ -336,17 +364,40 @@
         .player-name {
             font-size: 16px;
             color: #333;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .player-score {
             font-weight: bold;
             color: #667eea;
             font-size: 20px;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .player-eliminated {
             opacity: 0.5;
             text-decoration: line-through;
+        }
+        
+        /* Selected Question Box (waiting for Enter) */
+        .question-number.waiting-for-enter {
+            background: #4CAF50;
+            animation: pulse 0.8s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
         
         /* Utility Classes */
@@ -414,6 +465,22 @@
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
+            
+            .options-grid {
+                gap: 12px;
+            }
+            
+            .option-card {
+                padding: 14px;
+            }
+            
+            .option-letter {
+                width: 26px;
+                height: 26px;
+                font-size: 13px;
+                top: -10px;
+                right: 10px;
+            }
         }
         
         @media (min-width: 769px) and (max-width: 1024px) {
@@ -456,10 +523,8 @@
                 <div class="timer-circle">
                     <div class="timer" id="timer">30</div>
                 </div>
-                <div class="question-card">
-                    <div class="question-text" id="displayQuestion"></div>
-                    <div class="options-grid" id="displayOptions"></div>
-                </div>
+                <div class="question-text" id="displayQuestion"></div>
+                <div class="options-grid" id="displayOptions"></div>
             </div>
         </div>
         
@@ -472,10 +537,10 @@
     <!-- Reset Modal -->
     <div id="resetModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: white; border-radius: 25px; padding: 35px; max-width: 400px; width: 90%; text-align: center;">
-            <div style="font-size: 24px; margin-bottom: 20px;">⚠️ دڵنیای دەتەوێت بگەڕێیتەوە سەرەتایی یاری؟</div>
+            <div style="font-size: 24px; margin-bottom: 20px; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">⚠️ دڵنیای دەتەوێت بگەڕێیتەوە سەرەتایی یاری؟</div>
             <div style="display: flex; gap: 20px; justify-content: center;">
-                <button onclick="resetGame()" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 12px; font-size: 18px; cursor: pointer; font-family: inherit;">بەڵێ</button>
-                <button onclick="closeResetModal()" style="background: #f44336; color: white; border: none; padding: 12px 30px; border-radius: 12px; font-size: 18px; cursor: pointer; font-family: inherit;">نەخێر</button>
+                <button onclick="resetGame()" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 12px; font-size: 18px; cursor: pointer; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">بەڵێ</button>
+                <button onclick="closeResetModal()" style="background: #f44336; color: white; border: none; padding: 12px 30px; border-radius: 12px; font-size: 18px; cursor: pointer; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">نەخێر</button>
             </div>
         </div>
     </div>
@@ -518,6 +583,7 @@
         let timerInterval = null;
         let timerSeconds = 30;
         let isWaitingForEnter = false;
+        let selectedQuestionBox = null;
         
         const categories = [
             { key: 'history', name: 'مێژوو' },
@@ -531,12 +597,15 @@
             { key: 'religion', name: 'ئایینی' }
         ];
         
-        // Keyboard navigation - Backspace
+        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' || e.key === 'Escape') {
                 e.preventDefault();
-                if (!document.getElementById('categoryView').classList.contains('hidden')) {
-                    // Already in category view
+                if (!document.getElementById('modeView').classList.contains('hidden')) {
+                    // Already in mode view
+                } else if (!document.getElementById('categoryView').classList.contains('hidden')) {
+                    document.getElementById('categoryView').classList.add('hidden');
+                    document.getElementById('modeView').classList.remove('hidden');
                 } else if (!document.getElementById('questionGridView').classList.contains('hidden')) {
                     goBackToCategories();
                 } else if (!document.getElementById('questionDisplayView').classList.contains('hidden')) {
@@ -544,7 +613,13 @@
                 } else if (!document.getElementById('groupsView').classList.contains('hidden')) {
                     showQuestionGrid();
                 }
-            } else if (e.key === 'Enter' && isWaitingForEnter) {
+            } else if (e.key === 'Enter' && isWaitingForEnter && selectedQuestionBox) {
+                e.preventDefault();
+                // Execute the question selection
+                const questionId = selectedQuestionBox.dataset.questionId;
+                const questionData = JSON.parse(selectedQuestionBox.dataset.questionData);
+                executeSelectQuestion(questionId, questionData);
+            } else if (e.key === 'Enter' && isWaitingForEnter && !selectedQuestionBox) {
                 e.preventDefault();
                 showGroupsAndPlayers();
             }
@@ -597,7 +672,10 @@
             alert('یاریەکە بە سەرکەوتوویی ریسێت کرا');
             
             if (currentMode) {
-                loadCategories();
+                // Go back to mode selection
+                document.getElementById('categoryView').classList.add('hidden');
+                document.getElementById('modeView').classList.remove('hidden');
+                currentMode = null;
             }
         };
         
@@ -692,7 +770,22 @@
                     box.textContent = i;
                     
                     if (exists && !isUsed) {
-                        box.onclick = () => selectQuestion(qId, question);
+                        box.style.cursor = 'pointer';
+                        // When clicked, just highlight and wait for Enter
+                        box.onclick = () => {
+                            // Remove waiting class from previous box
+                            if (selectedQuestionBox) {
+                                selectedQuestionBox.classList.remove('waiting-for-enter');
+                            }
+                            // Add waiting class to this box
+                            box.classList.add('waiting-for-enter');
+                            selectedQuestionBox = box;
+                            selectedQuestionBox.dataset.questionId = qId;
+                            selectedQuestionBox.dataset.questionData = JSON.stringify(question);
+                            isWaitingForEnter = true;
+                        };
+                    } else if (isUsed) {
+                        box.style.cursor = 'not-allowed';
                     }
                     
                     container.appendChild(box);
@@ -708,60 +801,58 @@
             }
         }
         
-        async function selectQuestion(questionId, question) {
+        async function executeSelectQuestion(questionId, question) {
             currentQuestionId = questionId;
             currentQuestionData = question;
             
-            // Add green blink to question box
-            const boxes = document.querySelectorAll('.question-number');
-            for (let box of boxes) {
-                if (box.textContent == Object.keys(currentQuestionData).length) {
-                    box.classList.add('selected');
-                    setTimeout(() => box.classList.remove('selected'), 400);
-                    break;
-                }
+            // Remove waiting class
+            if (selectedQuestionBox) {
+                selectedQuestionBox.classList.remove('waiting-for-enter');
+                selectedQuestionBox.classList.add('used');
+                selectedQuestionBox.style.cursor = 'not-allowed';
+                // Mark as used in UI immediately
+            }
+            selectedQuestionBox = null;
+            isWaitingForEnter = false;
+            
+            // Mark as used in database
+            await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
+            
+            // Send question to players if online
+            if (currentMode === 'online') {
+                await set(ref(db, 'game/currentQuestion'), {
+                    id: questionId,
+                    category: currentCategory,
+                    text: question.text,
+                    options: question.options,
+                    correct: question.correct,
+                    timestamp: Date.now()
+                });
+                await set(ref(db, 'game/questionActive'), true);
+                await set(ref(db, 'game/timerStart'), Date.now());
             }
             
-            setTimeout(async () => {
-                // Mark as used
-                await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
-                
-                // Send question to players if online
-                if (currentMode === 'online') {
-                    await set(ref(db, 'game/currentQuestion'), {
-                        id: questionId,
-                        category: currentCategory,
-                        text: question.text,
-                        options: question.options,
-                        correct: question.correct,
-                        timestamp: Date.now()
-                    });
-                    await set(ref(db, 'game/questionActive'), true);
-                    await set(ref(db, 'game/timerStart'), Date.now());
-                }
-                
-                // Show question display
-                document.getElementById('questionGridView').classList.add('hidden');
-                document.getElementById('questionDisplayView').classList.remove('hidden');
-                
-                // Display question
-                document.getElementById('displayQuestion').textContent = question.text;
-                const optionsContainer = document.getElementById('displayOptions');
-                optionsContainer.innerHTML = '';
-                
-                const letters = ['A', 'B', 'C', 'D'];
-                question.options.forEach((opt, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'option-card';
-                    div.innerHTML = `
-                        <div class="option-letter">${letters[idx]}</div>
-                        <div class="option-text">${opt}</div>
-                    `;
-                    optionsContainer.appendChild(div);
-                });
-                
-                startTimer(question);
-            }, 200);
+            // Show question display
+            document.getElementById('questionGridView').classList.add('hidden');
+            document.getElementById('questionDisplayView').classList.remove('hidden');
+            
+            // Display question
+            document.getElementById('displayQuestion').textContent = question.text;
+            const optionsContainer = document.getElementById('displayOptions');
+            optionsContainer.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            question.options.forEach((opt, idx) => {
+                const div = document.createElement('div');
+                div.className = 'option-card';
+                div.innerHTML = `
+                    <div class="option-letter">${letters[idx]}</div>
+                    <div class="option-text">${opt}</div>
+                `;
+                optionsContainer.appendChild(div);
+            });
+            
+            startTimer(question);
         }
         
         function startTimer(question) {
@@ -786,6 +877,7 @@
                             }
                         });
                         isWaitingForEnter = true;
+                        selectedQuestionBox = null;
                         
                         if (currentMode === 'online') {
                             set(ref(db, 'game/questionActive'), false);
@@ -855,6 +947,12 @@
         }
         
         window.goBackToCategories = function() {
+            // Clear selected question
+            if (selectedQuestionBox) {
+                selectedQuestionBox.classList.remove('waiting-for-enter');
+                selectedQuestionBox = null;
+            }
+            isWaitingForEnter = false;
             document.getElementById('questionGridView').classList.add('hidden');
             document.getElementById('categoryView').classList.remove('hidden');
             loadCategories();
@@ -865,11 +963,14 @@
             document.getElementById('questionDisplayView').classList.add('hidden');
             document.getElementById('questionGridView').classList.remove('hidden');
             loadQuestionsForCategory(currentCategory);
+            isWaitingForEnter = false;
+            selectedQuestionBox = null;
         };
         
         window.showQuestionGrid = function() {
             document.getElementById('groupsView').classList.add('hidden');
             document.getElementById('questionGridView').classList.remove('hidden');
+            loadQuestionsForCategory(currentCategory);
         };
         
         // Check permission
