@@ -288,12 +288,72 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         
-        .option-letter {
+        /* پیتی A و C لە لای چەپ */
+        .option-card:nth-child(1) .option-letter {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            right: auto;
+            background: #2196F3;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* پیتی B و D لە لای ڕاست */
+        .option-card:nth-child(2) .option-letter {
             position: absolute;
             top: -12px;
             right: 15px;
-            background: #fff;
-            color: #FFB56B;
+            left: auto;
+            background: #2196F3;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .option-card:nth-child(3) .option-letter {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            right: auto;
+            background: #2196F3;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .option-card:nth-child(4) .option-letter {
+            position: absolute;
+            top: -12px;
+            right: 15px;
+            left: auto;
+            background: #2196F3;
+            color: white;
             width: 38px;
             height: 38px;
             border-radius: 50%;
@@ -482,11 +542,20 @@
             }
             
             .option-letter {
-                width: 30px;
-                height: 30px;
-                font-size: 16px;
-                top: -10px;
-                right: 10px;
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 16px !important;
+                top: -10px !important;
+            }
+            
+            .option-card:nth-child(1) .option-letter,
+            .option-card:nth-child(3) .option-letter {
+                left: 10px !important;
+            }
+            
+            .option-card:nth-child(2) .option-letter,
+            .option-card:nth-child(4) .option-letter {
+                right: 10px !important;
             }
             
             .group-title {
