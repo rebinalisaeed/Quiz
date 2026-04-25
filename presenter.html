@@ -7,12 +7,16 @@
     <style>
         @font-face {
             font-family: 'K24KurdishBold-Bold';
-            src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
+            src: url('./fonts/K24KurdishBold-Bold.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
         
         @font-face {
             font-family: 'K24KurdishLight-Light';
-            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
+            src: url('./fonts/K24KurdishLight-Light.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
         
         * {
@@ -203,7 +207,7 @@
         }
         
         .question-number.used {
-            background: #f44336;
+            background: #B3B3B3;
             cursor: not-allowed;
             opacity: 0.7;
         }
@@ -805,12 +809,11 @@
             currentQuestionId = questionId;
             currentQuestionData = question;
             
-            // Remove waiting class
+            // Remove waiting class and mark as used
             if (selectedQuestionBox) {
                 selectedQuestionBox.classList.remove('waiting-for-enter');
                 selectedQuestionBox.classList.add('used');
                 selectedQuestionBox.style.cursor = 'not-allowed';
-                // Mark as used in UI immediately
             }
             selectedQuestionBox = null;
             isWaitingForEnter = false;
