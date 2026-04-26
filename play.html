@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: 'K24KurdishBold-Bold';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
+            src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -15,7 +15,7 @@
         
         @font-face {
             font-family: 'K24KurdishLight-Light';
-            src: url('K24KurdishLight-Light.ttf') format('truetype');
+            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -32,7 +32,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* قەدەغەکردنی هەڵچوون (scroll) */
         html, body {
             margin: 0;
             padding: 0;
@@ -67,7 +66,6 @@
             align-items: center;
         }
         
-        /* Score Header */
         .score-header {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -92,7 +90,6 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Waiting Screen */
         .waiting-screen {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 30px;
@@ -122,7 +119,6 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Question Screen - Score Hidden */
         .question-screen {
             background: transparent;
             width: 100%;
@@ -135,7 +131,6 @@
             display: none;
         }
         
-        /* Timer */
         .timer-circle {
             width: 100px;
             height: 100px;
@@ -155,7 +150,6 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Question Box */
         .question-box {
             background: rgba(180, 160, 120, 0.9);
             backdrop-filter: blur(10px);
@@ -174,7 +168,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
         
-        /* Options Grid - Vertical Layout */
         .options-grid {
             display: flex;
             flex-direction: column;
@@ -199,7 +192,6 @@
             transform: scale(0.98);
         }
         
-        /* پیتی A, B, C, D لە لای چەپ بۆ هەموویان (Vertical Layout) */
         .option-card .option-letter {
             position: absolute;
             top: 50%;
@@ -231,7 +223,6 @@
             width: 100%;
         }
         
-        /* Option States */
         .option-card.selected {
             background: #FF9800;
         }
@@ -257,7 +248,6 @@
             color: #f44336;
         }
         
-        /* Result Screen */
         .result-screen {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 30px;
@@ -291,7 +281,6 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Eliminated Screen */
         .eliminated-screen {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 30px;
@@ -318,7 +307,6 @@
             font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Utility Classes */
         .hidden {
             display: none !important;
         }
@@ -402,19 +390,16 @@
 </head>
 <body>
     <div class="container" id="app">
-        <!-- Score Header (always visible except during question) -->
         <div id="scoreHeader" class="score-header">
             <div class="score-title">🌟 خاڵەکانی تۆ</div>
             <div class="score-value" id="playerScore">5</div>
         </div>
         
-        <!-- Waiting Screen -->
         <div id="waitingScreen" class="waiting-screen">
             <div class="waiting-spinner"></div>
             <div class="waiting-text">⏳ چاوەڕوانی پرسیاری داهاتوو...</div>
         </div>
         
-        <!-- Question Screen -->
         <div id="questionScreen" class="question-screen hidden">
             <div class="timer-circle">
                 <div class="timer" id="timer">30</div>
@@ -425,14 +410,12 @@
             <div class="options-grid" id="optionsList"></div>
         </div>
         
-        <!-- Result Screen -->
         <div id="resultScreen" class="result-screen hidden">
             <div class="result-icon" id="resultIcon"></div>
             <div class="result-text" id="resultText"></div>
             <div class="result-points" id="resultPoints"></div>
         </div>
         
-        <!-- Eliminated Screen -->
         <div id="eliminatedScreen" class="eliminated-screen hidden">
             <div class="eliminated-icon">😢</div>
             <div class="eliminated-text">تۆ لە یاریەکە دەرکرایت</div>
@@ -443,29 +426,10 @@
     <script type="module">
         import { db, ref, get, set, update, onValue } from './firebase-config.js';
         
-        // قەدەغەکردنی کلیکی ڕاست
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // قەدەغەکردنی هەڵبژاردن
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // قەدەغەکردنی Refresh
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F5') {
-                e.preventDefault();
-                return false;
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                e.preventDefault();
-                return false;
-            }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('selectstart', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
                 e.preventDefault();
                 return false;
             }
@@ -481,7 +445,6 @@
         let selectedOptionIndex = null;
         let resultTimeout = null;
         
-        // Check if player is eliminated
         async function checkEliminated() {
             if (!currentUser.userId) return false;
             
@@ -500,12 +463,10 @@
             return false;
         }
         
-        // Update score display
         function updateScoreDisplay() {
             document.getElementById('playerScore').textContent = currentScore;
         }
         
-        // Listen for questions
         function listenForQuestions() {
             const gameRef = ref(db, 'game');
             onValue(gameRef, async (snapshot) => {
@@ -517,7 +478,6 @@
                 const game = snapshot.val();
                 
                 if (game && game.questionActive === true && game.currentQuestion) {
-                    // New question arrived
                     if (!currentQuestion || game.currentQuestion.timestamp !== currentQuestion.timestamp) {
                         currentQuestion = game.currentQuestion;
                         hasAnswered = false;
@@ -526,10 +486,8 @@
                         showQuestion(game.currentQuestion);
                     }
                 } else if (game && game.showAnswer === true && currentQuestion && !hasAnswered && !hasShownResult) {
-                    // Show answer after timeout
                     showAnswerAndResult();
                 } else if ((!game || game.questionActive === false) && !game?.showAnswer && currentQuestion) {
-                    // Go back to waiting screen
                     if (resultTimeout) clearTimeout(resultTimeout);
                     hideQuestionScreen();
                     showWaitingScreen();
@@ -541,7 +499,6 @@
         }
         
         function showQuestion(question) {
-            // Hide score header during question
             document.getElementById('scoreHeader').classList.add('hidden');
             document.getElementById('waitingScreen').classList.add('hidden');
             document.getElementById('resultScreen').classList.add('hidden');
@@ -564,20 +521,17 @@
                 optionsContainer.appendChild(div);
             });
             
-            // Start timer
             startTimer();
         }
         
         function selectOption(selectedIndex) {
             if (hasAnswered) return;
             
-            // Remove selected class from all options
             const options = document.querySelectorAll('.option-card');
             options.forEach(opt => {
                 opt.classList.remove('selected');
             });
             
-            // Add selected class to clicked option
             options[selectedIndex].classList.add('selected');
             selectedOptionIndex = selectedIndex;
         }
@@ -589,18 +543,20 @@
             
             if (timerInterval) clearInterval(timerInterval);
             
-            timerInterval = setInterval(() => {
-                seconds--;
-                timerElement.textContent = seconds;
-                
-                if (seconds <= 0) {
-                    clearInterval(timerInterval);
-                    if (!hasAnswered) {
-                        // Auto submit when timer ends
-                        showAnswerAndResult();
+            // چاوەڕوانی 3 چرکە پێش دەستپێکردنی چرکەژمێر
+            setTimeout(() => {
+                timerInterval = setInterval(() => {
+                    seconds--;
+                    timerElement.textContent = seconds;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(timerInterval);
+                        if (!hasAnswered) {
+                            showAnswerAndResult();
+                        }
                     }
-                }
-            }, 1000);
+                }, 1000);
+            }, 3000);
         }
         
         async function showAnswerAndResult() {
@@ -625,11 +581,9 @@
                 if (selectedOptionIndex !== null) {
                     options[selectedOptionIndex].classList.add('wrong');
                 }
-                // Show correct answer
                 options[currentQuestion.correct].classList.add('correct');
             }
             
-            // Update score in Firebase
             const userRef = ref(db, `users/${currentUser.userId}`);
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
@@ -637,11 +591,9 @@
                 const newScore = (user.score || 5) + pointsChange;
                 await update(userRef, { score: newScore });
                 
-                // Check if eliminated
                 if (newScore <= 0) {
                     await update(userRef, { isEliminated: true, isActive: false });
                     
-                    // Penalty for group
                     const group = user.group;
                     const usersRef = ref(db, 'users');
                     const usersSnapshot = await get(usersRef);
@@ -649,14 +601,12 @@
                         const users = usersSnapshot.val();
                         let eliminatedCount = 0;
                         
-                        // Count eliminated players in group
                         for (let uid in users) {
                             if (users[uid].role === 'player' && users[uid].group === group && users[uid].isEliminated === true) {
                                 eliminatedCount++;
                             }
                         }
                         
-                        // Only apply penalty for first elimination
                         if (eliminatedCount === 1) {
                             for (let uid in users) {
                                 if (users[uid].role === 'player' && users[uid].group === group && users[uid].isEliminated !== true) {
@@ -674,12 +624,9 @@
             currentScore = Math.max(0, currentScore);
             updateScoreDisplay();
             
-            // Show result screen
             showResultScreen(isCorrect, pointsChange);
             
-            // Wait 10 seconds then go back
             resultTimeout = setTimeout(() => {
-                // Reset game showAnswer flag
                 set(ref(db, 'game/showAnswer'), false);
                 hideQuestionScreen();
                 showWaitingScreen();
@@ -738,7 +685,6 @@
             document.getElementById('eliminatedScreen').classList.remove('hidden');
         }
         
-        // Listen for score updates
         function listenForScoreUpdates() {
             if (!currentUser.userId) return;
             
@@ -757,7 +703,6 @@
             });
         }
         
-        // Check if player is allowed to play
         async function init() {
             if (!currentUser.userId || currentUser.userId === 'undefined') {
                 alert('تکایە بچۆرە ژوورەوە!');
