@@ -73,6 +73,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .logout-btn {
@@ -408,7 +409,7 @@
                                     <small>✅ وەڵامی ڕاست: ${q.options[q.correct]}</small>
                                 </div>
                                 <div class="question-actions">
-                                    <button class="edit-question-btn" onclick='editQuestion("${categoryKey}", "${qId}", ${JSON.stringify(q)})'>✏️ دەستکاری</button>
+                                    <button class="edit-question-btn" onclick='editQuestion("${categoryKey}", "${qId}", ${JSON.stringify(q).replace(/'/g, "&#39;")})'>✏️ دەستکاری</button>
                                     <button class="delete-question-btn" onclick='deleteQuestion("${categoryKey}", "${qId}")'>🗑️ سڕینەوە</button>
                                 </div>
                             </div>
@@ -520,7 +521,16 @@
                 const snapshot = await get(questionsRef);
                 
                 if (snapshot.exists()) {
-                    exportData[categoryKey] = snapshot.val();
+                    const questions = snapshot.val();
+                    const cleanQuestions = {};
+                    for (let qId in questions) {
+                        cleanQuestions[qId] = {
+                            text: questions[qId].text,
+                            options: questions[qId].options,
+                            correct: questions[qId].correct
+                        };
+                    }
+                    exportData[categoryKey] = cleanQuestions;
                 } else {
                     exportData[categoryKey] = {};
                 }
