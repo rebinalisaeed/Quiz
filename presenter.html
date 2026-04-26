@@ -7,7 +7,7 @@
     <style>
         @font-face {
             font-family: 'K24KurdishBold-Bold';
-            src: url('K24KurdishBold-Bold.ttf') format('truetype');
+            src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -15,7 +15,7 @@
         
         @font-face {
             font-family: 'K24KurdishLight-Light';
-            src: url('K24KurdishLight-Light.ttf') format('truetype');
+            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -32,7 +32,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* قەدەغەکردنی هەڵچوون (scroll) */
         html, body {
             margin: 0;
             padding: 0;
@@ -70,13 +69,14 @@
         .mode-selection {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
             margin: 0 auto;
+            flex-wrap: wrap;
         }
         
         .mode-btn {
-            padding: 18px 45px;
-            font-size: 30px;
+            padding: 15px 35px;
+            font-size: 24px;
             font-weight: bold;
             border: none;
             border-radius: 60px;
@@ -101,6 +101,16 @@
             color: white;
         }
         
+        .mode-btn.import {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .mode-btn.delete-all {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            color: white;
+        }
+        
         .mode-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
@@ -110,7 +120,7 @@
             transform: translateY(0);
         }
         
-        /* Category Grid */
+        /* Category Grid - No Animation */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -131,28 +141,10 @@
             font-weight: bold;
             color: white;
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            animation: fadeInScale 0.4s ease-out forwards;
-            opacity: 0;
-            transform: scale(0.9);
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            opacity: 1;
+            transform: scale(1);
         }
-        
-        @keyframes fadeInScale {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .category-card:nth-child(1) { animation-delay: 0.05s; }
-        .category-card:nth-child(2) { animation-delay: 0.1s; }
-        .category-card:nth-child(3) { animation-delay: 0.15s; }
-        .category-card:nth-child(4) { animation-delay: 0.2s; }
-        .category-card:nth-child(5) { animation-delay: 0.25s; }
-        .category-card:nth-child(6) { animation-delay: 0.3s; }
-        .category-card:nth-child(7) { animation-delay: 0.35s; }
-        .category-card:nth-child(8) { animation-delay: 0.4s; }
-        .category-card:nth-child(9) { animation-delay: 0.45s; }
         
         .category-card:hover {
             transform: translateY(-5px) scale(1.02);
@@ -243,7 +235,6 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Question Text Box */
         .question-text {
             font-size: 32px;
             color: #333;
@@ -258,14 +249,12 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Options Grid - Order Swapped */
         .options-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 18px;
         }
         
-        /* Reordering: Position 1 goes to Position 2, Position 2 goes to Position 1 */
         .options-grid .option-card:nth-child(1) { order: 2; }
         .options-grid .option-card:nth-child(2) { order: 1; }
         .options-grid .option-card:nth-child(3) { order: 4; }
@@ -288,46 +277,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         
-        /* پیتی A و C لە لای چەپ */
-        .option-card:nth-child(1) .option-letter {
-            position: absolute;
-            top: -12px;
-            left: 15px;
-            right: auto;
-            background: #2196F3;
-            color: white;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        /* پیتی B و D لە لای ڕاست */
-        .option-card:nth-child(2) .option-letter {
-            position: absolute;
-            top: -12px;
-            right: 15px;
-            left: auto;
-            background: #2196F3;
-            color: white;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
+        .option-card:nth-child(1) .option-letter,
         .option-card:nth-child(3) .option-letter {
             position: absolute;
             top: -12px;
@@ -347,6 +297,7 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        .option-card:nth-child(2) .option-letter,
         .option-card:nth-child(4) .option-letter {
             position: absolute;
             top: -12px;
@@ -386,7 +337,6 @@
             color: #4CAF50;
         }
         
-        /* Groups Display */
         .groups-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -446,7 +396,6 @@
             text-decoration: line-through;
         }
         
-        /* Selected Question Box (waiting for Enter) */
         .question-number.waiting-for-enter {
             background: #4CAF50;
             animation: pulse 0.8s infinite;
@@ -467,7 +416,6 @@
             }
         }
         
-        /* Utility Classes */
         .hidden {
             display: none !important;
         }
@@ -480,15 +428,78 @@
             flex-direction: column;
         }
         
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 25px;
+            padding: 35px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal-content h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .confirm-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: #f44336;
+            color: white;
+        }
+        
         @media (max-width: 768px) {
             .mode-selection {
-                flex-direction: column;
-                gap: 15px;
+                gap: 12px;
             }
             
             .mode-btn {
-                padding: 14px 30px;
-                font-size: 22px;
+                padding: 12px 20px;
+                font-size: 16px;
             }
             
             .category-grid {
@@ -545,17 +556,6 @@
                 width: 30px !important;
                 height: 30px !important;
                 font-size: 16px !important;
-                top: -10px !important;
-            }
-            
-            .option-card:nth-child(1) .option-letter,
-            .option-card:nth-child(3) .option-letter {
-                left: 10px !important;
-            }
-            
-            .option-card:nth-child(2) .option-letter,
-            .option-card:nth-child(4) .option-letter {
-                right: 10px !important;
             }
             
             .group-title {
@@ -570,50 +570,28 @@
                 font-size: 18px;
             }
         }
-        
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .category-card {
-                font-size: 20px;
-                padding: 30px 12px;
-            }
-            
-            .question-number {
-                padding: 15px 6px;
-                font-size: 18px;
-            }
-            
-            .question-text {
-                font-size: 28px;
-            }
-            
-            .option-text {
-                font-size: 20px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container" id="app">
-        <!-- Mode Selection View -->
         <div id="modeView" class="view">
             <div class="mode-selection">
                 <button class="mode-btn online" onclick="selectMode('online')">🌐 ئۆنلاین</button>
                 <button class="mode-btn offline" onclick="selectMode('offline')">📱 ئۆفلاین</button>
                 <button class="mode-btn reset" onclick="openResetModal()">🔄 ریسێت</button>
+                <button class="mode-btn import" onclick="openImportModal()">📥 Import JSON</button>
+                <button class="mode-btn delete-all" onclick="openDeleteAllModal()">🗑️ سڕینەوەی هەموو پرسیارەکان</button>
             </div>
         </div>
         
-        <!-- Category View -->
         <div id="categoryView" class="view hidden">
             <div class="category-grid" id="categoryGrid"></div>
         </div>
         
-        <!-- Question Grid View -->
         <div id="questionGridView" class="view hidden">
             <div class="question-grid" id="questionGrid"></div>
         </div>
         
-        <!-- Question Display View -->
         <div id="questionDisplayView" class="view hidden">
             <div class="question-display">
                 <div class="timer-circle">
@@ -624,49 +602,53 @@
             </div>
         </div>
         
-        <!-- Groups View -->
         <div id="groupsView" class="view hidden">
             <div class="groups-container" id="groupsContainer"></div>
         </div>
     </div>
     
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <h3>📥 فایلی JSON هەڵبژێرە</h3>
+            <input type="file" id="jsonFile" accept=".json">
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="importQuestions()">Import</button>
+                <button class="cancel-btn" onclick="closeImportModal()">پەشیمان بووم</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete All Modal -->
+    <div id="deleteAllModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ دڵنیای دەتەوێت هەموو پرسیارەکان بسڕیتەوە؟</h3>
+            <p style="font-size: 18px; margin-bottom: 20px;">ئاگاداربە! ئەم کارە هەموو پرسیارەکان لە هەموو کەتەگۆرییەکان دەسڕێتەوە و ناتوانرێت بگەڕێنرێتەوە!</p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="deleteAllQuestions()">بەڵێ، بسڕەوە</button>
+                <button class="cancel-btn" onclick="closeDeleteAllModal()">نەخێر، پەشیمان بووم</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Reset Modal -->
-    <div id="resetModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 25px; padding: 35px; max-width: 400px; width: 90%; text-align: center;">
-            <div style="font-size: 30px; margin-bottom: 20px; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">⚠️ دڵنیای دەتەوێت بگەڕێیتەوە سەرەتایی یاری؟</div>
-            <div style="display: flex; gap: 20px; justify-content: center;">
-                <button onclick="resetGame()" style="background: #4CAF50; color: white; border: none; padding: 14px 35px; border-radius: 12px; font-size: 22px; cursor: pointer; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">بەڵێ</button>
-                <button onclick="closeResetModal()" style="background: #f44336; color: white; border: none; padding: 14px 35px; border-radius: 12px; font-size: 22px; cursor: pointer; font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">نەخێر</button>
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ دڵنیای دەتەوێت بگەڕێیتەوە سەرەتایی یاری؟</h3>
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="resetGame()">بەڵێ</button>
+                <button class="cancel-btn" onclick="closeResetModal()">نەخێر</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import { db, ref, get, set, update, onValue } from './firebase-config.js';
+        import { db, ref, get, set, update, remove } from './firebase-config.js';
         
-        // قەدەغەکردنی کلیکی ڕاست
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // قەدەغەکردنی هەڵبژاردن
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // قەدەغەکردنی Refresh
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F5') {
-                e.preventDefault();
-                return false;
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                e.preventDefault();
-                return false;
-            }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('selectstart', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
                 e.preventDefault();
                 return false;
             }
@@ -674,8 +656,6 @@
         
         let currentMode = null;
         let currentCategory = null;
-        let currentQuestionId = null;
-        let currentQuestionData = null;
         let timerInterval = null;
         let timerSeconds = 30;
         let isWaitingForEnter = false;
@@ -693,12 +673,10 @@
             { key: 'religion', name: 'ئایینی' }
         ];
         
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' || e.key === 'Escape') {
                 e.preventDefault();
                 if (!document.getElementById('modeView').classList.contains('hidden')) {
-                    // Already in mode view
                 } else if (!document.getElementById('categoryView').classList.contains('hidden')) {
                     document.getElementById('categoryView').classList.add('hidden');
                     document.getElementById('modeView').classList.remove('hidden');
@@ -711,7 +689,6 @@
                 }
             } else if (e.key === 'Enter' && isWaitingForEnter && selectedQuestionBox) {
                 e.preventDefault();
-                // Execute the question selection
                 const questionId = selectedQuestionBox.dataset.questionId;
                 const questionData = JSON.parse(selectedQuestionBox.dataset.questionData);
                 executeSelectQuestion(questionId, questionData);
@@ -721,18 +698,89 @@
             }
         });
         
-        window.openResetModal = function() {
+        window.openImportModal = () => {
+            document.getElementById('importModal').style.display = 'flex';
+        };
+        
+        window.closeImportModal = () => {
+            document.getElementById('importModal').style.display = 'none';
+        };
+        
+        window.importQuestions = async () => {
+            const fileInput = document.getElementById('jsonFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('تکایە فایلێکی JSON هەڵبژێرە');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    for (let catKey in importedData) {
+                        if (importedData.hasOwnProperty(catKey)) {
+                            const categoryRef = ref(db, `categories/${catKey}/questions`);
+                            const questions = importedData[catKey];
+                            
+                            for (let qId in questions) {
+                                if (questions.hasOwnProperty(qId)) {
+                                    const newQuestionRef = ref(db, `categories/${catKey}/questions/${qId}`);
+                                    await set(newQuestionRef, questions[qId]);
+                                }
+                            }
+                        }
+                    }
+                    
+                    alert('پرسیارەکان بە سەرکەوتوویی import کرا');
+                    closeImportModal();
+                    
+                    if (currentMode) {
+                        loadCategories();
+                    }
+                } catch (error) {
+                    alert('هەڵە لە خوێندنەوەی فایلەکەدا: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        window.openDeleteAllModal = () => {
+            document.getElementById('deleteAllModal').style.display = 'flex';
+        };
+        
+        window.closeDeleteAllModal = () => {
+            document.getElementById('deleteAllModal').style.display = 'none';
+        };
+        
+        window.deleteAllQuestions = async () => {
+            for (let cat of categories) {
+                const questionsRef = ref(db, `categories/${cat.key}/questions`);
+                await remove(questionsRef);
+                // Re-create empty questions object
+                await set(ref(db, `categories/${cat.key}/questions`), {});
+            }
+            alert('هەموو پرسیارەکان سڕاینەوە');
+            closeDeleteAllModal();
+            
+            if (currentMode) {
+                loadCategories();
+            }
+        };
+        
+        window.openResetModal = () => {
             document.getElementById('resetModal').style.display = 'flex';
         };
         
-        window.closeResetModal = function() {
+        window.closeResetModal = () => {
             document.getElementById('resetModal').style.display = 'none';
         };
         
-        window.resetGame = async function() {
-            document.getElementById('resetModal').style.display = 'none';
+        window.resetGame = async () => {
+            closeResetModal();
             
-            // Reset used questions
             for (let cat of categories) {
                 const questionsRef = ref(db, `categories/${cat.key}/questions`);
                 const snapshot = await get(questionsRef);
@@ -744,23 +792,17 @@
                 }
             }
             
-            // Reset players scores
             const usersRef = ref(db, 'users');
             const snapshot = await get(usersRef);
             if (snapshot.exists()) {
                 const users = snapshot.val();
                 for (let userId in users) {
                     if (users[userId].role === 'player') {
-                        await update(ref(db, `users/${userId}`), { 
-                            score: 5, 
-                            isEliminated: false,
-                            isActive: true 
-                        });
+                        await update(ref(db, `users/${userId}`), { score: 5, isEliminated: false, isActive: true });
                     }
                 }
             }
             
-            // Reset game state
             await set(ref(db, 'game/currentQuestion'), null);
             await set(ref(db, 'game/questionActive'), false);
             await set(ref(db, 'game/showAnswer'), false);
@@ -768,7 +810,6 @@
             alert('یاریەکە بە سەرکەوتوویی ریسێت کرا');
             
             if (currentMode) {
-                // Go back to mode selection
                 document.getElementById('categoryView').classList.add('hidden');
                 document.getElementById('modeView').classList.remove('hidden');
                 currentMode = null;
@@ -828,7 +869,6 @@
         async function selectCategory(categoryKey) {
             currentCategory = categoryKey;
             
-            // Add green blink effect
             const cards = document.querySelectorAll('.category-card');
             for (let card of cards) {
                 if (card.textContent.includes(categories.find(c => c.key === categoryKey)?.name || '')) {
@@ -867,13 +907,10 @@
                     
                     if (exists && !isUsed) {
                         box.style.cursor = 'pointer';
-                        // When clicked, just highlight and wait for Enter
                         box.onclick = () => {
-                            // Remove waiting class from previous box
                             if (selectedQuestionBox) {
                                 selectedQuestionBox.classList.remove('waiting-for-enter');
                             }
-                            // Add waiting class to this box
                             box.classList.add('waiting-for-enter');
                             selectedQuestionBox = box;
                             selectedQuestionBox.dataset.questionId = qId;
@@ -898,10 +935,6 @@
         }
         
         async function executeSelectQuestion(questionId, question) {
-            currentQuestionId = questionId;
-            currentQuestionData = question;
-            
-            // Remove waiting class and mark as used
             if (selectedQuestionBox) {
                 selectedQuestionBox.classList.remove('waiting-for-enter');
                 selectedQuestionBox.classList.add('used');
@@ -910,10 +943,8 @@
             selectedQuestionBox = null;
             isWaitingForEnter = false;
             
-            // Mark as used in database
             await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
             
-            // Send question to players if online
             if (currentMode === 'online') {
                 await set(ref(db, 'game/currentQuestion'), {
                     id: questionId,
@@ -927,11 +958,9 @@
                 await set(ref(db, 'game/timerStart'), Date.now());
             }
             
-            // Show question display
             document.getElementById('questionGridView').classList.add('hidden');
             document.getElementById('questionDisplayView').classList.remove('hidden');
             
-            // Display question
             document.getElementById('displayQuestion').textContent = question.text;
             const optionsContainer = document.getElementById('displayOptions');
             optionsContainer.innerHTML = '';
@@ -964,7 +993,6 @@
                     
                     if (timerSeconds <= 0) {
                         clearInterval(timerInterval);
-                        // Show correct answer
                         const options = document.querySelectorAll('.option-card');
                         options.forEach((opt, idx) => {
                             if (idx === question.correct) {
@@ -980,7 +1008,7 @@
                         }
                     }
                 }, 1000);
-            }, 2000);
+            }, 3000);
         }
         
         function showGroupsAndPlayers() {
@@ -1042,7 +1070,6 @@
         }
         
         window.goBackToCategories = function() {
-            // Clear selected question
             if (selectedQuestionBox) {
                 selectedQuestionBox.classList.remove('waiting-for-enter');
                 selectedQuestionBox = null;
@@ -1068,7 +1095,6 @@
             loadQuestionsForCategory(currentCategory);
         };
         
-        // Check permission
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (currentUser.role !== 'presenter' && currentUser.role !== 'admin') {
             alert('تەنها پێشکەشکار دەتوانێت ئەم پەڕەیە ببینێت!');
