@@ -65,7 +65,6 @@
             flex-direction: column;
         }
         
-        /* Mode Selection */
         .mode-selection {
             display: flex;
             justify-content: center;
@@ -120,7 +119,6 @@
             transform: translateY(0);
         }
         
-        /* Category Grid - No Animation */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -168,7 +166,6 @@
             100% { background: #4CAF50; }
         }
         
-        /* Question Grid */
         .question-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -207,7 +204,6 @@
             opacity: 0.7;
         }
         
-        /* Question Display */
         .question-display {
             max-width: 900px;
             width: 100%;
@@ -428,7 +424,6 @@
             flex-direction: column;
         }
         
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -464,7 +459,7 @@
             border-radius: 12px;
             margin-bottom: 20px;
             font-size: 16px;
-            font-family: inherit;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .modal-buttons {
@@ -490,6 +485,30 @@
         .cancel-btn {
             background: #f44336;
             color: white;
+        }
+        
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
         
         @media (max-width: 768px) {
@@ -607,7 +626,6 @@
         </div>
     </div>
     
-    <!-- Import Modal -->
     <div id="importModal" class="modal">
         <div class="modal-content">
             <h3>📥 فایلی JSON هەڵبژێرە</h3>
@@ -619,11 +637,10 @@
         </div>
     </div>
     
-    <!-- Delete All Modal -->
     <div id="deleteAllModal" class="modal">
         <div class="modal-content">
             <h3>⚠️ دڵنیای دەتەوێت هەموو پرسیارەکان بسڕیتەوە؟</h3>
-            <p style="font-size: 18px; margin-bottom: 20px;">ئاگاداربە! ئەم کارە هەموو پرسیارەکان لە هەموو کەتەگۆرییەکان دەسڕێتەوە و ناتوانرێت بگەڕێنرێتەوە!</p>
+            <p style="font-size: 18px; margin-bottom: 20px; font-family: 'K24KurdishLight-Light';">ئاگاداربە! ئەم کارە هەموو پرسیارەکان لە هەموو کەتەگۆرییەکان دەسڕێتەوە و ناتوانرێت بگەڕێنرێتەوە!</p>
             <div class="modal-buttons">
                 <button class="confirm-btn" onclick="deleteAllQuestions()">بەڵێ، بسڕەوە</button>
                 <button class="cancel-btn" onclick="closeDeleteAllModal()">نەخێر، پەشیمان بووم</button>
@@ -631,7 +648,6 @@
         </div>
     </div>
     
-    <!-- Reset Modal -->
     <div id="resetModal" class="modal">
         <div class="modal-content">
             <h3>⚠️ دڵنیای دەتەوێت بگەڕێیتەوە سەرەتایی یاری؟</h3>
@@ -643,7 +659,7 @@
     </div>
 
     <script type="module">
-        import { db, ref, get, set, update, remove } from './firebase-config.js';
+        import { db, ref, get, set, push, remove, update } from './firebase-config.js';
         
         document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('selectstart', (e) => e.preventDefault());
@@ -672,6 +688,19 @@
             { key: 'geography', name: 'جوگرافیا' },
             { key: 'religion', name: 'ئایینی' }
         ];
+        
+        const categoryKeys = ['history', 'science', 'literature', 'art', 'sports', 'technology', 'health', 'geography', 'religion'];
+        
+        function showMessage(msg, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'toast-message';
+            messageDiv.style.background = type === 'success' ? '#4CAF50' : '#f44336';
+            messageDiv.textContent = msg;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
         
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' || e.key === 'Escape') {
@@ -704,6 +733,7 @@
         
         window.closeImportModal = () => {
             document.getElementById('importModal').style.display = 'none';
+            document.getElementById('jsonFile').value = '';
         };
         
         window.importQuestions = async () => {
@@ -711,7 +741,7 @@
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('تکایە فایلێکی JSON هەڵبژێرە');
+                showMessage('تکایە فایلێکی JSON هەڵبژێرە', 'error');
                 return;
             }
             
@@ -721,27 +751,46 @@
                     const importedData = JSON.parse(e.target.result);
                     
                     for (let catKey in importedData) {
-                        if (importedData.hasOwnProperty(catKey)) {
-                            const categoryRef = ref(db, `categories/${catKey}/questions`);
+                        if (importedData.hasOwnProperty(catKey) && categoryKeys.includes(catKey)) {
                             const questions = importedData[catKey];
+                            const questionCount = Object.keys(questions).length;
+                            
+                            if (questionCount > 36) {
+                                showMessage(`${catKey} کەتەگۆریەکە زیاتر لە 36 پرسیاری تێدایە!`, 'error');
+                                continue;
+                            }
+                            
+                            const categoryRef = ref(db, `categories/${catKey}/questions`);
+                            await remove(categoryRef);
+                            await set(categoryRef, {});
                             
                             for (let qId in questions) {
                                 if (questions.hasOwnProperty(qId)) {
-                                    const newQuestionRef = ref(db, `categories/${catKey}/questions/${qId}`);
-                                    await set(newQuestionRef, questions[qId]);
+                                    const question = questions[qId];
+                                    if (question.text && question.options && question.options.length === 4 && typeof question.correct === 'number') {
+                                        const newQuestionRef = push(ref(db, `categories/${catKey}/questions`));
+                                        await set(newQuestionRef, {
+                                            text: question.text,
+                                            options: question.options,
+                                            correct: question.correct,
+                                            used: false,
+                                            createdAt: new Date().toISOString()
+                                        });
+                                    }
                                 }
                             }
                         }
                     }
                     
-                    alert('پرسیارەکان بە سەرکەوتوویی import کرا');
+                    showMessage('پرسیارەکان بە سەرکەوتوویی import کرا', 'success');
                     closeImportModal();
                     
                     if (currentMode) {
                         loadCategories();
                     }
                 } catch (error) {
-                    alert('هەڵە لە خوێندنەوەی فایلەکەدا: ' + error.message);
+                    console.error('Import error:', error);
+                    showMessage('هەڵە لە خوێندنەوەی فایلەکەدا: ' + error.message, 'error');
                 }
             };
             reader.readAsText(file);
@@ -759,10 +808,9 @@
             for (let cat of categories) {
                 const questionsRef = ref(db, `categories/${cat.key}/questions`);
                 await remove(questionsRef);
-                // Re-create empty questions object
-                await set(ref(db, `categories/${cat.key}/questions`), {});
+                await set(questionsRef, {});
             }
-            alert('هەموو پرسیارەکان سڕاینەوە');
+            showMessage('هەموو پرسیارەکان سڕاینەوە', 'success');
             closeDeleteAllModal();
             
             if (currentMode) {
@@ -807,7 +855,7 @@
             await set(ref(db, 'game/questionActive'), false);
             await set(ref(db, 'game/showAnswer'), false);
             
-            alert('یاریەکە بە سەرکەوتوویی ریسێت کرا');
+            showMessage('یاریەکە بە سەرکەوتوویی ریسێت کرا', 'success');
             
             if (currentMode) {
                 document.getElementById('categoryView').classList.add('hidden');
