@@ -4,17 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>زیادکردنی پرسیار</title>
-    <link rel="stylesheet" href="style.css">
     <style>
+        @font-face {
+            font-family: 'K24KurdishBold-Bold';
+            src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        @font-face {
+            font-family: 'K24KurdishLight-Light';
+            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         
         body {
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -41,11 +60,14 @@
             font-size: 28px;
         }
         
-        .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .logout-btn, .export-btn {
             padding: 10px 25px;
+            border: none;
             border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
@@ -53,12 +75,26 @@
             transition: all 0.3s;
         }
         
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+        }
+        
         .logout-btn:hover {
             background: #ff3838;
             transform: translateY(-2px);
         }
         
-        /* Category Tabs */
+        .export-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .export-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
         .categories-tabs {
             background: white;
             border-radius: 15px;
@@ -78,8 +114,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s;
-            font-family: inherit;
-            font-weight: bold;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .category-tab.active {
@@ -93,7 +128,6 @@
             transform: translateY(-2px);
         }
         
-        /* Form Card */
         .form-card {
             background: white;
             border-radius: 20px;
@@ -117,7 +151,7 @@
             border-radius: 10px;
             font-size: 16px;
             margin-bottom: 20px;
-            font-family: inherit;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             resize: vertical;
         }
         
@@ -134,7 +168,7 @@
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 15px;
-            font-family: inherit;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .correct-select {
@@ -144,7 +178,7 @@
             border-radius: 10px;
             font-size: 16px;
             margin-bottom: 20px;
-            font-family: inherit;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             cursor: pointer;
         }
         
@@ -159,22 +193,18 @@
             cursor: pointer;
             transition: transform 0.2s;
             width: 100%;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .add-btn:hover {
             transform: translateY(-2px);
         }
         
-        /* Questions List */
         .questions-list-container {
             background: white;
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        
-        .category-questions {
-            margin-top: 20px;
         }
         
         .question-item {
@@ -193,6 +223,7 @@
             flex: 1;
             font-size: 16px;
             color: #333;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .question-actions {
@@ -207,6 +238,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .edit-question-btn {
@@ -219,14 +251,13 @@
             color: white;
         }
         
-        .question-count {
-            display: inline-block;
-            background: #667eea;
+        .limit-reached {
+            background: #ff4757;
             color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-right: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
         }
         
         .message {
@@ -260,15 +291,6 @@
             }
         }
         
-        .limit-reached {
-            background: #ff4757;
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        
         @media (max-width: 768px) {
             .category-tab {
                 padding: 8px 12px;
@@ -283,6 +305,16 @@
             .question-actions {
                 align-self: flex-end;
             }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -290,13 +322,14 @@
     <div class="container">
         <div class="header">
             <h1>📝 زیادکردنی پرسیار</h1>
-            <button class="logout-btn" onclick="logout()">🚪 دەرچوون</button>
+            <div class="header-buttons">
+                <button class="export-btn" onclick="exportQuestions()">📤 Export JSON</button>
+                <button class="logout-btn" onclick="logout()">🚪 دەرچوون</button>
+            </div>
         </div>
         
-        <!-- Categories Tabs -->
         <div class="categories-tabs" id="categoriesTabs"></div>
         
-        <!-- Add Question Form -->
         <div class="form-card">
             <h2 class="form-title">➕ زیادکردنی پرسیاری نوێ</h2>
             <textarea id="questionText" class="question-input" rows="3" placeholder="پرسیارەکە لێرە بنوسە..."></textarea>
@@ -316,7 +349,6 @@
             <div id="limitWarning" style="display: none;" class="limit-reached">⚠️ ئەم کەتەگۆریە پڕە! (36 پرسیار)</div>
         </div>
         
-        <!-- Questions List -->
         <div class="questions-list-container">
             <h2 class="form-title">📋 پرسیارەکان</h2>
             <div id="questionsList"></div>
@@ -326,21 +358,13 @@
     <script type="module">
         import { db, ref, get, set, push, remove, update, onValue } from './firebase-config.js';
         
-        const categories = [
-            'مێژوو', 'زانست', 'ئەدەبییات', 'هونەر', 'وەرزش', 
-            'تەکنەلۆژیا', 'تەندروستی', 'جوگرافیا', 'ئایینی'
-        ];
-        
-        const categoryKeys = [
-            'history', 'science', 'literature', 'art', 'sports',
-            'technology', 'health', 'geography', 'religion'
-        ];
+        const categories = ['مێژوو', 'زانست', 'ئەدەبییات', 'هونەر', 'وەرزش', 'تەکنەلۆژیا', 'تەندروستی', 'جوگرافیا', 'ئایینی'];
+        const categoryKeys = ['history', 'science', 'literature', 'art', 'sports', 'technology', 'health', 'geography', 'religion'];
         
         let currentCategory = 'history';
         let editingQuestionId = null;
         let editingCategory = null;
         
-        // دروستکردنی تاپەکان
         function createTabs() {
             const container = document.getElementById('categoriesTabs');
             container.innerHTML = '';
@@ -359,7 +383,6 @@
             });
         }
         
-        // بارکردنی پرسیارەکان بۆ کەتەگۆریەک
         async function loadQuestionsForCategory(categoryKey) {
             const questionsRef = ref(db, `categories/${categoryKey}/questions`);
             onValue(questionsRef, (snapshot) => {
@@ -368,8 +391,6 @@
                     const questions = snapshot.val();
                     const questionCount = Object.keys(questions).length;
                     
-                    // نیشاندانی ژمارەی پرسیارەکان
-                    const title = document.querySelector('.form-title');
                     if (questionCount >= 36) {
                         document.getElementById('limitWarning').style.display = 'block';
                     } else {
@@ -406,7 +427,6 @@
             });
         }
         
-        // زیادکردنی پرسیار
         window.addQuestion = async function() {
             const questionText = document.getElementById('questionText').value.trim();
             const options = [
@@ -429,7 +449,6 @@
                 }
             }
             
-            // پشکنینی ژمارەی پرسیارەکان
             const questionsRef = ref(db, `categories/${currentCategory}/questions`);
             const snapshot = await get(questionsRef);
             let currentCount = 0;
@@ -451,14 +470,12 @@
             };
             
             if (editingQuestionId && editingCategory === currentCategory) {
-                // نوێکردنەوەی پرسیار
                 await update(ref(db, `categories/${currentCategory}/questions/${editingQuestionId}`), questionData);
                 showMessage('پرسیار نوێ کرایەوە', 'success');
                 editingQuestionId = null;
                 editingCategory = null;
                 document.querySelector('.add-btn').innerHTML = '➕ زیادکردنی پرسیار';
             } else {
-                // زیادکردنی پرسیاری نوێ
                 const newQuestionRef = push(ref(db, `categories/${currentCategory}/questions`));
                 await set(newQuestionRef, questionData);
                 showMessage('پرسیار بە سەرکەوتوویی زیاد کرا', 'success');
@@ -467,12 +484,10 @@
             clearForm();
         }
         
-        // دەستکاری پرسیار
         window.editQuestion = function(categoryKey, questionId, question) {
             editingQuestionId = questionId;
             editingCategory = categoryKey;
             
-            // گۆڕینی کەتەگۆری ئەگەر پێویست بێت
             const categoryIndex = categoryKeys.indexOf(categoryKey);
             if (categoryIndex !== -1) {
                 document.querySelectorAll('.category-tab')[categoryIndex].click();
@@ -486,18 +501,44 @@
             document.getElementById('correctAnswer').value = question.correct;
             
             document.querySelector('.add-btn').innerHTML = '✏️ نوێکردنەوەی پرسیار';
-            
-            // Scrolling to form
             document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
-        }
+        };
         
-        // سڕینەوەی پرسیار
         window.deleteQuestion = async function(categoryKey, questionId) {
             if (confirm('دڵنیایت دەتەوێت ئەم پرسیارە بسڕیتەوە؟')) {
                 await remove(ref(db, `categories/${categoryKey}/questions/${questionId}`));
                 showMessage('پرسیار سڕایەوە', 'success');
             }
-        }
+        };
+        
+        window.exportQuestions = async function() {
+            const exportData = {};
+            
+            for (let i = 0; i < categoryKeys.length; i++) {
+                const categoryKey = categoryKeys[i];
+                const questionsRef = ref(db, `categories/${categoryKey}/questions`);
+                const snapshot = await get(questionsRef);
+                
+                if (snapshot.exists()) {
+                    exportData[categoryKey] = snapshot.val();
+                } else {
+                    exportData[categoryKey] = {};
+                }
+            }
+            
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `questions_export_${new Date().toISOString().slice(0,19)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('پرسیارەکان بە سەرکەوتوویی export کرا', 'success');
+        };
         
         function clearForm() {
             document.getElementById('questionText').value = '';
@@ -526,14 +567,12 @@
             }, 3000);
         }
         
-        // پشکنینی ڕێگەپێدان
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (currentUser.role !== 'admin' && currentUser.role !== 'question_creator') {
             alert('تەنها ئەدمین و دروستکەری پرسیار دەتوانن ئەم پەڕەیە ببینن!');
             window.location.href = 'login.html';
         }
         
-        // Initialize
         createTabs();
         loadQuestionsForCategory('history');
     </script>
