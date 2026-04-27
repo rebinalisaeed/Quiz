@@ -4,12 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>بەڕێوەبردنی یوزەرەکان</title>
-    <link rel="stylesheet" href="style.css">
     <style>
+        @font-face {
+            font-family: 'K24KurdishBold-Bold';
+            src: url('fonts/K24KurdishBold-Bold.ttf') format('truetype');
+        }
+        
+        @font-face {
+            font-family: 'K24KurdishLight-Light';
+            src: url('fonts/K24KurdishLight-Light.ttf') format('truetype');
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
         }
         
         body {
@@ -51,6 +62,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .logout-btn:hover {
@@ -88,7 +100,7 @@
             border-radius: 10px;
             font-size: 16px;
             transition: all 0.3s;
-            font-family: inherit;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .input-field:focus {
@@ -98,6 +110,7 @@
         
         select.input-field {
             cursor: pointer;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .create-btn {
@@ -111,6 +124,7 @@
             cursor: pointer;
             transition: transform 0.2s;
             width: 100%;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .create-btn:hover {
@@ -141,6 +155,11 @@
             background: #667eea;
             color: white;
             font-weight: bold;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .users-table td {
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .users-table tr:hover {
@@ -155,6 +174,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .edit-btn {
@@ -252,6 +272,7 @@
                     <option value="question_creator">دروستکەری پرسیار</option>
                     <option value="admin">بەڕێوەبەر</option>
                     <option value="presenter">پێشکەشکار</option>
+                    <option value="point_viewer">نیشاندانی خاڵ</option>
                 </select>
                 <select id="newGroup" class="input-field" disabled>
                     <option value="group1">گروپی یەکەم</option>
@@ -289,7 +310,6 @@
         
         let currentEditId = null;
         
-        // چالاک/ناچالاک کردنی کۆمبۆ بۆکسی گرووپ بۆ یاریکەر
         window.toggleGroupSelect = function() {
             const role = document.getElementById('newRole').value;
             const groupSelect = document.getElementById('newGroup');
@@ -301,7 +321,17 @@
             }
         }
         
-        // بارکردنی هەموو یوزەرەکان
+        function getRoleName(role) {
+            const roles = {
+                'player': 'یاریکەر',
+                'question_creator': 'دروستکەری پرسیار',
+                'admin': 'بەڕێوەبەر',
+                'presenter': 'پێشکەشکار',
+                'point_viewer': 'نیشاندانی خاڵ'
+            };
+            return roles[role] || role;
+        }
+        
         function loadUsers() {
             const usersRef = ref(db, 'users');
             onValue(usersRef, (snapshot) => {
@@ -316,17 +346,17 @@
                             const row = tbody.insertRow();
                             row.innerHTML = `
                                 <td>${user.username || ''}</td>
-                                <td>${user.name || ''}</td>
-                                <td>${getRoleName(user.role)}</td>
-                                <td>${user.group === 'group1' ? 'گروپی یەکەم' : (user.group === 'group2' ? 'گروپی دووەم' : '-')}</td>
-                                <td>${user.score !== undefined ? user.score : 5}</td>
+                                <td>${user.name || ''}Jsx
+                                <td>${getRoleName(user.role)}Jsx
+                                <td>${user.group === 'group1' ? 'گروپی یەکەم' : (user.group === 'group2' ? 'گروپی دووەم' : '-')}Jsx
+                                <td>${user.score !== undefined ? user.score : 5}Jsx
                                 <td class="${user.isActive !== false ? 'status-active' : 'status-inactive'}">
                                     ${user.isActive !== false ? 'چالاکە' : 'ناچالاکە'}
-                                </td>
+                                 </td>
                                 <td>
                                     <button class="edit-btn" onclick='editUser(${JSON.stringify(userId)}, ${JSON.stringify(user)})'>✏️ دەستکاری</button>
                                     <button class="delete-btn" onclick="deleteUser('${userId}')">🗑️ سڕینەوە</button>
-                                </td>
+                                 </td>
                             `;
                         }
                     }
@@ -336,17 +366,6 @@
             });
         }
         
-        function getRoleName(role) {
-            const roles = {
-                'player': 'یاریکەر',
-                'question_creator': 'دروستکەری پرسیار',
-                'admin': 'بەڕێوەبەر',
-                'presenter': 'پێشکەشکار'
-            };
-            return roles[role] || role;
-        }
-        
-        // دروستکردنی یوزەری نوێ
         window.createUser = async function() {
             const username = document.getElementById('newUsername').value.trim();
             const password = document.getElementById('newPassword').value.trim();
@@ -359,7 +378,6 @@
                 return;
             }
             
-            // پشکنینی بوونی یوزەر
             const usersRef = ref(db, 'users');
             const snapshot = await get(usersRef);
             let exists = false;
@@ -395,7 +413,6 @@
             await set(newUserRef, userData);
             showMessage('یوزەر بە سەرکەوتوویی دروست کرا', 'success');
             
-            // خاوێنکردنەوەی فۆرم
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newName').value = '';
@@ -403,7 +420,6 @@
             document.getElementById('newGroup').disabled = true;
         }
         
-        // دەستکاری یوزەر
         window.editUser = function(userId, user) {
             document.getElementById('newUsername').value = user.username;
             document.getElementById('newPassword').value = user.password;
@@ -423,7 +439,6 @@
             createBtn.onclick = () => updateUser(userId);
         }
         
-        // نوێکردنەوەی یوزەر
         window.updateUser = async function(userId) {
             const username = document.getElementById('newUsername').value.trim();
             const password = document.getElementById('newPassword').value.trim();
@@ -442,7 +457,6 @@
             
             showMessage('یوزەر نوێ کرایەوە', 'success');
             
-            // گەڕاندنەوەی فۆرم بۆ دۆخی بنەڕەت
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('newName').value = '';
@@ -454,7 +468,6 @@
             createBtn.onclick = createUser;
         }
         
-        // سڕینەوەی یوزەر
         window.deleteUser = async function(userId) {
             if (confirm('دڵنیایت دەتەوێت ئەم یوزەرە بسڕیتەوە؟')) {
                 await remove(ref(db, `users/${userId}`));
@@ -462,7 +475,6 @@
             }
         }
         
-        // دەرچوون
         window.logout = function() {
             localStorage.removeItem('currentUser');
             window.location.href = 'login.html';
@@ -478,14 +490,12 @@
             }, 3000);
         }
         
-        // پشکنینی ڕێگەپێدان
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (currentUser.role !== 'admin') {
             alert('تەنها ئەدمین دەتوانێت ئەم پەڕەیە ببینێت!');
             window.location.href = 'login.html';
         }
         
-        // بارکردنی یوزەرەکان
         loadUsers();
     </script>
 </body>
