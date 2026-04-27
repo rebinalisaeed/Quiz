@@ -119,6 +119,13 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        .waiting-subtext {
+            font-size: 18px;
+            color: #888;
+            margin-top: 15px;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         .question-screen {
             background: transparent;
             width: 100%;
@@ -307,6 +314,11 @@
             font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
+        .waiting-for-turn {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -398,6 +410,7 @@
         <div id="waitingScreen" class="waiting-screen">
             <div class="waiting-spinner"></div>
             <div class="waiting-text">⏳ چاوەڕوانی پرسیاری داهاتوو...</div>
+            <div class="waiting-subtext" id="waitingSubtext"></div>
         </div>
         
         <div id="questionScreen" class="question-screen hidden">
@@ -444,6 +457,8 @@
         let currentScore = 5;
         let selectedOptionIndex = null;
         let resultTimeout = null;
+        let currentActiveGroup = null;
+        let myGroup = currentUser.group;
         
         async function checkEliminated() {
             if (!currentUser.userId) return false;
@@ -477,13 +492,34 @@
                 
                 const game = snapshot.val();
                 
+                // Update waiting subtext based on active group
+                if (game && game.activeGroup) {
+                    const waitingSubtext = document.getElementById('waitingSubtext');
+                    if (game.activeGroup !== myGroup) {
+                        waitingSubtext.innerHTML = '⏰ نۆرەی گروپی ترە، تکایە چاوەڕوان بە...';
+                    } else {
+                        waitingSubtext.innerHTML = '';
+                    }
+                }
+                
                 if (game && game.questionActive === true && game.currentQuestion) {
-                    if (!currentQuestion || game.currentQuestion.timestamp !== currentQuestion.timestamp) {
-                        currentQuestion = game.currentQuestion;
-                        hasAnswered = false;
-                        hasShownResult = false;
-                        selectedOptionIndex = null;
-                        showQuestion(game.currentQuestion);
+                    // Only show question if it's this group's turn
+                    if (game.currentQuestion.activeGroup === myGroup) {
+                        if (!currentQuestion || game.currentQuestion.timestamp !== currentQuestion.timestamp) {
+                            currentQuestion = game.currentQuestion;
+                            hasAnswered = false;
+                            hasShownResult = false;
+                            selectedOptionIndex = null;
+                            showQuestion(game.currentQuestion);
+                        }
+                    } else {
+                        // Not this group's turn, make sure waiting screen is shown
+                        if (!document.getElementById('waitingScreen').classList.contains('hidden')) {
+                            // Already waiting
+                        } else {
+                            hideQuestionScreen();
+                            showWaitingScreen();
+                        }
                     }
                 } else if (game && game.showAnswer === true && currentQuestion && !hasAnswered && !hasShownResult) {
                     showAnswerAndResult();
@@ -715,6 +751,7 @@
                 return;
             }
             
+            myGroup = currentUser.group;
             const eliminated = await checkEliminated();
             if (!eliminated) {
                 listenForQuestions();
