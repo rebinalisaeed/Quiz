@@ -119,6 +119,21 @@
             transform: translateY(0);
         }
         
+        .turn-indicator {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .turn-indicator span {
+            color: #667eea;
+        }
+        
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -142,6 +157,7 @@
             font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             opacity: 1;
             transform: scale(1);
+            animation: none;
         }
         
         .category-card:hover {
@@ -521,6 +537,11 @@
                 font-size: 16px;
             }
             
+            .turn-indicator {
+                font-size: 18px;
+                padding: 10px 15px;
+            }
+            
             .category-grid {
                 gap: 12px;
             }
@@ -604,10 +625,16 @@
         </div>
         
         <div id="categoryView" class="view hidden">
+            <div class="turn-indicator" id="turnIndicator">
+                👥 نۆرە بۆ <span id="currentTurn">گروپی یەکەم</span>
+            </div>
             <div class="category-grid" id="categoryGrid"></div>
         </div>
         
         <div id="questionGridView" class="view hidden">
+            <div class="turn-indicator" id="turnIndicator2">
+                👥 نۆرە بۆ <span id="currentTurn2">گروپی یەکەم</span>
+            </div>
             <div class="question-grid" id="questionGrid"></div>
         </div>
         
@@ -676,6 +703,9 @@
         let timerSeconds = 30;
         let isWaitingForEnter = false;
         let selectedQuestionBox = null;
+        let currentTurn = 'group1'; // 'group1' or 'group2'
+        let group1QuestionCount = 0;
+        let group2QuestionCount = 0;
         
         const categories = [
             { key: 'history', name: 'مێژوو' },
@@ -690,6 +720,22 @@
         ];
         
         const categoryKeys = ['history', 'science', 'literature', 'art', 'sports', 'technology', 'health', 'geography', 'religion'];
+        
+        function updateTurnIndicators() {
+            const turnText = currentTurn === 'group1' ? 'گروپی یەکەم' : 'گروپی دووەم';
+            const turnElements = document.querySelectorAll('#currentTurn, #currentTurn2');
+            turnElements.forEach(el => {
+                if (el) el.textContent = turnText;
+            });
+            
+            // Update game state in Firebase
+            set(ref(db, 'game/currentTurn'), currentTurn);
+        }
+        
+        function switchTurn() {
+            currentTurn = currentTurn === 'group1' ? 'group2' : 'group1';
+            updateTurnIndicators();
+        }
         
         function showMessage(msg, type) {
             const messageDiv = document.createElement('div');
@@ -855,6 +901,14 @@
             await set(ref(db, 'game/questionActive'), false);
             await set(ref(db, 'game/showAnswer'), false);
             
+            // Reset turn and question counts
+            currentTurn = 'group1';
+            group1QuestionCount = 0;
+            group2QuestionCount = 0;
+            await set(ref(db, 'game/group1Count'), 0);
+            await set(ref(db, 'game/group2Count'), 0);
+            await set(ref(db, 'game/currentTurn'), 'group1');
+            
             showMessage('یاریەکە بە سەرکەوتوویی ریسێت کرا', 'success');
             
             if (currentMode) {
@@ -866,8 +920,17 @@
         
         window.selectMode = function(mode) {
             currentMode = mode;
+            currentTurn = 'group1';
+            group1QuestionCount = 0;
+            group2QuestionCount = 0;
+            
+            set(ref(db, 'game/group1Count'), 0);
+            set(ref(db, 'game/group2Count'), 0);
+            set(ref(db, 'game/currentTurn'), 'group1');
+            
             document.getElementById('modeView').classList.add('hidden');
             document.getElementById('categoryView').classList.remove('hidden');
+            updateTurnIndicators();
             
             if (mode === 'online') {
                 set(ref(db, 'game/presenterOnline'), true);
@@ -929,6 +992,7 @@
             setTimeout(async () => {
                 document.getElementById('categoryView').classList.add('hidden');
                 document.getElementById('questionGridView').classList.remove('hidden');
+                updateTurnIndicators();
                 await loadQuestionsForCategory(categoryKey);
             }, 200);
         }
@@ -991,6 +1055,15 @@
             selectedQuestionBox = null;
             isWaitingForEnter = false;
             
+            // Update question count for current turn
+            if (currentTurn === 'group1') {
+                group1QuestionCount++;
+                await set(ref(db, 'game/group1Count'), group1QuestionCount);
+            } else {
+                group2QuestionCount++;
+                await set(ref(db, 'game/group2Count'), group2QuestionCount);
+            }
+            
             await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
             
             if (currentMode === 'online') {
@@ -1000,10 +1073,12 @@
                     text: question.text,
                     options: question.options,
                     correct: question.correct,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    activeGroup: currentTurn
                 });
                 await set(ref(db, 'game/questionActive'), true);
                 await set(ref(db, 'game/timerStart'), Date.now());
+                await set(ref(db, 'game/activeGroup'), currentTurn);
             }
             
             document.getElementById('questionGridView').classList.add('hidden');
@@ -1065,6 +1140,9 @@
             document.getElementById('groupsView').classList.remove('hidden');
             isWaitingForEnter = false;
             loadPlayersAndGroups();
+            
+            // Switch turn after showing results
+            switchTurn();
         }
         
         async function loadPlayersAndGroups() {
@@ -1148,6 +1226,18 @@
             alert('تەنها پێشکەشکار دەتوانێت ئەم پەڕەیە ببینێت!');
             window.location.href = 'login.html';
         }
+        
+        // Load initial turn from Firebase if exists
+        async function loadInitialTurn() {
+            const turnRef = ref(db, 'game/currentTurn');
+            const snapshot = await get(turnRef);
+            if (snapshot.exists()) {
+                currentTurn = snapshot.val();
+            }
+            updateTurnIndicators();
+        }
+        
+        loadInitialTurn();
     </script>
 </body>
 </html>
