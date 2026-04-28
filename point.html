@@ -90,6 +90,20 @@
         .page-header h1 {
             font-size: 26px;
             color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .turn-indicator {
+            font-size: 20px;
+            color: #667eea;
+            margin-top: 5px;
+            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .turn-indicator span {
+            font-weight: bold;
+            color: #4CAF50;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .group-card {
@@ -184,48 +198,6 @@
             font-size: 18px;
         }
         
-        .logout-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 100;
-        }
-        
-        .logout-btn:hover {
-            background: #ff3838;
-            transform: scale(1.05);
-        }
-        
-        .refresh-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 100;
-        }
-        
-        .refresh-btn:hover {
-            background: #1976D2;
-            transform: scale(1.05);
-        }
-        
         @media (max-width: 600px) {
             .group-name {
                 font-size: 22px;
@@ -256,9 +228,8 @@
                 font-size: 22px;
             }
             
-            .logout-btn, .refresh-btn {
-                padding: 10px 16px;
-                font-size: 14px;
+            .turn-indicator {
+                font-size: 16px;
             }
         }
     </style>
@@ -267,6 +238,9 @@
     <div class="container" id="container">
         <div class="page-header">
             <h1>🏆 نمایشی خاڵەکان</h1>
+            <div class="turn-indicator" id="turnIndicator">
+                👥 ئێستا نۆرەی <span id="currentTurn">گروپی یەکەم</span> ە
+            </div>
         </div>
         
         <div id="group1Card" class="group-card">
@@ -293,9 +267,6 @@
             </div>
         </div>
     </div>
-    
-    <button class="logout-btn" onclick="logout()">🚪 دەرچوون</button>
-    <button class="refresh-btn" onclick="refreshData()">🔄 نوێکردنەوە</button>
     
     <script type="module">
         import { db, ref, get, onValue } from './firebase-config.js';
@@ -393,9 +364,15 @@
                 const game = gameSnapshot.val();
                 document.getElementById('group1Count').textContent = `پرسیار: ${game.group1Count || 0}`;
                 document.getElementById('group2Count').textContent = `پرسیار: ${game.group2Count || 0}`;
+                
+                // Update turn indicator
+                const currentTurn = game.currentTurn || 'group1';
+                const turnText = currentTurn === 'group1' ? 'گروپی یەکەم' : 'گروپی دووەم';
+                document.getElementById('currentTurn').textContent = turnText;
             } else {
                 document.getElementById('group1Count').textContent = 'پرسیار: 0';
                 document.getElementById('group2Count').textContent = 'پرسیار: 0';
+                document.getElementById('currentTurn').textContent = 'گروپی یەکەم';
             }
         }
         
@@ -404,17 +381,6 @@
             div.textContent = text;
             return div.innerHTML;
         }
-        
-        function refreshData() {
-            loadData();
-        }
-        
-        window.logout = function() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
-        };
-        
-        window.refreshData = refreshData;
         
         // Listen for real-time updates
         function listenForUpdates() {
@@ -437,6 +403,11 @@
         
         loadData();
         listenForUpdates();
+        
+        // Auto refresh every 2 seconds
+        setInterval(() => {
+            loadData();
+        }, 2000);
     </script>
 </body>
 </html>
