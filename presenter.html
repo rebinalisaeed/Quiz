@@ -849,6 +849,7 @@
             const container = document.getElementById('categoryGrid');
             container.innerHTML = '';
             
+            // دروستکردنی هەموو کەتەگۆریەکان بەیەکەوە (بێ هیچ جوڵەیەک)
             for (let cat of categories) {
                 const questionsRef = ref(db, `categories/${cat.key}/questions`);
                 const snapshot = await get(questionsRef);
