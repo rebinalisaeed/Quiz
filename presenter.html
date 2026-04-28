@@ -119,21 +119,7 @@
             transform: translateY(0);
         }
         
-        .turn-indicator {
-            background: rgba(255,255,255,0.9);
-            border-radius: 20px;
-            padding: 15px 25px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .turn-indicator span {
-            color: #667eea;
-        }
-        
+        /* Category Grid - No Animation, All appear at once */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -413,14 +399,19 @@
             animation: pulse 0.8s infinite;
         }
         
+        .category-card.waiting-for-enter {
+            background: #4CAF50;
+            animation: pulse 0.8s infinite;
+        }
+        
         @keyframes pulse {
             0% {
                 transform: scale(1);
                 opacity: 1;
             }
             50% {
-                transform: scale(1.08);
-                opacity: 0.8;
+                transform: scale(1.05);
+                opacity: 0.9;
             }
             100% {
                 transform: scale(1);
@@ -537,11 +528,6 @@
                 font-size: 16px;
             }
             
-            .turn-indicator {
-                font-size: 18px;
-                padding: 10px 15px;
-            }
-            
             .category-grid {
                 gap: 12px;
             }
@@ -625,16 +611,10 @@
         </div>
         
         <div id="categoryView" class="view hidden">
-            <div class="turn-indicator" id="turnIndicator">
-                👥 نۆرە بۆ <span id="currentTurn">گروپی یەکەم</span>
-            </div>
             <div class="category-grid" id="categoryGrid"></div>
         </div>
         
         <div id="questionGridView" class="view hidden">
-            <div class="turn-indicator" id="turnIndicator2">
-                👥 نۆرە بۆ <span id="currentTurn2">گروپی یەکەم</span>
-            </div>
             <div class="question-grid" id="questionGrid"></div>
         </div>
         
@@ -688,6 +668,7 @@
     <script type="module">
         import { db, ref, get, set, push, remove, update } from './firebase-config.js';
         
+        // ==================== قەدەغەکردنی کلیک و Refresh ====================
         document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('selectstart', (e) => e.preventDefault());
         document.addEventListener('keydown', (e) => {
@@ -697,15 +678,75 @@
             }
         });
         
+        // ==================== دەنگەکان ====================
+        function playTickSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                gainNode.gain.value = 0.1;
+                oscillator.type = 'sine';
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.3);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch(e) { console.log('Audio not supported'); }
+        }
+        
+        function playWarningSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 600;
+                gainNode.gain.value = 0.15;
+                oscillator.type = 'sine';
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.frequency.value = 400;
+                }, 200);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.6);
+                oscillator.stop(audioContext.currentTime + 0.6);
+            } catch(e) { console.log('Audio not supported'); }
+        }
+        
+        function playAnswerRevealSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 523.25;
+                gainNode.gain.value = 0.15;
+                oscillator.type = 'sine';
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.frequency.value = 659.25;
+                }, 150);
+                setTimeout(() => {
+                    oscillator.frequency.value = 783.99;
+                }, 300);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.6);
+                oscillator.stop(audioContext.currentTime + 0.6);
+            } catch(e) { console.log('Audio not supported'); }
+        }
+        
+        // ==================== گۆڕاوە سەرەکییەکان ====================
         let currentMode = null;
         let currentCategory = null;
         let timerInterval = null;
         let timerSeconds = 30;
         let isWaitingForEnter = false;
+        let selectedCategoryBox = null;
         let selectedQuestionBox = null;
-        let currentTurn = 'group1'; // 'group1' or 'group2'
-        let group1QuestionCount = 0;
-        let group2QuestionCount = 0;
+        let isInQuestion = false;
+        let isAnswerRevealed = false;
+        let currentQuestionData = null;
         
         const categories = [
             { key: 'history', name: 'مێژوو' },
@@ -721,22 +762,388 @@
         
         const categoryKeys = ['history', 'science', 'literature', 'art', 'sports', 'technology', 'health', 'geography', 'religion'];
         
-        function updateTurnIndicators() {
-            const turnText = currentTurn === 'group1' ? 'گروپی یەکەم' : 'گروپی دووەم';
-            const turnElements = document.querySelectorAll('#currentTurn, #currentTurn2');
-            turnElements.forEach(el => {
-                if (el) el.textContent = turnText;
+        // ==================== کۆنترۆڵی کیبۆرد ====================
+        function disableAllKeyboard() {
+            isWaitingForEnter = false;
+        }
+        
+        function enableEnterOnly() {
+            // Enter only will be handled in keydown
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            // Backspace - گەڕانەوە
+            if (e.key === 'Backspace' || e.key === 'Escape') {
+                e.preventDefault();
+                
+                // لە لیستی کەتەگۆریدا
+                if (!document.getElementById('categoryView').classList.contains('hidden')) {
+                    // nothing
+                }
+                // لە لیستی پرسیارەکاندا
+                else if (!document.getElementById('questionGridView').classList.contains('hidden')) {
+                    goBackToCategories();
+                }
+                // لە لیستی خاڵەکاندا (کاتێک Backspace چالاکە)
+                else if (!document.getElementById('groupsView').classList.contains('hidden')) {
+                    goBackToCategoriesFromPoints();
+                }
+            }
+            // Enter - چوونە ژوورەوە
+            else if (e.key === 'Enter' && isWaitingForEnter) {
+                e.preventDefault();
+                
+                // ئەگەر کەتەگۆریەک هەڵبژێردرابوو
+                if (selectedCategoryBox && !document.getElementById('questionGridView').classList.contains('hidden') === false) {
+                    const categoryKey = selectedCategoryBox.dataset.categoryKey;
+                    enterCategory(categoryKey);
+                }
+                // ئەگەر پرسیارێک هەڵبژێردرابوو
+                else if (selectedQuestionBox && !document.getElementById('questionDisplayView').classList.contains('hidden') === false) {
+                    const questionId = selectedQuestionBox.dataset.questionId;
+                    const questionData = JSON.parse(selectedQuestionBox.dataset.questionData);
+                    executeSelectQuestion(questionId, questionData);
+                }
+                // ئەگەر وەڵام ئاشکرا بوو بچێتە لیستی خاڵەکان
+                else if (isAnswerRevealed && !document.getElementById('groupsView').classList.contains('hidden') === false) {
+                    showGroupsAndPlayers();
+                }
+            }
+        });
+        
+        // ==================== فەنکشنەکانی کەتەگۆری ====================
+        async function loadCategories() {
+            const container = document.getElementById('categoryGrid');
+            container.innerHTML = '';
+            
+            for (let cat of categories) {
+                const questionsRef = ref(db, `categories/${cat.key}/questions`);
+                const snapshot = await get(questionsRef);
+                let allUsed = false;
+                let hasQuestions = false;
+                
+                if (snapshot.exists()) {
+                    hasQuestions = true;
+                    const questions = snapshot.val();
+                    const total = Object.keys(questions).length;
+                    let usedCount = 0;
+                    
+                    for (let qId in questions) {
+                        if (questions[qId].used === true) usedCount++;
+                    }
+                    allUsed = (usedCount === total && total > 0);
+                }
+                
+                const card = document.createElement('div');
+                card.className = `category-card ${allUsed ? 'used' : ''}`;
+                card.textContent = `${cat.name} ${hasQuestions ? '' : '(پرسیار نییە)'}`;
+                card.dataset.categoryKey = cat.key;
+                
+                if (!allUsed && hasQuestions) {
+                    card.style.cursor = 'pointer';
+                    card.onclick = () => {
+                        // Remove previous selection
+                        if (selectedCategoryBox) {
+                            selectedCategoryBox.classList.remove('selected', 'waiting-for-enter');
+                        }
+                        // Select this category
+                        card.classList.add('selected');
+                        selectedCategoryBox = card;
+                        isWaitingForEnter = true;
+                    };
+                } else if (!hasQuestions) {
+                    card.style.opacity = '0.5';
+                    card.style.cursor = 'not-allowed';
+                }
+                
+                container.appendChild(card);
+            }
+        }
+        
+        function enterCategory(categoryKey) {
+            currentCategory = categoryKey;
+            
+            // Remove selection
+            if (selectedCategoryBox) {
+                selectedCategoryBox.classList.remove('selected', 'waiting-for-enter');
+                selectedCategoryBox = null;
+            }
+            isWaitingForEnter = false;
+            
+            // Go to question grid
+            document.getElementById('categoryView').classList.add('hidden');
+            document.getElementById('questionGridView').classList.remove('hidden');
+            loadQuestionsForCategory(categoryKey);
+        }
+        
+        // ==================== فەنکشنەکانی پرسیار ====================
+        async function loadQuestionsForCategory(categoryKey) {
+            const questionsRef = ref(db, `categories/${categoryKey}/questions`);
+            const snapshot = await get(questionsRef);
+            const container = document.getElementById('questionGrid');
+            container.innerHTML = '';
+            selectedQuestionBox = null;
+            
+            if (snapshot.exists()) {
+                const questions = snapshot.val();
+                const questionIds = Object.keys(questions);
+                
+                for (let i = 1; i <= 36; i++) {
+                    const qId = questionIds[i-1];
+                    const question = questions[qId];
+                    const isUsed = question?.used === true;
+                    const exists = qId !== undefined;
+                    
+                    const box = document.createElement('div');
+                    box.className = `question-number ${isUsed ? 'used' : ''}`;
+                    box.textContent = i;
+                    
+                    if (exists && !isUsed) {
+                        box.style.cursor = 'pointer';
+                        box.onclick = () => {
+                            if (selectedQuestionBox) {
+                                selectedQuestionBox.classList.remove('selected', 'waiting-for-enter');
+                            }
+                            box.classList.add('selected', 'waiting-for-enter');
+                            selectedQuestionBox = box;
+                            selectedQuestionBox.dataset.questionId = qId;
+                            selectedQuestionBox.dataset.questionData = JSON.stringify(question);
+                            isWaitingForEnter = true;
+                        };
+                    } else if (isUsed) {
+                        box.style.cursor = 'not-allowed';
+                    }
+                    
+                    container.appendChild(box);
+                }
+            } else {
+                for (let i = 1; i <= 36; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'question-number';
+                    box.textContent = i;
+                    box.style.opacity = '0.3';
+                    container.appendChild(box);
+                }
+            }
+        }
+        
+        async function executeSelectQuestion(questionId, question) {
+            currentQuestionData = question;
+            
+            // Mark as used
+            if (selectedQuestionBox) {
+                selectedQuestionBox.classList.remove('selected', 'waiting-for-enter');
+                selectedQuestionBox.classList.add('used');
+                selectedQuestionBox.style.cursor = 'not-allowed';
+            }
+            selectedQuestionBox = null;
+            isWaitingForEnter = false;
+            
+            await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
+            
+            // Update question count for current turn (from game state)
+            const gameRef = ref(db, 'game');
+            const gameSnapshot = await get(gameRef);
+            let currentTurn = 'group1';
+            if (gameSnapshot.exists()) {
+                currentTurn = gameSnapshot.val().currentTurn || 'group1';
+            }
+            
+            if (currentTurn === 'group1') {
+                const group1Count = gameSnapshot.exists() ? (gameSnapshot.val().group1Count || 0) : 0;
+                await set(ref(db, 'game/group1Count'), group1Count + 1);
+            } else {
+                const group2Count = gameSnapshot.exists() ? (gameSnapshot.val().group2Count || 0) : 0;
+                await set(ref(db, 'game/group2Count'), group2Count + 1);
+            }
+            
+            // Send to players if online
+            if (currentMode === 'online') {
+                await set(ref(db, 'game/currentQuestion'), {
+                    id: questionId,
+                    category: currentCategory,
+                    text: question.text,
+                    options: question.options,
+                    correct: question.correct,
+                    timestamp: Date.now(),
+                    activeGroup: currentTurn
+                });
+                await set(ref(db, 'game/questionActive'), true);
+                await set(ref(db, 'game/timerStart'), Date.now());
+                await set(ref(db, 'game/activeGroup'), currentTurn);
+            }
+            
+            // Show question display
+            document.getElementById('questionGridView').classList.add('hidden');
+            document.getElementById('questionDisplayView').classList.remove('hidden');
+            isInQuestion = true;
+            isAnswerRevealed = false;
+            
+            // Display question
+            document.getElementById('displayQuestion').textContent = question.text;
+            const optionsContainer = document.getElementById('displayOptions');
+            optionsContainer.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            question.options.forEach((opt, idx) => {
+                const div = document.createElement('div');
+                div.className = 'option-card';
+                div.innerHTML = `
+                    <div class="option-letter">${letters[idx]}</div>
+                    <div class="option-text">${opt}</div>
+                `;
+                optionsContainer.appendChild(div);
             });
             
-            // Update game state in Firebase
-            set(ref(db, 'game/currentTurn'), currentTurn);
+            startTimer(question);
         }
         
-        function switchTurn() {
-            currentTurn = currentTurn === 'group1' ? 'group2' : 'group1';
-            updateTurnIndicators();
+        // ==================== تایمەر و دەنگەکان ====================
+        function startTimer(question) {
+            timerSeconds = 30;
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timerSeconds;
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            let warningPlayed = false;
+            
+            setTimeout(() => {
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    timerElement.textContent = timerSeconds;
+                    
+                    // دەنگی چرکە (تک تیک)
+                    if (timerSeconds > 0 && timerSeconds <= 30) {
+                        playTickSound();
+                    }
+                    
+                    // دەنگی ئاگادارکردنەوە کاتێک 5 چرکە مابوو
+                    if (timerSeconds === 5 && !warningPlayed) {
+                        warningPlayed = true;
+                        playWarningSound();
+                    }
+                    
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        // Show correct answer
+                        const options = document.querySelectorAll('.option-card');
+                        options.forEach((opt, idx) => {
+                            if (idx === question.correct) {
+                                opt.classList.add('correct');
+                            }
+                        });
+                        
+                        // دەنگی ئاشکراکردنی وەڵام
+                        playAnswerRevealSound();
+                        
+                        isAnswerRevealed = true;
+                        isWaitingForEnter = true;
+                        selectedQuestionBox = null;
+                        isInQuestion = false;
+                        
+                        if (currentMode === 'online') {
+                            set(ref(db, 'game/questionActive'), false);
+                            set(ref(db, 'game/showAnswer'), true);
+                        }
+                    }
+                }, 1000);
+            }, 3000);
         }
         
+        // ==================== خاڵەکان ====================
+        function showGroupsAndPlayers() {
+            clearInterval(timerInterval);
+            document.getElementById('questionDisplayView').classList.add('hidden');
+            document.getElementById('groupsView').classList.remove('hidden');
+            isWaitingForEnter = false;
+            isAnswerRevealed = false;
+            loadPlayersAndGroups();
+            
+            // Switch turn after showing results (will be done in presenter)
+            const gameRef = ref(db, 'game');
+            get(gameRef).then((snapshot) => {
+                let currentTurn = 'group1';
+                if (snapshot.exists()) {
+                    currentTurn = snapshot.val().currentTurn || 'group1';
+                }
+                const newTurn = currentTurn === 'group1' ? 'group2' : 'group1';
+                set(ref(db, 'game/currentTurn'), newTurn);
+            });
+        }
+        
+        async function loadPlayersAndGroups() {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            const group1 = [];
+            const group2 = [];
+            
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                for (let userId in users) {
+                    const user = users[userId];
+                    if (user.role === 'player' && user.isActive !== false) {
+                        if (user.group === 'group1') {
+                            group1.push({ id: userId, ...user });
+                        } else if (user.group === 'group2') {
+                            group2.push({ id: userId, ...user });
+                        }
+                    }
+                }
+            }
+            
+            const container = document.getElementById('groupsContainer');
+            container.innerHTML = `
+                <div class="group-card">
+                    <div class="group-title">👥 گروپی یەکەم</div>
+                    <div class="players-list" id="group1List"></div>
+                </div>
+                <div class="group-card">
+                    <div class="group-title">👥 گروپی دووەم</div>
+                    <div class="players-list" id="group2List"></div>
+                </div>
+            `;
+            
+            const group1List = document.getElementById('group1List');
+            const group2List = document.getElementById('group2List');
+            
+            group1.forEach(p => {
+                const li = document.createElement('li');
+                li.className = `player-item ${p.isEliminated ? 'player-eliminated' : ''}`;
+                li.innerHTML = `<span class="player-name">${p.name || p.username}</span><span class="player-score">⭐ ${p.score || 5}</span>`;
+                group1List.appendChild(li);
+            });
+            
+            group2.forEach(p => {
+                const li = document.createElement('li');
+                li.className = `player-item ${p.isEliminated ? 'player-eliminated' : ''}`;
+                li.innerHTML = `<span class="player-name">${p.name || p.username}</span><span class="player-score">⭐ ${p.score || 5}</span>`;
+                group2List.appendChild(li);
+            });
+        }
+        
+        // ==================== گەڕانەوە ====================
+        function goBackToCategories() {
+            if (selectedQuestionBox) {
+                selectedQuestionBox.classList.remove('selected', 'waiting-for-enter');
+                selectedQuestionBox = null;
+            }
+            isWaitingForEnter = false;
+            document.getElementById('questionGridView').classList.add('hidden');
+            document.getElementById('categoryView').classList.remove('hidden');
+            loadCategories();
+        }
+        
+        function goBackToCategoriesFromPoints() {
+            document.getElementById('groupsView').classList.add('hidden');
+            document.getElementById('categoryView').classList.remove('hidden');
+            loadCategories();
+            isWaitingForEnter = false;
+            selectedCategoryBox = null;
+            selectedQuestionBox = null;
+        }
+        
+        // ==================== مۆدال و فەنکشنەکانی تر ====================
         function showMessage(msg, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'toast-message';
@@ -747,31 +1154,6 @@
                 messageDiv.remove();
             }, 3000);
         }
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' || e.key === 'Escape') {
-                e.preventDefault();
-                if (!document.getElementById('modeView').classList.contains('hidden')) {
-                } else if (!document.getElementById('categoryView').classList.contains('hidden')) {
-                    document.getElementById('categoryView').classList.add('hidden');
-                    document.getElementById('modeView').classList.remove('hidden');
-                } else if (!document.getElementById('questionGridView').classList.contains('hidden')) {
-                    goBackToCategories();
-                } else if (!document.getElementById('questionDisplayView').classList.contains('hidden')) {
-                    goBackToQuestions();
-                } else if (!document.getElementById('groupsView').classList.contains('hidden')) {
-                    showQuestionGrid();
-                }
-            } else if (e.key === 'Enter' && isWaitingForEnter && selectedQuestionBox) {
-                e.preventDefault();
-                const questionId = selectedQuestionBox.dataset.questionId;
-                const questionData = JSON.parse(selectedQuestionBox.dataset.questionData);
-                executeSelectQuestion(questionId, questionData);
-            } else if (e.key === 'Enter' && isWaitingForEnter && !selectedQuestionBox) {
-                e.preventDefault();
-                showGroupsAndPlayers();
-            }
-        });
         
         window.openImportModal = () => {
             document.getElementById('importModal').style.display = 'flex';
@@ -900,11 +1282,6 @@
             await set(ref(db, 'game/currentQuestion'), null);
             await set(ref(db, 'game/questionActive'), false);
             await set(ref(db, 'game/showAnswer'), false);
-            
-            // Reset turn and question counts
-            currentTurn = 'group1';
-            group1QuestionCount = 0;
-            group2QuestionCount = 0;
             await set(ref(db, 'game/group1Count'), 0);
             await set(ref(db, 'game/group2Count'), 0);
             await set(ref(db, 'game/currentTurn'), 'group1');
@@ -920,17 +1297,14 @@
         
         window.selectMode = function(mode) {
             currentMode = mode;
-            currentTurn = 'group1';
-            group1QuestionCount = 0;
-            group2QuestionCount = 0;
             
+            // Reset game state
             set(ref(db, 'game/group1Count'), 0);
             set(ref(db, 'game/group2Count'), 0);
             set(ref(db, 'game/currentTurn'), 'group1');
             
             document.getElementById('modeView').classList.add('hidden');
             document.getElementById('categoryView').classList.remove('hidden');
-            updateTurnIndicators();
             
             if (mode === 'online') {
                 set(ref(db, 'game/presenterOnline'), true);
@@ -940,304 +1314,12 @@
             loadCategories();
         };
         
-        async function loadCategories() {
-            const container = document.getElementById('categoryGrid');
-            container.innerHTML = '';
-            
-            for (let cat of categories) {
-                const questionsRef = ref(db, `categories/${cat.key}/questions`);
-                const snapshot = await get(questionsRef);
-                let allUsed = false;
-                let hasQuestions = false;
-                
-                if (snapshot.exists()) {
-                    hasQuestions = true;
-                    const questions = snapshot.val();
-                    const total = Object.keys(questions).length;
-                    let usedCount = 0;
-                    
-                    for (let qId in questions) {
-                        if (questions[qId].used === true) usedCount++;
-                    }
-                    allUsed = (usedCount === total && total > 0);
-                }
-                
-                const card = document.createElement('div');
-                card.className = `category-card ${allUsed ? 'used' : ''}`;
-                card.textContent = `${cat.name} ${hasQuestions ? '' : '(پرسیار نییە)'}`;
-                
-                if (!allUsed && hasQuestions) {
-                    card.onclick = () => selectCategory(cat.key);
-                } else if (!hasQuestions) {
-                    card.style.opacity = '0.5';
-                    card.style.cursor = 'not-allowed';
-                }
-                
-                container.appendChild(card);
-            }
-        }
-        
-        async function selectCategory(categoryKey) {
-            currentCategory = categoryKey;
-            
-            const cards = document.querySelectorAll('.category-card');
-            for (let card of cards) {
-                if (card.textContent.includes(categories.find(c => c.key === categoryKey)?.name || '')) {
-                    card.classList.add('selected');
-                    setTimeout(() => card.classList.remove('selected'), 400);
-                    break;
-                }
-            }
-            
-            setTimeout(async () => {
-                document.getElementById('categoryView').classList.add('hidden');
-                document.getElementById('questionGridView').classList.remove('hidden');
-                updateTurnIndicators();
-                await loadQuestionsForCategory(categoryKey);
-            }, 200);
-        }
-        
-        async function loadQuestionsForCategory(categoryKey) {
-            const questionsRef = ref(db, `categories/${categoryKey}/questions`);
-            const snapshot = await get(questionsRef);
-            const container = document.getElementById('questionGrid');
-            container.innerHTML = '';
-            
-            if (snapshot.exists()) {
-                const questions = snapshot.val();
-                const questionIds = Object.keys(questions);
-                
-                for (let i = 1; i <= 36; i++) {
-                    const qId = questionIds[i-1];
-                    const question = questions[qId];
-                    const isUsed = question?.used === true;
-                    const exists = qId !== undefined;
-                    
-                    const box = document.createElement('div');
-                    box.className = `question-number ${isUsed ? 'used' : ''}`;
-                    box.textContent = i;
-                    
-                    if (exists && !isUsed) {
-                        box.style.cursor = 'pointer';
-                        box.onclick = () => {
-                            if (selectedQuestionBox) {
-                                selectedQuestionBox.classList.remove('waiting-for-enter');
-                            }
-                            box.classList.add('waiting-for-enter');
-                            selectedQuestionBox = box;
-                            selectedQuestionBox.dataset.questionId = qId;
-                            selectedQuestionBox.dataset.questionData = JSON.stringify(question);
-                            isWaitingForEnter = true;
-                        };
-                    } else if (isUsed) {
-                        box.style.cursor = 'not-allowed';
-                    }
-                    
-                    container.appendChild(box);
-                }
-            } else {
-                for (let i = 1; i <= 36; i++) {
-                    const box = document.createElement('div');
-                    box.className = 'question-number';
-                    box.textContent = i;
-                    box.style.opacity = '0.3';
-                    container.appendChild(box);
-                }
-            }
-        }
-        
-        async function executeSelectQuestion(questionId, question) {
-            if (selectedQuestionBox) {
-                selectedQuestionBox.classList.remove('waiting-for-enter');
-                selectedQuestionBox.classList.add('used');
-                selectedQuestionBox.style.cursor = 'not-allowed';
-            }
-            selectedQuestionBox = null;
-            isWaitingForEnter = false;
-            
-            // Update question count for current turn
-            if (currentTurn === 'group1') {
-                group1QuestionCount++;
-                await set(ref(db, 'game/group1Count'), group1QuestionCount);
-            } else {
-                group2QuestionCount++;
-                await set(ref(db, 'game/group2Count'), group2QuestionCount);
-            }
-            
-            await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
-            
-            if (currentMode === 'online') {
-                await set(ref(db, 'game/currentQuestion'), {
-                    id: questionId,
-                    category: currentCategory,
-                    text: question.text,
-                    options: question.options,
-                    correct: question.correct,
-                    timestamp: Date.now(),
-                    activeGroup: currentTurn
-                });
-                await set(ref(db, 'game/questionActive'), true);
-                await set(ref(db, 'game/timerStart'), Date.now());
-                await set(ref(db, 'game/activeGroup'), currentTurn);
-            }
-            
-            document.getElementById('questionGridView').classList.add('hidden');
-            document.getElementById('questionDisplayView').classList.remove('hidden');
-            
-            document.getElementById('displayQuestion').textContent = question.text;
-            const optionsContainer = document.getElementById('displayOptions');
-            optionsContainer.innerHTML = '';
-            
-            const letters = ['A', 'B', 'C', 'D'];
-            question.options.forEach((opt, idx) => {
-                const div = document.createElement('div');
-                div.className = 'option-card';
-                div.innerHTML = `
-                    <div class="option-letter">${letters[idx]}</div>
-                    <div class="option-text">${opt}</div>
-                `;
-                optionsContainer.appendChild(div);
-            });
-            
-            startTimer(question);
-        }
-        
-        function startTimer(question) {
-            timerSeconds = 30;
-            const timerElement = document.getElementById('timer');
-            timerElement.textContent = timerSeconds;
-            
-            if (timerInterval) clearInterval(timerInterval);
-            
-            setTimeout(() => {
-                timerInterval = setInterval(() => {
-                    timerSeconds--;
-                    timerElement.textContent = timerSeconds;
-                    
-                    if (timerSeconds <= 0) {
-                        clearInterval(timerInterval);
-                        const options = document.querySelectorAll('.option-card');
-                        options.forEach((opt, idx) => {
-                            if (idx === question.correct) {
-                                opt.classList.add('correct');
-                            }
-                        });
-                        isWaitingForEnter = true;
-                        selectedQuestionBox = null;
-                        
-                        if (currentMode === 'online') {
-                            set(ref(db, 'game/questionActive'), false);
-                            set(ref(db, 'game/showAnswer'), true);
-                        }
-                    }
-                }, 1000);
-            }, 3000);
-        }
-        
-        function showGroupsAndPlayers() {
-            clearInterval(timerInterval);
-            document.getElementById('questionDisplayView').classList.add('hidden');
-            document.getElementById('groupsView').classList.remove('hidden');
-            isWaitingForEnter = false;
-            loadPlayersAndGroups();
-            
-            // Switch turn after showing results
-            switchTurn();
-        }
-        
-        async function loadPlayersAndGroups() {
-            const usersRef = ref(db, 'users');
-            const snapshot = await get(usersRef);
-            const group1 = [];
-            const group2 = [];
-            
-            if (snapshot.exists()) {
-                const users = snapshot.val();
-                for (let userId in users) {
-                    const user = users[userId];
-                    if (user.role === 'player' && user.isActive !== false) {
-                        if (user.group === 'group1') {
-                            group1.push({ id: userId, ...user });
-                        } else if (user.group === 'group2') {
-                            group2.push({ id: userId, ...user });
-                        }
-                    }
-                }
-            }
-            
-            const container = document.getElementById('groupsContainer');
-            container.innerHTML = `
-                <div class="group-card">
-                    <div class="group-title">👥 گروپی یەکەم</div>
-                    <div class="players-list" id="group1List"></div>
-                </div>
-                <div class="group-card">
-                    <div class="group-title">👥 گروپی دووەم</div>
-                    <div class="players-list" id="group2List"></div>
-                </div>
-            `;
-            
-            const group1List = document.getElementById('group1List');
-            const group2List = document.getElementById('group2List');
-            
-            group1.forEach(p => {
-                const li = document.createElement('li');
-                li.className = `player-item ${p.isEliminated ? 'player-eliminated' : ''}`;
-                li.innerHTML = `<span class="player-name">${p.name || p.username}</span><span class="player-score">⭐ ${p.score || 5}</span>`;
-                group1List.appendChild(li);
-            });
-            
-            group2.forEach(p => {
-                const li = document.createElement('li');
-                li.className = `player-item ${p.isEliminated ? 'player-eliminated' : ''}`;
-                li.innerHTML = `<span class="player-name">${p.name || p.username}</span><span class="player-score">⭐ ${p.score || 5}</span>`;
-                group2List.appendChild(li);
-            });
-        }
-        
-        window.goBackToCategories = function() {
-            if (selectedQuestionBox) {
-                selectedQuestionBox.classList.remove('waiting-for-enter');
-                selectedQuestionBox = null;
-            }
-            isWaitingForEnter = false;
-            document.getElementById('questionGridView').classList.add('hidden');
-            document.getElementById('categoryView').classList.remove('hidden');
-            loadCategories();
-        };
-        
-        window.goBackToQuestions = function() {
-            if (timerInterval) clearInterval(timerInterval);
-            document.getElementById('questionDisplayView').classList.add('hidden');
-            document.getElementById('questionGridView').classList.remove('hidden');
-            loadQuestionsForCategory(currentCategory);
-            isWaitingForEnter = false;
-            selectedQuestionBox = null;
-        };
-        
-        window.showQuestionGrid = function() {
-            document.getElementById('groupsView').classList.add('hidden');
-            document.getElementById('questionGridView').classList.remove('hidden');
-            loadQuestionsForCategory(currentCategory);
-        };
-        
+        // ==================== دەستپێکردن ====================
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (currentUser.role !== 'presenter' && currentUser.role !== 'admin') {
             alert('تەنها پێشکەشکار دەتوانێت ئەم پەڕەیە ببینێت!');
             window.location.href = 'login.html';
         }
-        
-        // Load initial turn from Firebase if exists
-        async function loadInitialTurn() {
-            const turnRef = ref(db, 'game/currentTurn');
-            const snapshot = await get(turnRef);
-            if (snapshot.exists()) {
-                currentTurn = snapshot.val();
-            }
-            updateTurnIndicators();
-        }
-        
-        loadInitialTurn();
     </script>
 </body>
 </html>
