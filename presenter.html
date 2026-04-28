@@ -788,6 +788,9 @@
         let isAnswerRevealed = false;
         let currentQuestionData = null;
         
+        // Cache for categories data to avoid multiple Firebase calls
+        let categoriesCache = null;
+        
         const categories = [
             { key: 'history', name: 'مێژوو' },
             { key: 'science', name: 'زانست' },
@@ -834,40 +837,58 @@
             }
         });
         
-        // ==================== فەنکشنەکانی کەتەگۆری (چارەسەری کێشەی دانە بە دانە) ====================
+        // ==================== فەنکشنەکانی کەتەگۆری (خێرا و بێ درەنگ) ====================
         async function loadCategories() {
             const container = document.getElementById('categoryGrid');
             
             // خاڵیکردنەوەی کۆنتەینەرەکە
             container.innerHTML = '';
             
-            // دروستکردنی ئەرەیەک بۆ هەموو کارتەکان
+            // ئەگەر کاشمان هەیە بەکاری بهێنە، وەک نا لە داتابیسەوە وەریبگرە
+            if (!categoriesCache) {
+                categoriesCache = [];
+                
+                // هەموو داتاکان لە یەک جاردا وەربگرە بۆ خێرایی
+                const promises = categories.map(cat => get(ref(db, `categories/${cat.key}/questions`)));
+                const snapshots = await Promise.all(promises);
+                
+                for (let i = 0; i < categories.length; i++) {
+                    const cat = categories[i];
+                    const snapshot = snapshots[i];
+                    let allUsed = false;
+                    let hasQuestions = false;
+                    
+                    if (snapshot.exists()) {
+                        hasQuestions = true;
+                        const questions = snapshot.val();
+                        const total = Object.keys(questions).length;
+                        let usedCount = 0;
+                        
+                        for (let qId in questions) {
+                            if (questions[qId].used === true) usedCount++;
+                        }
+                        allUsed = (usedCount === total && total > 0);
+                    }
+                    
+                    categoriesCache.push({
+                        key: cat.key,
+                        name: cat.name,
+                        hasQuestions: hasQuestions,
+                        allUsed: allUsed
+                    });
+                }
+            }
+            
+            // دروستکردنی کارتەکان لە کاشەوە (زۆر خێرا)
             const cards = [];
             
-            for (let cat of categories) {
-                const questionsRef = ref(db, `categories/${cat.key}/questions`);
-                const snapshot = await get(questionsRef);
-                let allUsed = false;
-                let hasQuestions = false;
-                
-                if (snapshot.exists()) {
-                    hasQuestions = true;
-                    const questions = snapshot.val();
-                    const total = Object.keys(questions).length;
-                    let usedCount = 0;
-                    
-                    for (let qId in questions) {
-                        if (questions[qId].used === true) usedCount++;
-                    }
-                    allUsed = (usedCount === total && total > 0);
-                }
-                
+            for (let catData of categoriesCache) {
                 const card = document.createElement('div');
-                card.className = `category-card ${allUsed ? 'used' : ''}`;
-                card.textContent = `${cat.name} ${hasQuestions ? '' : '(پرسیار نییە)'}`;
-                card.dataset.categoryKey = cat.key;
+                card.className = `category-card ${catData.allUsed ? 'used' : ''}`;
+                card.textContent = `${catData.name} ${catData.hasQuestions ? '' : '(پرسیار نییە)'}`;
+                card.dataset.categoryKey = catData.key;
                 
-                if (!allUsed && hasQuestions) {
+                if (!catData.allUsed && catData.hasQuestions) {
                     card.style.cursor = 'pointer';
                     card.onclick = () => {
                         if (selectedCategoryBox) {
@@ -877,7 +898,7 @@
                         selectedCategoryBox = card;
                         isWaitingForEnter = true;
                     };
-                } else if (!hasQuestions) {
+                } else if (!catData.hasQuestions) {
                     card.style.opacity = '0.5';
                     card.style.cursor = 'not-allowed';
                 }
@@ -885,7 +906,7 @@
                 cards.push(card);
             }
             
-            // هەموو کارتەکان بەیەکەوە زیاد بکە بۆ ناو کۆنتەینەرەکە
+            // هەموو کارتەکان بەیەکەوە زیاد بکە (لە ٠.٠١ چرکەدا)
             cards.forEach(card => container.appendChild(card));
         }
         
@@ -903,14 +924,14 @@
             loadQuestionsForCategory(categoryKey);
         }
         
-        // ==================== فەنکشنەکانی پرسیار ====================
+        // ==================== فەنکشنەکانی پرسیار (خێرا) ====================
         async function loadQuestionsForCategory(categoryKey) {
-            const questionsRef = ref(db, `categories/${categoryKey}/questions`);
-            const snapshot = await get(questionsRef);
             const container = document.getElementById('questionGrid');
             container.innerHTML = '';
             
-            // دروستکردنی ئەرەیەک بۆ هەموو بۆکسەکان
+            const questionsRef = ref(db, `categories/${categoryKey}/questions`);
+            const snapshot = await get(questionsRef);
+            
             const boxes = [];
             
             if (snapshot.exists()) {
@@ -973,6 +994,7 @@
             
             await update(ref(db, `categories/${currentCategory}/questions/${questionId}`), { used: true });
             
+            // به‌ده‌ست هێنانی نۆره‌ی ئێستا
             const gameRef = ref(db, 'game');
             const gameSnapshot = await get(gameRef);
             let currentTurn = 'group1';
@@ -1162,6 +1184,8 @@
         function goBackToCategoriesFromPoints() {
             document.getElementById('groupsView').classList.add('hidden');
             document.getElementById('categoryView').classList.remove('hidden');
+            // کاشەکە ریسێت دەکەین بۆ ئەوەی داتای نوێ وەربگرێت
+            categoriesCache = null;
             loadCategories();
             isWaitingForEnter = false;
             selectedCategoryBox = null;
@@ -1235,6 +1259,9 @@
                         }
                     }
                     
+                    // کاشەکە ریسێت بکە بۆ ئەوەی داتای نوێ وەربگرێت
+                    categoriesCache = null;
+                    
                     showMessage('پرسیارەکان بە سەرکەوتوویی import کرا', 'success');
                     closeImportModal();
                     
@@ -1263,6 +1290,8 @@
                 await remove(questionsRef);
                 await set(questionsRef, {});
             }
+            // کاشەکە ریسێت بکە
+            categoriesCache = null;
             showMessage('هەموو پرسیارەکان سڕاینەوە', 'success');
             closeDeleteAllModal();
             
@@ -1310,6 +1339,9 @@
             await set(ref(db, 'game/group1Count'), 0);
             await set(ref(db, 'game/group2Count'), 0);
             await set(ref(db, 'game/currentTurn'), 'group1');
+            
+            // کاشەکە ریسێت بکە
+            categoriesCache = null;
             
             showMessage('یاریەکە بە سەرکەوتوویی ریسێت کرا', 'success');
             
