@@ -119,7 +119,7 @@
             transform: translateY(0);
         }
         
-        /* Category Grid - No Animation, All appear at once */
+        /* Category Grid - All appear at once, no animation */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -319,7 +319,7 @@
             font-size: 24px;
             color: #333;
             padding: 12px;
-            font-family: 'K24KurdishLight-Light', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'K24KurdishBold-Bold', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .option-card.correct {
@@ -679,48 +679,89 @@
         });
         
         // ==================== دەنگەکان ====================
+        let audioContext = null;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+        
         function playTickSound() {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const ctx = initAudio();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 800;
-                gainNode.gain.value = 0.1;
+                gainNode.connect(ctx.destination);
+                oscillator.frequency.value = 880;
+                gainNode.gain.value = 0.08;
                 oscillator.type = 'sine';
                 oscillator.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.3);
-                oscillator.stop(audioContext.currentTime + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.15);
+                oscillator.stop(ctx.currentTime + 0.15);
             } catch(e) { console.log('Audio not supported'); }
         }
         
-        function playWarningSound() {
+        function playWarningSound(secondsLeft) {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const ctx = initAudio();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 600;
+                gainNode.connect(ctx.destination);
+                
+                let frequency = 600;
+                if (secondsLeft === 5) frequency = 600;
+                else if (secondsLeft === 4) frequency = 550;
+                else if (secondsLeft === 3) frequency = 500;
+                else if (secondsLeft === 2) frequency = 450;
+                else if (secondsLeft === 1) frequency = 400;
+                
+                oscillator.frequency.value = frequency;
                 gainNode.gain.value = 0.15;
                 oscillator.type = 'sine';
                 oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+                oscillator.stop(ctx.currentTime + 0.3);
+            } catch(e) { console.log('Audio not supported'); }
+        }
+        
+        function playTimeUpSound() {
+            try {
+                const ctx = initAudio();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.frequency.value = 440;
+                gainNode.gain.value = 0.15;
+                oscillator.type = 'sine';
+                oscillator.start();
+                
                 setTimeout(() => {
-                    oscillator.frequency.value = 400;
+                    oscillator.frequency.value = 330;
                 }, 200);
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.6);
-                oscillator.stop(audioContext.currentTime + 0.6);
+                setTimeout(() => {
+                    oscillator.frequency.value = 220;
+                }, 400);
+                
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.8);
+                oscillator.stop(ctx.currentTime + 0.8);
             } catch(e) { console.log('Audio not supported'); }
         }
         
         function playAnswerRevealSound() {
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
+                const ctx = initAudio();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(ctx.destination);
                 oscillator.frequency.value = 523.25;
                 gainNode.gain.value = 0.15;
                 oscillator.type = 'sine';
@@ -731,8 +772,8 @@
                 setTimeout(() => {
                     oscillator.frequency.value = 783.99;
                 }, 300);
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.6);
-                oscillator.stop(audioContext.currentTime + 0.6);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.6);
+                oscillator.stop(ctx.currentTime + 0.6);
             } catch(e) { console.log('Audio not supported'); }
         }
         
@@ -763,14 +804,6 @@
         const categoryKeys = ['history', 'science', 'literature', 'art', 'sports', 'technology', 'health', 'geography', 'religion'];
         
         // ==================== کۆنترۆڵی کیبۆرد ====================
-        function disableAllKeyboard() {
-            isWaitingForEnter = false;
-        }
-        
-        function enableEnterOnly() {
-            // Enter only will be handled in keydown
-        }
-        
         document.addEventListener('keydown', (e) => {
             // Backspace - گەڕانەوە
             if (e.key === 'Backspace' || e.key === 'Escape') {
@@ -1006,26 +1039,27 @@
             
             if (timerInterval) clearInterval(timerInterval);
             
-            let warningPlayed = false;
-            
             setTimeout(() => {
                 timerInterval = setInterval(() => {
                     timerSeconds--;
                     timerElement.textContent = timerSeconds;
                     
-                    // دەنگی چرکە (تک تیک)
+                    // دەنگی چرکە (تک تیک) - بۆ هەموو چرکەکان
                     if (timerSeconds > 0 && timerSeconds <= 30) {
                         playTickSound();
                     }
                     
-                    // دەنگی ئاگادارکردنەوە کاتێک 5 چرکە مابوو
-                    if (timerSeconds === 5 && !warningPlayed) {
-                        warningPlayed = true;
-                        playWarningSound();
+                    // دەنگی ئاگادارکردنەوە بۆ چرکەکانی 5,4,3,2,1
+                    if (timerSeconds >= 1 && timerSeconds <= 5) {
+                        playWarningSound(timerSeconds);
                     }
                     
                     if (timerSeconds <= 0) {
                         clearInterval(timerInterval);
+                        
+                        // دەنگی کۆتایی هاتنی کات
+                        playTimeUpSound();
+                        
                         // Show correct answer
                         const options = document.querySelectorAll('.option-card');
                         options.forEach((opt, idx) => {
@@ -1035,7 +1069,9 @@
                         });
                         
                         // دەنگی ئاشکراکردنی وەڵام
-                        playAnswerRevealSound();
+                        setTimeout(() => {
+                            playAnswerRevealSound();
+                        }, 600);
                         
                         isAnswerRevealed = true;
                         isWaitingForEnter = true;
@@ -1060,7 +1096,7 @@
             isAnswerRevealed = false;
             loadPlayersAndGroups();
             
-            // Switch turn after showing results (will be done in presenter)
+            // Switch turn after showing results
             const gameRef = ref(db, 'game');
             get(gameRef).then((snapshot) => {
                 let currentTurn = 'group1';
@@ -1294,6 +1330,16 @@
                 currentMode = null;
             }
         };
+        
+        // Initialize audio on first user interaction
+        function initAudioOnFirstClick() {
+            document.body.addEventListener('click', () => {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }, { once: true });
+        }
+        initAudioOnFirstClick();
         
         window.selectMode = function(mode) {
             currentMode = mode;
